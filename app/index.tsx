@@ -18,6 +18,7 @@ import {
   spacing,
   borderRadius,
 } from '@/components/ui/design-system';
+import { Logo } from '@/components/ui/logo';
 
 // Mock data for now (will be replaced with real data from Firestore in Phase 3)
 const MOCK_PLANTS = [
@@ -85,12 +86,7 @@ export default function MyJungleScreen() {
 
       {/* Header with Logo */}
       <View style={styles.headerContainer}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoIcon}>
-            <Text style={styles.logoEmoji}>🪴</Text>
-          </View>
-          <Text style={styles.logoText}>Bloomie</Text>
-        </View>
+        <Logo size="medium" />
       </View>
 
       <ScrollView
