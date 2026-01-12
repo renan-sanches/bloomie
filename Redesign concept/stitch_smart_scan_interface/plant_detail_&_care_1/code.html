@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LeafLog - Playful Plant Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5b8069",
+                        "primary-dark": "#3d5c48",
+                        "accent-orange": "#f9b233", // Inspired by palette yellow/orange
+                        "accent-purple": "#6366f1", // Inspired by palette blue/purple
+                        "accent-red": "#f0515b",    // Inspired by palette red
+                        "background-light": "#f8f7f7",
+                        "background-dark": "#1a1f1c",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2c3630",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0 10px 40px -10px rgba(91, 128, 105, 0.15)",
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-100 dark:border-gray-800 bg-surface-light dark:bg-surface-dark px-6 lg:px-10 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">potted_plant</span>
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">LeafLog</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-gray-900 dark:text-gray-200 text-sm font-semibold leading-normal hover:text-primary transition-colors" href="#">My Garden</a>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Schedule</a>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Community</a>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-6">
+<label class="flex flex-col min-w-40 !h-10 max-w-64 hidden sm:flex">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-background-light dark:bg-background-dark border border-transparent focus-within:border-primary/50 transition-colors">
+<div class="text-gray-400 flex items-center justify-center pl-4 rounded-l-xl">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-gray-400 px-4 pl-2 text-sm font-normal leading-normal" placeholder="Search plants..."/>
+</div>
+</label>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white dark:ring-gray-700 cursor-pointer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAsLw7ynqiUXEkxJLZHRmp9jtTwzWd_s7e9jDNENrASFAOiB1IY-Y0AtKFwN-r8RNK3LcTaTmh0soVOxst6GzbP2PNWv0l9WgnTwqaxbAfjShnhLFAVpt-lcwIWyDEzAgGSjB_m-U4fodBx6o7uxILoE4TjiybLCOnBoF85LqDyaS9EzMuqkVTOTTE1Me3YSgsc0Wux_96snmiDwabQqOXlCN7weds1qUwcZGd9Lz6yQrAWR87ZnQDUcr1aQICLDLEcJt7UKyZIeN7_");'></div>
+</div>
+</header>
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6">
+<div class="flex flex-wrap gap-2 py-4 mb-4">
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[18px]">home</span>
+            My Garden
+        </a>
+<span class="text-gray-300 dark:text-gray-600 text-sm font-medium">/</span>
+<span class="text-primary font-semibold text-sm leading-normal">Fiddle Leaf Fig</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-soft transition-colors">
+<div class="relative w-full aspect-[4/5] rounded-lg overflow-hidden mb-6 group">
+<div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
+<div class="w-full h-full bg-center bg-cover transform group-hover:scale-105 transition-transform duration-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB1jzChS5JULEV1H8Qo15wC-EM8ranvqd_midj84gPQOjnp-7l0kaDQ_o76rp4O0QGLdVGCKb-_LpHU5ynUeC7izKZNqBiy5tuh96vCJSBS9JEMvIDJqHVMuA1G1FcaIIuRiX9DAZo4AN5WhZNvbvudfn0Cb-Xs_e95tYpjTQckgi1exjzaNsShBqgG7onh6aRJXIhQF5ukrHyt8GGR16wcqSO-dTgKJc2l0p-OF1wWJ1UNK62bLswv1RIMByIdU5L9a4wE9fsCicmS");'></div>
+<div class="absolute top-4 right-4 bg-white/90 dark:bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-800 dark:text-white flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-accent-orange">water_drop</span>
+                        2 days ago
+                    </div>
+</div>
+<div class="flex flex-col gap-1 mb-6">
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Fiddle Leaf Fig</h1>
+<p class="text-primary text-lg font-medium italic">Ficus lyrata</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-8">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-background-light dark:bg-background-dark text-xs font-semibold text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+<span class="material-symbols-outlined text-[14px] text-accent-purple">speed</span> Difficulty: Med
+                    </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-background-light dark:bg-background-dark text-xs font-semibold text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+<span class="material-symbols-outlined text-[14px] text-accent-red">pets</span> Toxic to Pets
+                    </span>
+</div>
+<button class="flex w-full items-center justify-center gap-2 rounded-xl h-12 px-6 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-all border border-gray-200 dark:border-gray-600">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                    Edit Profile
+                </button>
+</div>
+<div class="bg-accent-orange/10 rounded-xl p-5 border border-accent-orange/20 flex gap-4 items-start">
+<span class="material-symbols-outlined text-accent-orange text-2xl">lightbulb</span>
+<div>
+<h4 class="text-accent-orange font-bold text-sm mb-1">Pro Tip</h4>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        Rotate your Fiddle Leaf Fig every time you water it to ensure even growth towards the sunlight.
+                    </p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-8 flex flex-col gap-8 pb-20">
+<section>
+<div class="flex items-center justify-between mb-5">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-orange">calendar_month</span>
+                        Care Schedule
+                    </h2>
+<a class="text-primary text-sm font-bold hover:underline" href="#">View Calendar</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800 flex flex-col justify-between group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-full bg-accent-orange/10 flex items-center justify-center text-accent-orange">
+<span class="material-symbols-outlined">water_drop</span>
+</div>
+<span class="bg-accent-orange/10 text-accent-orange text-xs font-bold px-2 py-1 rounded">Every 7 days</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">Water</h3>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Next due: <span class="text-accent-orange font-semibold">Tomorrow</span></p>
+<button class="w-full py-2.5 rounded-lg bg-accent-orange hover:brightness-110 text-white text-sm font-bold transition-all shadow-lg shadow-accent-orange/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check</span>
+                                Mark Done
+                            </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800 flex flex-col justify-between group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-full bg-accent-orange/10 flex items-center justify-center text-accent-orange">
+<span class="material-symbols-outlined">humidity_high</span>
+</div>
+<span class="bg-accent-orange/10 text-accent-orange text-xs font-bold px-2 py-1 rounded">Every 3 days</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">Mist</h3>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Next due: <span class="text-accent-red font-semibold">Today</span></p>
+<button class="w-full py-2.5 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-accent-orange text-gray-700 dark:text-white hover:text-accent-orange text-sm font-bold transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check</span>
+                                Mark Done
+                            </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800 flex flex-col justify-between group hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-full bg-accent-orange/10 flex items-center justify-center text-accent-orange">
+<span class="material-symbols-outlined">compost</span>
+</div>
+<span class="bg-accent-orange/10 text-accent-orange text-xs font-bold px-2 py-1 rounded">Every 30 days</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">Fertilize</h3>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Next due: <span class="text-gray-900 dark:text-white font-semibold">12 Days</span></p>
+<button class="w-full py-2.5 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-accent-orange text-gray-700 dark:text-white hover:text-accent-orange text-sm font-bold transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check</span>
+                                Mark Done
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-orange">wb_sunny</span>
+                    Environment
+                </h2>
+<div class="bg-surface-light dark:bg-surface-dark p-6 lg:p-8 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800">
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Light Requirement</span>
+<span class="text-accent-purple font-bold bg-accent-purple/10 px-3 py-1 rounded-full text-sm">Bright Indirect</span>
+</div>
+<div class="relative h-4 w-full rounded-full bg-gradient-to-r from-gray-200 via-accent-orange/40 to-accent-orange dark:from-gray-700 dark:via-accent-orange/30 dark:to-accent-orange mb-2 mt-4">
+<div class="absolute top-1/2 -translate-y-1/2 left-[70%] size-6 bg-white dark:bg-gray-800 border-4 border-accent-purple rounded-full shadow-lg transform -translate-x-1/2 z-10"></div>
+</div>
+<div class="flex justify-between text-xs font-medium text-gray-400 dark:text-gray-500 mt-2">
+<span>Low Light</span>
+<span>Medium</span>
+<span class="text-accent-purple font-bold">Bright Indirect</span>
+<span>Direct Sun</span>
+</div>
+<div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-6">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-background-light dark:bg-background-dark flex items-center justify-center text-accent-purple">
+<span class="material-symbols-outlined">thermostat</span>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase font-bold">Temp</div>
+<div class="text-sm font-semibold text-gray-900 dark:text-white">65°F - 85°F</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-background-light dark:bg-background-dark flex items-center justify-center text-accent-purple">
+<span class="material-symbols-outlined">cloud</span>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase font-bold">Humidity</div>
+<div class="text-sm font-semibold text-gray-900 dark:text-white">High (60%+)</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<section>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-purple">ecg_heart</span>
+                        Health Status
+                    </h2>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800 h-full">
+<div class="flex items-center gap-5 mb-6">
+<div class="relative size-20 flex items-center justify-center">
+<svg class="transform -rotate-90 size-20">
+<circle class="text-gray-100 dark:text-gray-700" cx="40" cy="40" fill="transparent" r="36" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-accent-purple" cx="40" cy="40" fill="transparent" r="36" stroke="currentColor" stroke-dasharray="226" stroke-dashoffset="18" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<span class="absolute text-xl font-bold text-gray-900 dark:text-white">92%</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Thriving!</h3>
+<p class="text-sm text-gray-500">Last checked: 3 days ago</p>
+<div class="mt-1">
+<span class="inline-block px-2 py-0.5 rounded-full bg-accent-purple/10 text-accent-purple text-[10px] font-bold uppercase">Optimal Health</span>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3 p-3 bg-background-light dark:bg-background-dark rounded-lg border-l-4 border-accent-purple">
+<span class="material-symbols-outlined text-accent-purple text-sm mt-0.5">check_circle</span>
+<p class="text-sm text-gray-600 dark:text-gray-300">New leaf growth spotted on top branch.</p>
+</div>
+<div class="flex items-start gap-3 p-3 bg-background-light dark:bg-background-dark rounded-lg">
+<span class="material-symbols-outlined text-gray-400 text-sm mt-0.5">history</span>
+<p class="text-sm text-gray-500 dark:text-gray-400">Leaves dusted and cleaned.</p>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-dashed border-accent-purple/30 rounded-lg text-sm font-medium text-gray-500 hover:text-accent-purple hover:border-accent-purple transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Add Health Log
+                        </button>
+</div>
+</section>
+<section>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">menu_book</span>
+                        Notes
+                    </h2>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-soft border border-gray-50 dark:border-gray-800 h-full flex flex-col">
+<div class="prose prose-sm dark:prose-invert mb-4 flex-1">
+<p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                               My Fiddle Leaf seems to prefer the corner spot near the east-facing window. It dropped two leaves last winter when moved near the heater.
+                            </p>
+<p class="text-gray-600 dark:text-gray-300 leading-relaxed mt-2">
+                               Currently using the 10-10-10 fertilizer mix during growing season.
+                            </p>
+</div>
+<div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center mt-auto">
+<span class="text-xs font-bold text-gray-400 uppercase">Last edited: Oct 24</span>
+<button class="text-primary hover:text-primary-dark font-bold text-sm">Edit Notes</button>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

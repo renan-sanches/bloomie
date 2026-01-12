@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloomie Dashboard - Mobile View</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4ade80", 
+                        "primary-dark": "#16a34a",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "accent-pink": "#f43f5e", 
+                        "accent-purple": "#8b5cf6", 
+                        "accent-orange": "#f59e0b", 
+                        "accent-cyan": "#06b6d4",
+                        "accent-alert": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "brand": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft-green': '0 10px 40px -10px rgba(74, 222, 128, 0.15)',
+                        'card-hover': '0 20px 40px -10px rgba(74, 222, 128, 0.25)',
+                        'vibrant-pink': '0 10px 25px -5px rgba(244, 63, 94, 0.3)',
+                        'vibrant-purple': '0 10px 25px -5px rgba(139, 92, 246, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 font-display antialiased min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 py-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<a class="flex items-center gap-2 group" href="#">
+<div class="size-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary-dark transition-all group-hover:bg-primary group-hover:text-white">
+<span class="material-symbols-outlined text-[24px] filled font-bold">potted_plant</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white font-brand">Bloomie</span>
+</a>
+<div class="flex items-center gap-3">
+<button class="text-slate-400 hover:text-accent-pink transition-colors relative flex items-center p-2">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+<span class="absolute top-2 right-2 size-2.5 bg-accent-pink rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="size-9 rounded-full bg-slate-200 overflow-hidden ring-2 ring-transparent">
+<div class="w-full h-full bg-center bg-cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLcKElTI9a0qsHfrbRD7PZ9NW1PYrwzu2hW82ujrocAh80SRHPAic-_TINAkVnT3TDz9mk3fx9_4fgjBUxa0mskkdH_SuvWz0J6Tny-1inL7oXY1d81kvqVQ0TyovHyGTtgMgCrsGvC1Vk_OeA7TiimAirJy2NSPydnE1UJ0tCEpEs-XqPzFWdebQj5_42-pHDUpsiRi19I_C-ma2kmdVb0pJxXI3dyP0aKvEcAvYCWBjZpKBhA54Ypsq9BH6reZiwRzR0pYBw4fqo');"></div>
+</button>
+</div>
+</div>
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-2xl leading-5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm transition-all" placeholder="Find a plant in your jungle..." type="text"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+<div class="mb-8">
+<h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
+            My Jungle
+        </h1>
+<p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
+            Thriving beautifully. <span class="text-accent-pink font-bold">3 plants</span> need attention.
+        </p>
+</div>
+<div class="flex items-center gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+<button class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px] fill-current">grid_view</span>
+<span class="text-sm font-bold">All</span>
+</button>
+<button class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] fill-current text-accent-pink">water_drop</span>
+<span class="text-sm font-bold">Thirsty (3)</span>
+</button>
+<button class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] fill-current text-accent-orange">wb_sunny</span>
+<span class="text-sm font-bold">Sunlight</span>
+</button>
+<button class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] fill-current text-accent-purple">content_cut</span>
+<span class="text-sm font-bold">Growth</span>
+</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<div class="group bg-white dark:bg-slate-800 rounded-3xl p-3 shadow-soft-green border border-slate-50 dark:border-slate-700 transition-all">
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+<div class="absolute top-3 right-3 z-10 bg-accent-pink text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-accent-pink/30">
+<span class="material-symbols-outlined text-[14px] fill-current">water_drop</span>
+                    thirsty
+                </div>
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLUCyhLO0KX3s7Qgnz1OMXjWdw4F7oFohtmQ9SeXYg3nBAmxfvLsnCaEFkqd0BqVrot4oKywypXvs8B2SpaOFsBkZeFIrCi7l4eaN1Abt4NKA6IiIQ6NtkLvRjMEw2dwaUn4qXH-dsr6lpjg5znT6gV9uRcnTBe-If6Zg2tMx_1QdHPBgz0tenbyGNlMSfORJ1GkiBncHYioh8afaslbLQwwas2HL-1UZhNHwQ-stBkk6tljLuBWysXnSGAO_1csYsm5xgelQujs5D');"></div>
+</div>
+<div class="px-2 pb-2">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white font-brand">Monstera</h3>
+<p class="text-xs text-slate-400 font-medium italic">Living Room</p>
+</div>
+<div class="size-9 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-accent-pink">
+<span class="material-symbols-outlined text-[20px] font-bold">water_drop</span>
+</div>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800 rounded-3xl p-3 shadow-sm border border-slate-50 dark:border-slate-700 transition-all">
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+<div class="absolute top-3 right-3 z-10 bg-accent-purple text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-accent-purple/30">
+<span class="material-symbols-outlined text-[14px] fill-current">content_cut</span>
+                    growing
+                </div>
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCPHQdJxz8S48vX70lXw7k4zO9WZCm5kIpqRhSX-imrrEBHh1X-HCJDT8Gc5AYlflzkSaawbhHkZVW-mdDcLARkmsCQU4DIpIuYimDw57spEBneor_tASxMntqvUJjEKElUOJXf49kBmSkdiXZACPqj2wgja6XCr0Ci3DuIt6F6P17_7kLcGacjGuAER-XHfQtlE9URDspPX1JEtA1nSylPr4iaf6705NhmVTr09HPywfgo7sV5MRWVQvWE0K_s-5dY-ljO3LftlJqn');"></div>
+</div>
+<div class="px-2 pb-2">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white font-brand">Goldie</h3>
+<p class="text-xs text-slate-400 font-medium italic">Kitchen Shelf</p>
+</div>
+<div class="size-9 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-accent-purple">
+<span class="material-symbols-outlined text-[20px] font-bold">eco</span>
+</div>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800 rounded-3xl p-3 shadow-sm border border-slate-50 dark:border-slate-700 transition-all">
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+<div class="absolute top-3 right-3 z-10 bg-primary text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-[14px] fill-current">check_circle</span>
+                    thriving
+                </div>
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFDhr-z4nPgsUewH3Y56ecfqWTmJ6sm88feDQnal1Ip6YOhA25NhA__Z7OImGvXpHHqB3foR_qh7S725ymC29rqz3Nlwjl9_WzcMQ6mqDCEXmP32KTht7OGb5_5XqfGRzRYqhfMP4aCFEiTNlUZHtr3AMg0beXCC8i06h-5hXsp2zRiWlVAzdyloNaksiCZkVxpbIJHVl6MT6Hcbb_HuKuFSPVi6eDAo-IWpgtv8OV3sKLD1x4Ofx0tS3HapXg9lXqiueNZRwb6CNi');"></div>
+</div>
+<div class="px-2 pb-2">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white font-brand">Figgy</h3>
+<p class="text-xs text-slate-400 font-medium italic">Bedroom</p>
+</div>
+<div class="size-9 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px] font-bold">verified</span>
+</div>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800 rounded-3xl p-3 shadow-sm border border-slate-50 dark:border-slate-700 transition-all">
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+<div class="absolute top-3 right-3 z-10 bg-accent-cyan text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-accent-cyan/30">
+<span class="material-symbols-outlined text-[14px] fill-current">opacity</span>
+                    mist me
+                </div>
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCn4dVlJZPe-3a8tR2NGWrEw4i62g3WdyjtednFCzt9rqkF3dioGXFttJvsNfgBUQRR5GLGRRLia6VjRy8bxz14_KTnMlXg93NwBJqJJhRcq4c7f8VoWGIkzgQsxiGlsc_inD0s-HVOaxw-x0R04KXtO_h1vRoAre8rw_k2fjMBl9Bjqlim7S-ejG0Um57sF22eF4aWCSZznRhaXgeAnIpRw-icqYWH29XfyB9v8UL9rEbEyA8ejqGWgxWRanSP6lt-7Ss9cDoQw0At');"></div>
+</div>
+<div class="px-2 pb-2">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white font-brand">Snakey</h3>
+<p class="text-xs text-slate-400 font-medium italic">Home Office</p>
+</div>
+<div class="size-9 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-accent-cyan">
+<span class="material-symbols-outlined text-[20px] font-bold">filter_vintage</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 lg:hidden">
+<div class="flex items-center justify-around py-4">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined filled">home</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Plan</span>
+</button>
+<div class="w-12"></div> 
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">photo_camera</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Scan</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">More</span>
+</button>
+</div>
+</div>
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+<button class="flex items-center justify-center bg-accent-purple text-white size-16 rounded-3xl shadow-2xl shadow-accent-purple/50 border-4 border-white dark:border-slate-900 active:scale-90 transition-all">
+<span class="material-symbols-outlined text-3xl font-black">add</span>
+</button>
+</div>
+
+</body></html>

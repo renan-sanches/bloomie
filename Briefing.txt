@@ -1,0 +1,217 @@
+2.8 Settings & Profile
+
+Profile header:
+	•	Avatar
+	•	Username
+	•	Level badge
+	•	Stats
+
+Notification preferences (granular):
+	•	Morning reminders
+	•	Individual plant alerts
+	•	Weekly summaries
+	•	Custom quiet hours
+
+Appearance:
+	•	Light / Dark / System
+	•	High contrast mode option
+	•	Reduced motion respected
+
+Units:
+	•	Metric / Imperial (pot sizes)
+
+Data:
+	•	Export plant collection
+	•	Backup to iCloud
+
+Premium upsell banner (if applicable)
+
+⸻
+
+3) AI SYSTEMS (REQUIRED, FULLY IMPLEMENTED)
+
+3.1 AI Care Coach: “Bloomie Buddy” (Conversational, Context-Aware)
+
+Implement an in-app chat assistant called Bloomie Buddy that feels like a friendly plant nerd.
+
+It must be context-aware of:
+	•	User’s actual plants
+	•	Recent missed tasks
+	•	Scan results
+	•	Environment (light, season, location)
+	•	Recent photos + journal entries + AI insights
+
+Example interactions:
+	•	“Why is Theo’s leaf turning yellow?”
+	•	“I’m going on vacation for 10 days — what should I do?”
+	•	“Which of my plants are most fragile right now?”
+
+Requirements:
+	•	Uses LLM + plant metadata + recent logs
+	•	Guardrails to avoid hallucinated plant advice
+	•	If confidence is low:
+	•	Clearly say so
+	•	Offer a safe checklist
+	•	Offer curated content fallback
+	•	Provide per-plant quick entry points (chat from plant detail and dashboard card)
+
+3.2 AI Smart Schedule Auto-Tuning (already specified above)
+
+Must be implemented with transparent reasoning + user override controls.
+
+3.3 Visual Progress AI (already specified above)
+
+Must generate insights and early warnings surfaced across dashboard + plant detail.
+
+3.4 Privacy-First AI Messaging (REQUIRED)
+	•	Explicitly communicate privacy in UI:
+	•	Explain what data is processed (photos, plant logs) and for what purpose
+	•	Clearly state photos are not used for training (privacy-first messaging)
+	•	Provide settings controls for AI features:
+	•	Enable/disable AI insights
+	•	Enable/disable photo analysis
+	•	Manage data retention where applicable
+
+⸻
+
+4) RETENTION & SOCIAL (REQUIRED)
+
+4.1 Smart Notification Copy Rotation (REQUIRED)
+
+Notifications must rotate tone to avoid fatigue:
+	•	Encouraging
+	•	Playful
+	•	Gentle accountability
+
+Examples:
+	•	“Your fern misses you”
+	•	“Quick splash = happy leaves”
+	•	“One tap keeps the streak alive 👀”
+
+Also:
+	•	Respect quiet hours and system settings
+	•	Let users choose a preferred tone style (optional) but still rotate
+
+4.2 Social-Optional (No Forced Community) — REQUIRED
+
+Implement opt-in sharing features:
+	•	Share a plant progress card as an image
+	•	“Plant of the Month” community gallery (read-only)
+	•	No follower mechanics and no pressure to participate
+
+⸻
+
+5) PLANT DEATH FLOW (REQUIRED, GENTLE + MEANINGFUL)
+
+When a plant is marked as dead:
+	•	Gentle removal flow with: “Say goodbye to [name]”
+	•	Option to archive
+
+Must include “memory card”:
+	•	First photo
+	•	Longest streak
+	•	“You kept Theo alive for 9 months 💚”
+	•	Optional reflection prompt:
+	•	“What did you learn from this plant?”
+
+Goal: remove shame, encourage continuation.
+
+⸻
+
+6) TECHNICAL REQUIREMENTS (STRICT)
+
+Architecture
+	•	SwiftUI for all UI components
+	•	MVVM architecture pattern
+	•	Core Data or SwiftData for local plant storage
+	•	CloudKit for cross-device sync
+
+Integrations
+	•	Plant identification API (Plant.id, PlantNet, or similar)
+	•	Local notifications for care reminders
+	•	HealthKit integration optional:
+	•	Track “plant care” as a mindfulness activity (if implemented, keep it tasteful and non-invasive)
+	•	Deep linking for shop affiliate URLs
+
+Animations
+	•	Lottie or custom SwiftUI animations for celebrations
+	•	Haptic feedback on task completion
+	•	Smooth spring animations on all interactive elements
+
+Accessibility
+	•	VoiceOver support with meaningful labels
+	•	Dynamic Type support
+	•	High contrast mode option
+	•	Reduced motion setting respected
+
+Offline Mode
+	•	Show cached data
+	•	Display banner: “You’re offline. Some features unavailable.”
+	•	Disable/gray out features that require network (scan/AI chat/shop) with friendly tooltips
+
+⸻
+
+7) OBSERVABILITY / PRODUCT INFRA (REQUIRED)
+
+Analytics Events (REQUIRED)
+
+Track events for:
+	•	Task completion
+	•	Scan success/failure
+	•	Drop-off points (onboarding step exits, scan exit, paywall dismiss, etc.)
+	•	AI chat usage (message sent, answer rated helpful/unhelpful)
+	•	Schedule tuning accepted/declined
+	•	Photo insight generated
+
+Remote Config (REQUIRED)
+	•	Implement remote config to:
+	•	Control notification copy rotation pools
+	•	Control confidence threshold X%
+	•	Enable/disable seasonal themes dynamically
+
+Feature Flags (REQUIRED)
+	•	Implement feature flags for:
+	•	AI features (Buddy, schedule tuning, photo intelligence)
+	•	Seasonal themes
+	•	Community gallery
+	•	These are for safe rollout/testing inside the app (but features are still implemented).
+
+⸻
+
+8) USER FLOWS TO IMPLEMENT (END-TO-END)
+	1.	New user → Onboarding → Add first plant → Complete first task → Celebration
+	2.	Returning user → Dashboard → See pending tasks → Complete task → XP earned
+	3.	User scans plant → Identification → Add to collection → Set care schedule
+	4.	User receives notification → Opens app → Completes task → Streak maintained
+	5.	User browses shop → Finds plant → Taps “Shop Now” → External redirect
+	6.	User adds growth photo → AI insight generated → Insight appears on dashboard
+	7.	User asks Bloomie Buddy for help → Context-aware response → Suggested action/logging
+	8.	User marks plant as dead → Gentle goodbye flow → Memory card + archive
+
+⸻
+
+9) EMPTY STATES & EDGE CASES (ALL REQUIRED)
+	•	No plants: Friendly illustration with CTA to add first plant
+	•	No tasks today: “All caught up! Your plants are thriving”
+	•	Scan fails: “Hmm, couldn’t identify that one. Try a clearer photo or search manually.”
+	•	Offline mode: Show cached data with banner “You’re offline. Some features unavailable.”
+	•	Plant dies: Gentle removal flow with “Say goodbye to [name]” + archive + memory card + reflection
+
+⸻
+
+10) TONE OF VOICE
+
+All copy should feel like a supportive friend who’s excited about plants:
+	•	“Woohoo! You’re on a 5-day streak!”
+	•	“Psst… your Monstera is looking a little thirsty.”
+	•	“You’re doing amazing, plant parent!”
+
+Avoid clinical/robotic language. Use plant puns sparingly but delightfully.
+
+⸻
+
+11) DELIVERY REQUIREMENT
+
+Deliver a fully functional iOS app with all screens, navigation, animations, integrations, AI features, remote config, feature flags, analytics, and core flows working exactly as specified above. No features are omitted. No stubs. No “coming soon.”
+
+⸻

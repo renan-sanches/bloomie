@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloomie Mobile Smart Scan - Result</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#248f59",
+                        "background-light": "#fafaf9",
+                        "background-dark": "#161d1b",
+                        "bloomie-ivory": "#FCFAF7",
+                        "bloomie-pink": "#FF4081",
+                        "bloomie-orange": "#FF9800",
+                        "bloomie-lime": "#8BC34A",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "1rem", 
+                        "xl": "1.5rem", 
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft-bloom': '0 -10px 60px -15px rgba(0, 0, 0, 0.15)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hide for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen p-8 overflow-hidden">
+<!-- Desktop Presentation Wrapper -->
+<div class="relative group/design-root">
+<!-- Decoration: Background Circle to give depth on desktop -->
+<div class="absolute -left-20 top-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10"></div>
+<div class="absolute -right-20 bottom-20 w-80 h-80 bg-bloomie-orange/10 rounded-full blur-3xl -z-10"></div>
+<!-- Mobile Device Frame -->
+<div class="relative w-[375px] h-[812px] bg-black rounded-[48px] shadow-2xl border-[8px] border-zinc-900 overflow-hidden ring-1 ring-white/10 mx-auto transform transition-transform duration-700 hover:scale-[1.01]">
+<!-- Dynamic Island / Notch Placeholder -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-3xl z-50 pointer-events-none"></div>
+<!-- Screen Content -->
+<div class="relative w-full h-full flex flex-col bg-gray-900">
+<!-- Viewfinder Layer (Blurred Background) -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover filter blur-[6px] scale-110 brightness-75" data-alt="Blurred close-up of green plant leaves background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTASPXDK9pYJJ3Rc56RY0G1jZfeFUOLmA8d1_vxAwuXRUwyiblsvKaOgPlB3ykmeOsVHwZPOE6Fe7MmjkT6bC7BjwCTcqPO5d_VrUpQNGKQBfyxOr--SCq6Cho3iNgtR2URF7Unqf9qaPSvUPAjstBtZmE8K1DM4bCVgXvzq361qkQfKxKGLgrFvHGHPxGc7EJaxnaQWwHyFPTLilnMQaRkgKqWa7EMsCAshXAQvUFkLf3Ivpe12W3BG-AcDULyiNPbP5op3_0nzz2"/>
+</div>
+<!-- Top Bar Actions -->
+<div class="relative z-10 pt-14 px-6 flex justify-between items-start">
+<!-- Status Bar Time (Visual only) -->
+<span class="text-white/80 text-sm font-medium ml-2">9:41</span>
+<!-- Close Button -->
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/30 transition-colors border border-white/10">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Spacer to push bottom sheet down -->
+<div class="flex-grow"></div>
+<!-- Bottom Sheet Container -->
+<div class="relative z-20 bg-bloomie-ivory dark:bg-zinc-900 rounded-t-3xl pt-3 pb-8 px-6 shadow-soft-bloom flex flex-col items-center animate-[slideUp_0.6s_ease-out]">
+<!-- Drag Indicator -->
+<div class="w-12 h-1.5 bg-gray-300/60 dark:bg-gray-700 rounded-full mb-8"></div>
+<!-- Diagnosis Header -->
+<div class="text-center w-full mb-8">
+<h2 class="text-[#121714] dark:text-white text-2xl font-extrabold tracking-tight mb-6">
+                            Diagnosis Complete
+                        </h2>
+<!-- Alert Block -->
+<div class="flex flex-col items-center gap-3">
+<div class="relative">
+<!-- Pulsing effect behind icon -->
+<div class="absolute inset-0 bg-bloomie-pink/20 rounded-full animate-ping opacity-75"></div>
+<div class="relative w-16 h-16 bg-bloomie-pink/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-bloomie-pink text-[32px] font-variation-FILL">water_drop</span>
+</div>
+</div>
+<h3 class="text-bloomie-pink text-lg font-bold">Root Rot Detected</h3>
+</div>
+</div>
+<!-- Explanation Text -->
+<div class="w-full mb-8">
+<p class="text-[#678375] dark:text-gray-400 text-center text-[15px] leading-relaxed font-medium">
+                            It looks like your plant is suffering from overwatering. The roots are struggling to breathe, but don't worry—we can save it!
+                        </p>
+</div>
+<!-- Action Buttons Group -->
+<div class="w-full flex flex-col gap-3 mb-4">
+<!-- Primary Action: Fix -->
+<button class="w-full bg-bloomie-orange hover:bg-orange-500 text-white p-4 rounded-full font-bold text-base shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">healing</span>
+<span>How to fix it</span>
+</button>
+<!-- Secondary Action: Add -->
+<button class="w-full bg-bloomie-lime hover:bg-[#7CB342] text-white p-4 rounded-full font-bold text-base shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Add to My Jungle</span>
+</button>
+</div>
+<!-- Home Indicator Area -->
+<div class="w-full pt-4 flex justify-center">
+<div class="w-32 h-1 bg-gray-900/10 dark:bg-white/10 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .font-variation-FILL {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</body></html>

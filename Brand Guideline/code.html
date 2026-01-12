@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloomie Brand Guidelines</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4ade80", 
+                        "primary-dark": "#16a34a",
+                        "background-light": "#fcfdfc",
+                        "background-dark": "#0f172a",
+                        "accent-pink": "#f43f5e", 
+                        "accent-purple": "#8b5cf6", 
+                        "accent-orange": "#f59e0b", 
+                        "accent-cyan": "#06b6d4",
+                        "accent-alert": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "brand": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft-green': '0 10px 40px -10px rgba(74, 222, 128, 0.15)',
+                        'card-hover': '0 20px 40px -10px rgba(74, 222, 128, 0.25)',
+                        'vibrant-pink': '0 10px 25px -5px rgba(244, 63, 94, 0.3)',
+                        'vibrant-purple': '0 10px 25px -5px rgba(139, 92, 246, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-background-light text-slate-900 font-display antialiased; }
+        }
+        .guide-section { @apply mb-20; }
+        .section-title { @apply text-2xl font-extrabold text-slate-800 mb-8 flex items-center gap-3 font-brand; }
+        .swatch-card { @apply flex flex-col gap-3 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm transition-transform hover:-translate-y-1; }
+    </style>
+</head>
+<body class="min-h-screen">
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-20">
+<div class="flex items-center gap-2 group">
+<div class="size-10 bg-primary/20 rounded-2xl flex items-center justify-center text-primary-dark">
+<span class="material-symbols-outlined text-[24px] filled font-bold">local_florist</span>
+</div>
+<span class="text-2xl font-bold tracking-tight text-slate-900 font-brand">Bloomie</span>
+</div>
+<div class="text-sm font-bold uppercase tracking-widest text-slate-400">Brand Guidelines v1.0</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<div class="mb-20">
+<h1 class="text-5xl font-extrabold text-slate-900 font-brand mb-4">Cultivating Care.</h1>
+<p class="text-xl text-slate-500 max-w-2xl leading-relaxed">
+            Bloomie is a friendly, botanical, and minimalist brand designed to help indoor gardeners flourish. These guidelines ensure our visual identity remains vibrant and consistent.
+        </p>
+</div>
+<section class="guide-section">
+<h2 class="section-title">
+<span class="size-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary-dark">01</span>
+            Primary Logo
+        </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-soft-green flex flex-col items-center justify-center text-center">
+<div class="size-24 bg-primary/20 rounded-[2rem] flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[56px] font-bold">local_florist</span>
+</div>
+<span class="text-5xl font-bold tracking-tight text-slate-900 font-brand">Bloomie</span>
+<p class="mt-4 text-slate-400 font-medium">Full Wordmark &amp; Icon</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-slate-900 p-8 rounded-[2rem] flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-bold tracking-tight text-white font-brand">Bloomie</span>
+<p class="mt-2 text-slate-500 text-xs font-bold uppercase tracking-widest">Dark Mode</p>
+</div>
+<div class="bg-primary p-8 rounded-[2rem] flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-bold tracking-tight text-white font-brand">Bloomie</span>
+<p class="mt-2 text-white/70 text-xs font-bold uppercase tracking-widest">On Brand Color</p>
+</div>
+<div class="col-span-2 bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[2rem] flex items-center justify-center gap-4">
+<div class="size-12 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[24px] font-bold">local_florist</span>
+</div>
+<p class="text-slate-500 font-medium italic">Logo Icon - Isolated usage</p>
+</div>
+</div>
+</div>
+</section>
+<section class="guide-section">
+<h2 class="section-title">
+<span class="size-8 rounded-lg bg-accent-pink/20 flex items-center justify-center text-accent-pink">02</span>
+            Typography
+        </h2>
+<div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+<div class="flex flex-col gap-12">
+<div class="border-b border-slate-100 pb-12">
+<p class="text-xs font-black text-slate-300 uppercase tracking-widest mb-6">Primary Brand Font - Quicksand</p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+<div class="font-brand space-y-2">
+<p class="text-6xl font-bold text-slate-900">AaBbCc 123</p>
+<p class="text-lg text-slate-500 font-medium">Friendly, rounded, and approachable. Used for headings and branding.</p>
+</div>
+<div class="flex gap-4 font-brand text-2xl">
+<span class="font-bold text-slate-900">Bold</span>
+<span class="font-semibold text-slate-700">SemiBold</span>
+<span class="font-medium text-slate-500">Medium</span>
+</div>
+</div>
+</div>
+<div>
+<p class="text-xs font-black text-slate-300 uppercase tracking-widest mb-6">Interface Font - Plus Jakarta Sans</p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+<div class="font-display space-y-2">
+<p class="text-5xl font-extrabold text-slate-900 tracking-tight">System Interface</p>
+<p class="text-lg text-slate-500 font-medium">Clear, modern, and highly legible for functional elements and UI.</p>
+</div>
+<div class="flex gap-4 font-display text-xl">
+<span class="font-extrabold text-slate-900">ExtraBold</span>
+<span class="font-bold text-slate-700">Bold</span>
+<span class="font-medium text-slate-500">Medium</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="guide-section">
+<h2 class="section-title">
+<span class="size-8 rounded-lg bg-accent-orange/20 flex items-center justify-center text-accent-orange">03</span>
+            Color Palette
+        </h2>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+<div class="swatch-card">
+<div class="h-32 bg-primary rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Soft Green</p>
+<p class="text-xs text-slate-400 font-mono">#4ADE80</p>
+</div>
+</div>
+<div class="swatch-card">
+<div class="h-32 bg-accent-pink rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Vibrant Pink</p>
+<p class="text-xs text-slate-400 font-mono">#F43F5E</p>
+</div>
+</div>
+<div class="swatch-card">
+<div class="h-32 bg-accent-purple rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Rich Purple</p>
+<p class="text-xs text-slate-400 font-mono">#8B5CF6</p>
+</div>
+</div>
+<div class="swatch-card">
+<div class="h-32 bg-accent-orange rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Amber Glow</p>
+<p class="text-xs text-slate-400 font-mono">#F59E0B</p>
+</div>
+</div>
+<div class="swatch-card">
+<div class="h-32 bg-accent-cyan rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Sky Cyan</p>
+<p class="text-xs text-slate-400 font-mono">#06B6D4</p>
+</div>
+</div>
+<div class="swatch-card">
+<div class="h-32 bg-white border border-slate-100 rounded-2xl w-full"></div>
+<div>
+<p class="font-bold text-slate-900">Crisp White</p>
+<p class="text-xs text-slate-400 font-mono">#FFFFFF</p>
+</div>
+</div>
+</div>
+</section>
+<section class="guide-section">
+<h2 class="section-title">
+<span class="size-8 rounded-lg bg-accent-cyan/20 flex items-center justify-center text-accent-cyan">04</span>
+            Iconography
+        </h2>
+<div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+<p class="text-slate-500 mb-8 font-medium italic">Rounded, soft, and colorful care icons for plant maintenance tasks.</p>
+<div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-8">
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary-dark">
+<span class="material-symbols-outlined text-[32px] filled">water_drop</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Watering</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-accent-orange/10 flex items-center justify-center text-accent-orange">
+<span class="material-symbols-outlined text-[32px] filled">wb_sunny</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lighting</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-accent-pink/10 flex items-center justify-center text-accent-pink">
+<span class="material-symbols-outlined text-[32px] filled">local_hospital</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Care</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-accent-purple/10 flex items-center justify-center text-accent-purple">
+<span class="material-symbols-outlined text-[32px] filled">content_cut</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pruning</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
+<span class="material-symbols-outlined text-[32px] filled">opacity</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Misting</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[32px] filled">home_pin</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Location</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[32px] filled">energy_savings_leaf</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Growth</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary-dark">
+<span class="material-symbols-outlined text-[32px] filled">compost</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Soil</span>
+</div>
+</div>
+</div>
+</section>
+<section class="guide-section">
+<h2 class="section-title">
+<span class="size-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary-dark">05</span>
+            UI Components
+        </h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+<div class="space-y-8">
+<p class="text-xs font-black text-slate-300 uppercase tracking-widest">Buttons &amp; Interaction</p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-4 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/30 transition-all hover:scale-105">Primary Action</button>
+<button class="px-8 py-4 rounded-2xl bg-accent-purple text-white font-bold shadow-lg shadow-accent-purple/30 transition-all hover:scale-105">Accent Action</button>
+<button class="px-8 py-4 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50">Secondary Action</button>
+</div>
+<div class="flex gap-4">
+<div class="size-14 rounded-2xl bg-white shadow-md flex items-center justify-center text-primary border border-slate-100">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+<div class="size-14 rounded-full bg-accent-pink text-white flex items-center justify-center shadow-vibrant-pink">
+<span class="material-symbols-outlined text-2xl">favorite</span>
+</div>
+</div>
+</div>
+<div class="space-y-8">
+<p class="text-xs font-black text-slate-300 uppercase tracking-widest">Plant Card Structure</p>
+<div class="max-w-sm group bg-white rounded-3xl p-4 shadow-soft-green border border-slate-100">
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-5">
+<div class="absolute top-4 right-4 z-10 bg-accent-pink text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-accent-pink/30">
+<span class="material-symbols-outlined text-[14px] fill-current">water_drop</span>
+                            thirsty
+                        </div>
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLUCyhLO0KX3s7Qgnz1OMXjWdw4F7oFohtmQ9SeXYg3nBAmxfvLsnCaEFkqd0BqVrot4oKywypXvs8B2SpaOFsBkZeFIrCi7l4eaN1Abt4NKA6IiIQ6NtkLvRjMEw2dwaUn4qXH-dsr6lpjg5znT6gV9uRcnTBe-If6Zg2tMx_1QdHPBgz0tenbyGNlMSfORJ1GkiBncHYioh8afaslbLQwwas2HL-1UZhNHwQ-stBkk6tljLuBWysXnSGAO_1csYsm5xgelQujs5D');"></div>
+</div>
+<div class="px-2 pb-2">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-xl font-bold text-slate-900 leading-tight font-brand">Sample Plant</h3>
+<p class="text-sm text-slate-400 font-medium italic">Genus Botanicalis</p>
+</div>
+<div class="size-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-slate-50 border-t border-slate-200/60 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+<div class="flex items-center gap-2 mb-4">
+<div class="size-8 bg-primary/20 rounded-xl flex items-center justify-center text-primary-dark">
+<span class="material-symbols-outlined text-[20px] filled font-bold">local_florist</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900 font-brand">Bloomie</span>
+</div>
+<p class="text-slate-400 text-sm">© 2024 Bloomie App. Grow with love.</p>
+</div>
+</footer>
+
+</body></html>
