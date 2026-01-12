@@ -4,10 +4,18 @@ import { onAuthChange } from './auth';
 import {
   subscribeToUserPlants,
   subscribeToCareHistory,
+  subscribeToUserProfile,
   createUserProfile,
   getUserProfile,
+  updateUserProfile,
+  updateUserPreferences,
+  createPlant,
+  updatePlant,
+  deletePlant,
+  addCareActivity,
   type Plant as FirestorePlant,
   type CareActivity,
+  type UserProfile as FirestoreUserProfile,
 } from './firestore';
 import {
   AppContext,
@@ -65,6 +73,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setPlants([]);
         setCareHistory([]);
         setTasks([]);
+        setProfile(DEFAULT_PROFILE);
+        setPreferences(DEFAULT_PREFERENCES);
         setIsLoading(false);
       }
     });
@@ -81,6 +91,44 @@ export function AppProvider({ children }: AppProviderProps) {
 
     setIsLoading(true);
 
+    // Subscribe to real-time user profile updates
+    const unsubscribeProfile = subscribeToUserProfile(user.uid, (firestoreProfile) => {
+      const { level, levelName, progress } = calculateLevel(firestoreProfile.xp || 0);
+
+      setProfile({
+        id: firestoreProfile.uid,
+        username: firestoreProfile.username || firestoreProfile.displayName || 'User',
+        experienceLevel: firestoreProfile.experienceLevel || 'beginner',
+        xp: firestoreProfile.xp || 0,
+        totalXP: firestoreProfile.xp || 0,
+        level,
+        levelName,
+        streakDays: firestoreProfile.streakDays || 0,
+        currentStreak: firestoreProfile.streakDays || 0,
+        totalPlantsAdded: firestoreProfile.totalPlantsAdded || 0,
+        totalTasksCompleted: firestoreProfile.totalTasksCompleted || 0,
+        tasksCompleted: firestoreProfile.totalTasksCompleted || 0,
+        lastActiveDate: firestoreProfile.lastActiveDate?.toMillis().toString() || new Date().toISOString(),
+      });
+
+      if (firestoreProfile.preferences) {
+        setPreferences({
+          theme: firestoreProfile.preferences.theme || 'light',
+          notifications: firestoreProfile.preferences.notificationsEnabled,
+          notificationsEnabled: firestoreProfile.preferences.notificationsEnabled,
+          morningReminders: firestoreProfile.preferences.morningReminders ?? true,
+          weeklySummaries: firestoreProfile.preferences.weeklySummaries ?? true,
+          highContrast: firestoreProfile.preferences.highContrast ?? false,
+          reducedMotion: firestoreProfile.preferences.reducedMotion ?? false,
+          hapticFeedbackEnabled: firestoreProfile.preferences.hapticFeedbackEnabled ?? true,
+          reminderTime: firestoreProfile.preferences.reminderTime || '09:00',
+          onboardingCompleted: firestoreProfile.preferences.onboardingCompleted || false,
+          preferredUnits: firestoreProfile.preferences.units || 'metric',
+          units: firestoreProfile.preferences.units || 'metric',
+        });
+      }
+    });
+
     // Subscribe to real-time plant updates
     const unsubscribePlants = subscribeToUserPlants(user.uid, (firestorePlants) => {
       // Convert Firestore plants to app plants format
@@ -93,10 +141,12 @@ export function AppProvider({ children }: AppProviderProps) {
         healthScore: calculateHealthScore(plant),
         wateringFrequencyDays: plant.careSchedule.water.frequency,
         mistingFrequencyDays: plant.careSchedule.mist.frequency,
+        fertilizingFrequencyDays: plant.careSchedule.fertilize.frequency,
+        rotatingFrequencyDays: 7, // Default
         lastWatered: plant.careSchedule.water.lastDone
           ? plant.careSchedule.water.lastDone.toMillis().toString()
           : undefined,
-        dateAdded: plant.createdAt.toMillis().toString(),
+        dateAdded: plant.createdAt?.toMillis().toString() || new Date().toISOString(),
         notes: plant.notes ? [plant.notes] : [],
         photos: [],
         careHistory: [],
@@ -114,6 +164,7 @@ export function AppProvider({ children }: AppProviderProps) {
     });
 
     return () => {
+      unsubscribeProfile();
       unsubscribePlants();
       unsubscribeHistory();
     };
@@ -134,7 +185,6 @@ export function AppProvider({ children }: AppProviderProps) {
     addPlant: useCallback(async (plant) => {
       if (!user) return {} as Plant;
 
-      const { createPlant } = await import('./firestore');
       const plantId = await createPlant(user.uid, {
         name: plant.nickname,
         species: plant.species,
@@ -148,7 +198,7 @@ export function AppProvider({ children }: AppProviderProps) {
             lastDone: null,
           },
           fertilize: {
-            frequency: 14,
+            frequency: plant.fertilizingFrequencyDays || 14,
             unit: 'days',
             lastDone: null,
           },
@@ -166,7 +216,6 @@ export function AppProvider({ children }: AppProviderProps) {
     updatePlant: useCallback(async (id: string, updates: Partial<Plant>) => {
       if (!user) return;
 
-      const { updatePlant } = await import('./firestore');
       await updatePlant(user.uid, id, {
         name: updates.nickname,
         species: updates.species,
@@ -179,7 +228,6 @@ export function AppProvider({ children }: AppProviderProps) {
     deletePlant: useCallback(async (id: string) => {
       if (!user) return;
 
-      const { deletePlant } = await import('./firestore');
       await deletePlant(user.uid, id);
     }, [user]),
 
@@ -189,7 +237,6 @@ export function AppProvider({ children }: AppProviderProps) {
       const plant = plants.find(p => p.id === plantId);
       if (!plant) return;
 
-      const { addCareActivity } = await import('./firestore');
       await addCareActivity(
         user.uid,
         plantId,
@@ -201,7 +248,15 @@ export function AppProvider({ children }: AppProviderProps) {
 
     // Task operations (stub - can be implemented later)
     addTask: useCallback(async (task) => {
-      const newTask = { ...task, id: generateId(), createdAt: new Date().toISOString(), completed: false };
+      const newTask = {
+        ...task,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        completed: false,
+        plantId: task.plantId || '',
+        type: task.type || 'water',
+        dueDate: task.dueDate || new Date().toISOString(),
+      } as CareTask;
       setTasks(prev => [...prev, newTask]);
     }, []),
 
@@ -219,14 +274,29 @@ export function AppProvider({ children }: AppProviderProps) {
       ));
     }, []),
 
-    // Profile operations (stub)
+    // Profile operations
     updateProfile: useCallback(async (updates: Partial<UserProfile>) => {
+      if (!user) return;
+
+      const firestoreUpdates: any = { ...updates };
+      // Map some fields back if they were changed
+      if (updates.username) firestoreUpdates.username = updates.username;
+
+      await updateUserProfile(user.uid, firestoreUpdates);
       setProfile(prev => ({ ...prev, ...updates }));
-    }, []),
+    }, [user]),
 
     updatePreferences: useCallback(async (updates: Partial<UserPreferences>) => {
+      if (!user) return;
+
+      const firestorePrefs: any = { ...updates };
+      // Map back legacy fields to firestore fields
+      if (updates.notificationsEnabled !== undefined) firestorePrefs.notificationsEnabled = updates.notificationsEnabled;
+      if (updates.units !== undefined) firestorePrefs.units = updates.units;
+
+      await updateUserPreferences(user.uid, firestorePrefs);
       setPreferences(prev => ({ ...prev, ...updates }));
-    }, []),
+    }, [user]),
 
     // Achievement operations (stub)
     unlockAchievement: useCallback(async (id: string) => {
@@ -243,6 +313,17 @@ export function AppProvider({ children }: AppProviderProps) {
 
     dismissInsight: useCallback(async (id: string) => {
       setInsights(prev => prev.filter(insight => insight.id !== id));
+    }, []),
+
+    // Other stubs
+    snoozeTask: useCallback(async (id: string, days: number) => {
+      // Stub
+    }, []),
+    addXP: useCallback(async (amount: number) => {
+      // Stub
+    }, []),
+    refreshData: useCallback(async () => {
+      // Stub
     }, []),
   };
 

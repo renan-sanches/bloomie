@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
+import { colors, spacing, borderRadius, typography } from "@/components/ui/design-system";
 import { useApp, formatTimeAgo, type CareTask, type Plant } from "@/lib/store";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
@@ -23,11 +24,11 @@ import Animated, {
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const TASK_COLORS: Record<string, { bg: string; icon: string }> = {
-  water: { bg: "#E3F2FD", icon: "💧" },
-  mist: { bg: "#E0F7FA", icon: "💨" },
-  fertilize: { bg: "#FFF3E0", icon: "🌱" },
-  rotate: { bg: "#F3E5F5", icon: "🔄" },
+const TASK_COLORS: Record<string, { bg: string; icon: string; text: string }> = {
+  water: { bg: colors.accentCyan + '20', icon: "💧", text: colors.accentCyan },
+  mist: { bg: colors.accentCyan + '10', icon: "💨", text: colors.accentCyan },
+  fertilize: { bg: colors.accentOrange + '20', icon: "🌱", text: colors.accentOrange },
+  rotate: { bg: colors.accentPurple + '20', icon: "🔄", text: colors.accentPurple },
 };
 
 export default function CalendarScreen() {
@@ -323,52 +324,53 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingBottom: 100,
   },
   header: {
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg,
   },
   streakBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF3E0",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: colors.accentOrange + '10',
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
   },
   streakEmoji: {
     fontSize: 36,
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   streakInfo: {
     flex: 1,
   },
   streakDays: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#E65100",
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.accentOrange,
   },
   streakMessage: {
-    fontSize: 14,
-    color: "#FF8A65",
+    fontSize: typography.fontSize.sm,
+    color: colors.accentOrange,
+    opacity: 0.8,
   },
   viewToggle: {
     flexDirection: "row",
-    backgroundColor: "#F5F5F0",
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 16,
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.md,
+    padding: spacing.xs,
+    marginBottom: spacing.lg,
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: spacing.sm,
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
   },
   toggleButtonActive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceLight,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -376,51 +378,51 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   toggleText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#687076",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.gray500,
   },
   toggleTextActive: {
-    color: "#2D5A27",
+    color: colors.primaryDark,
   },
   calendarContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 2,
   },
   calendarHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   calendarNav: {
-    fontSize: 20,
-    color: "#A8E063",
-    fontWeight: "700",
-    paddingHorizontal: 8,
+    fontSize: typography.fontSize.xl,
+    color: colors.primary,
+    fontWeight: typography.fontWeight.bold,
+    paddingHorizontal: spacing.sm,
   },
   calendarMonth: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
   },
   calendarWeekdays: {
     flexDirection: "row",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   weekdayText: {
     flex: 1,
     textAlign: "center",
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#9BA1A6",
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.gray400,
   },
   calendarGrid: {
     flexDirection: "row",
@@ -434,25 +436,25 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   calendarDayToday: {
-    backgroundColor: "#F5FFF0",
-    borderRadius: 12,
+    backgroundColor: colors.primaryLight + '30',
+    borderRadius: borderRadius.md,
   },
   calendarDaySelected: {
-    backgroundColor: "#A8E063",
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
   },
   calendarDayText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.gray700,
   },
   calendarDayTextToday: {
-    color: "#2D5A27",
-    fontWeight: "700",
+    color: colors.primaryDark,
+    fontWeight: typography.fontWeight.bold,
   },
   calendarDayTextSelected: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    color: colors.surfaceLight,
+    fontWeight: typography.fontWeight.bold,
   },
   taskDots: {
     flexDirection: "row",
@@ -465,13 +467,13 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2C3E50",
-    marginBottom: 12,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
+    marginBottom: spacing.md,
   },
   taskCard: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
     position: "relative",
   },
   swipeIndicators: {
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
   },
   swipeIndicator: {
     width: 40,
@@ -493,29 +495,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   completeIndicator: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
   },
   snoozeIndicator: {
-    backgroundColor: "#B8A9E8",
+    backgroundColor: colors.accentPurple,
   },
   swipeIcon: {
     fontSize: 18,
-    color: "#FFFFFF",
+    color: colors.surfaceLight,
   },
   taskCardContent: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   taskIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceLight,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: spacing.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   taskEmoji: {
     fontSize: 24,
@@ -524,25 +533,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskPlantName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
     marginBottom: 2,
   },
   taskType: {
-    fontSize: 14,
-    color: "#687076",
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
   },
   completeButton: {
-    backgroundColor: "#A8E063",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
   },
   completeButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#2D5A27",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.surfaceLight,
   },
   buttonPressed: {
     transform: [{ scale: 0.95 }],
@@ -554,17 +563,17 @@ const styles = StyleSheet.create({
   },
   emptyEmoji: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#2C3E50",
-    marginBottom: 8,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
+    marginBottom: spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: "#687076",
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
     textAlign: "center",
   },
 });

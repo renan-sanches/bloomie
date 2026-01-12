@@ -7,6 +7,7 @@ export interface Plant {
   species: string;
   scientificName?: string;
   photo?: string;
+  imageUrl?: string;
   dateAdded: string;
   lastWatered?: string;
   lastMisted?: string;
@@ -17,14 +18,16 @@ export interface Plant {
   fertilizingFrequencyDays: number;
   rotatingFrequencyDays: number;
   healthScore: number;
-  hydrationLevel: number;
-  lightExposure: number;
-  humidityLevel: number;
-  personality: PlantPersonality;
+  hydrationLevel?: number;
+  lightExposure?: number;
+  humidityLevel?: number;
+  personality?: PlantPersonality;
   notes: string[];
   photos: PlantPhoto[];
   careHistory: CareEvent[];
   diagnosisHistory: Diagnosis[];
+  status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+  location: string;
 }
 
 export type PlantPersonality =
@@ -87,21 +90,34 @@ export interface UserProfile {
   avatar?: string;
   experienceLevel: "beginner" | "growing" | "expert";
   xp: number;
+  totalXP: number; // For profile backward compatibility/legacy code
   level: number;
   levelName: string;
   streakDays: number;
+  currentStreak: number; // For profile backward compatibility
   totalPlantsAdded: number;
   totalTasksCompleted: number;
+  tasksCompleted: number; // For profile backward compatibility
   lastActiveDate: string;
 }
 
 export interface UserPreferences {
   theme: "light" | "dark" | "auto";
   notifications: boolean;
+  notificationsEnabled: boolean; // For profile backward compatibility
+  morningReminders: boolean;
+  weeklySummaries: boolean;
+  highContrast: boolean;
+  reducedMotion: boolean;
+  hapticFeedbackEnabled: boolean;
   reminderTime: string;
   onboardingCompleted: boolean;
   preferredUnits: "metric" | "imperial";
+  units: "metric" | "imperial"; // For profile backward compatibility
 }
+
+export const LEVEL_NAMES = ["Seedling", "Sprout", "Budding", "Blooming", "Flourishing", "Master Gardener"];
+export const XP_PER_LEVEL = 100;
 
 export interface Insight {
   id: string;
@@ -115,22 +131,28 @@ export interface Insight {
 
 // Context
 export interface AppContextType {
+  user: any | null;
   plants: Plant[];
   tasks: CareTask[];
   achievements: Achievement[];
   profile: UserProfile;
   preferences: UserPreferences;
   insights: Insight[];
-  addPlant: (plant: Omit<Plant, "id" | "dateAdded" | "careHistory" | "photos" | "diagnosisHistory" | "notes">) => Promise<Plant>;
+  isLoading: boolean;
+  addPlant: (plant: Partial<Plant> & { nickname: string; species: string; location: string }) => Promise<Plant>;
   updatePlant: (id: string, updates: Partial<Plant>) => Promise<void>;
-  removePlant: (id: string) => Promise<void>;
+  deletePlant: (id: string) => Promise<void>;
+  addTask: (task: Partial<CareTask>) => Promise<void>;
+  updateTask: (id: string, updates: Partial<CareTask>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
   snoozeTask: (taskId: string, days: number) => Promise<void>;
   addXP: (amount: number) => Promise<void>;
+  unlockAchievement: (id: string) => Promise<void>;
   updatePreferences: (updates: Partial<UserPreferences>) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshData: () => Promise<void>;
-  logCareEvent: (plantId: string, type: CareEvent["type"], note?: string) => Promise<void>;
+  logCare: (plantId: string, type: string, note?: string) => Promise<void>;
   addInsight: (insight: Omit<Insight, "id" | "createdAt" | "dismissed">) => Promise<void>;
   dismissInsight: (id: string) => Promise<void>;
 }
@@ -157,10 +179,10 @@ export function getPlantStatus(plant: Plant): { status: string; message: string;
   if (plant.healthScore >= 80) {
     return { status: "happy", message: "Thriving", color: "#4ade80" };
   }
-  if (plant.hydrationLevel < 30) {
+  if ((plant.hydrationLevel ?? 100) < 30) {
     return { status: "thirsty", message: "Needs Water", color: "#26d0ce" };
   }
-  if (plant.lightExposure < 40) {
+  if ((plant.lightExposure ?? 100) < 40) {
     return { status: "needs-light", message: "Needs Light", color: "#f9a620" };
   }
   return { status: "needs-attention", message: "Needs Care", color: "#f43f5e" };
@@ -175,7 +197,7 @@ export function getPersonalityTagline(plant: Plant): string {
     "main-character": "Center of attention",
     "chill-vibes": "Just vibing",
   };
-  return taglines[plant.personality] || "Living its best life";
+  return taglines[plant.personality ?? "chill-vibes"] || "Living its best life";
 }
 
 export function formatTimeAgo(dateString: string): string {
@@ -198,11 +220,11 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-export function calculateLevel(xp: number): { level: number; levelName: string } {
-  const level = Math.floor(xp / 100) + 1;
-  const levelNames = ["Seedling", "Sprout", "Budding", "Blooming", "Flourishing", "Master Gardener"];
-  const levelName = levelNames[Math.min(level - 1, levelNames.length - 1)];
-  return { level, levelName };
+export function calculateLevel(xp: number): { level: number; levelName: string; progress: number } {
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+  const levelName = LEVEL_NAMES[Math.min(level - 1, LEVEL_NAMES.length - 1)];
+  const progress = (xp % XP_PER_LEVEL) / XP_PER_LEVEL;
+  return { level, levelName, progress };
 }
 
 // Default values
@@ -211,20 +233,30 @@ export const DEFAULT_PROFILE: UserProfile = {
   username: "Plant Parent",
   experienceLevel: "beginner",
   xp: 0,
+  totalXP: 0,
   level: 1,
   levelName: "Seedling",
   streakDays: 0,
+  currentStreak: 0,
   totalPlantsAdded: 0,
   totalTasksCompleted: 0,
+  tasksCompleted: 0,
   lastActiveDate: new Date().toISOString(),
 };
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   theme: "light",
   notifications: true,
+  notificationsEnabled: true,
+  morningReminders: true,
+  weeklySummaries: true,
+  highContrast: false,
+  reducedMotion: false,
+  hapticFeedbackEnabled: true,
   reminderTime: "09:00",
   onboardingCompleted: false,
   preferredUnits: "metric",
+  units: "metric",
 };
 
 export const DEFAULT_ACHIEVEMENTS: Achievement[] = [

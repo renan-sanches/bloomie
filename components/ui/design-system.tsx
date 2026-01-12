@@ -38,9 +38,9 @@ export const colors = {
 // Typography
 export const typography = {
     fontFamily: {
-        display: 'Plus Jakarta Sans',
-        brand: 'Quicksand',
-        body: 'Noto Sans',
+        display: 'PlusJakartaSans-Bold',
+        brand: 'PlusJakartaSans-SemiBold',
+        body: 'PlusJakartaSans-Regular',
     },
     fontSize: {
         xs: 12,

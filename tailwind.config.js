@@ -29,9 +29,10 @@ module.exports = {
                 'surface-dark': '#2c3630',
             },
             fontFamily: {
-                display: ['Plus Jakarta Sans', 'sans-serif'],
-                brand: ['Quicksand', 'sans-serif'],
-                body: ['Noto Sans', 'sans-serif'],
+                sans: ['PlusJakartaSans-Regular', 'sans-serif'],
+                display: ['PlusJakartaSans-Bold', 'sans-serif'],
+                brand: ['PlusJakartaSans-SemiBold', 'sans-serif'],
+                body: ['PlusJakartaSans-Regular', 'sans-serif'],
             },
             borderRadius: {
                 DEFAULT: '0.5rem',

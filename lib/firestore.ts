@@ -21,12 +21,27 @@ import { db } from './firebase.config';
 export interface UserProfile {
     uid: string;
     email: string;
+    username: string;
     displayName: string;
     photoURL?: string;
+    experienceLevel: 'beginner' | 'growing' | 'expert';
     createdAt: Timestamp;
+    xp: number;
+    streakDays: number;
+    totalPlantsAdded: number;
+    totalTasksCompleted: number;
+    lastActiveDate: Timestamp;
     preferences: {
+        theme: 'light' | 'dark' | 'auto';
         notificationsEnabled: boolean;
-        theme: 'light' | 'dark';
+        morningReminders: boolean;
+        weeklySummaries: boolean;
+        highContrast: boolean;
+        reducedMotion: boolean;
+        hapticFeedbackEnabled: boolean;
+        units: 'metric' | 'imperial';
+        reminderTime: string;
+        onboardingCompleted: boolean;
     };
 }
 
@@ -72,12 +87,26 @@ export async function createUserProfile(
     await setDoc(userRef, {
         uid,
         email,
+        username: displayName,
         displayName,
         photoURL: null,
         createdAt: serverTimestamp(),
+        xp: 0,
+        streakDays: 0,
+        totalPlantsAdded: 0,
+        totalTasksCompleted: 0,
+        lastActiveDate: serverTimestamp(),
         preferences: {
-            notificationsEnabled: true,
             theme: 'light',
+            notificationsEnabled: true,
+            morningReminders: true,
+            weeklySummaries: true,
+            highContrast: false,
+            reducedMotion: false,
+            hapticFeedbackEnabled: true,
+            units: 'metric',
+            reminderTime: '09:00',
+            onboardingCompleted: false,
         },
     });
 }
@@ -100,10 +129,46 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
  */
 export async function updateUserProfile(
     uid: string,
-    data: Partial<UserProfile>
+    data: Partial<Omit<UserProfile, 'uid' | 'createdAt' | 'preferences'>>
 ): Promise<void> {
     const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, data);
+    await updateDoc(userRef, {
+        ...data,
+        updatedAt: serverTimestamp(),
+    } as any);
+}
+
+/**
+ * Subscribe to real-time updates for user profile
+ */
+export function subscribeToUserProfile(
+    uid: string,
+    callback: (profile: UserProfile) => void
+): () => void {
+    const userRef = doc(db, 'users', uid);
+    return onSnapshot(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            callback(snapshot.data() as UserProfile);
+        }
+    });
+}
+
+/**
+ * Update user preferences
+ */
+export async function updateUserPreferences(
+    uid: string,
+    preferences: Partial<UserProfile['preferences']>
+): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    const updates: any = {};
+
+    // Map preferences to field paths
+    Object.keys(preferences).forEach(key => {
+        updates[`preferences.${key}`] = preferences[key as keyof UserProfile['preferences']];
+    });
+
+    await updateDoc(userRef, updates);
 }
 
 // ========================================

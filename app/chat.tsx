@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { colors, spacing, borderRadius, typography } from "@/components/ui/design-system";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useApp } from "@/lib/store";
 import * as Haptics from "expo-haptics";
@@ -43,7 +44,7 @@ export default function ChatScreen() {
   const { plants, tasks, profile } = useApp();
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
-  
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -180,15 +181,15 @@ export default function ChatScreen() {
       // Call server-side AI endpoint
       const conversationHistory = getConversationHistory();
       const userContext = getUserContext();
-      
+
       const result = await chatMutation.mutateAsync({
         message: messageText,
         history: conversationHistory,
         context: userContext,
       });
 
-      const responseText = result.success 
-        ? result.response 
+      const responseText = result.success
+        ? result.response
         : "Oops! I'm having a moment. Let me collect my thoughts and try again. 🌿";
 
       // Add assistant message
@@ -206,14 +207,14 @@ export default function ChatScreen() {
 
     } catch (error) {
       console.error("Chat error:", error);
-      
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Oops! I'm having a moment. Let me collect my thoughts and try again. 🌿",
         timestamp: new Date(),
       };
-      
+
       setMessages((prev) => [...prev, errorMessage]);
     }
 
@@ -383,28 +384,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#E8E4DC",
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: colors.gray100,
+    backgroundColor: colors.surfaceLight,
   },
   backButton: {
     width: 40,
     height: 40,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: borderRadius.full,
   },
   headerInfo: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   headerAvatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#F5FFF0",
+    backgroundColor: colors.primaryLight + '20',
     alignItems: "center",
     justifyContent: "center",
   },
@@ -412,21 +414,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
   },
   headerSubtitle: {
-    fontSize: 13,
-    color: "#9BA1A6",
+    fontSize: typography.fontSize.xs,
+    color: colors.gray500,
   },
   messagesList: {
-    padding: 16,
-    paddingBottom: 8,
+    padding: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   messageContainer: {
     flexDirection: "row",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
     alignItems: "flex-end",
   },
   userMessageContainer: {
@@ -436,10 +438,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F5FFF0",
+    backgroundColor: colors.primaryLight + '20',
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   avatarEmoji: {
     fontSize: 20,
@@ -448,46 +450,51 @@ const styles = StyleSheet.create({
     width: 44,
   },
   messageBubble: {
-    maxWidth: "75%",
-    padding: 14,
-    borderRadius: 20,
+    maxWidth: "80%",
+    padding: spacing.md,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
   },
   userBubble: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
     borderBottomRightRadius: 4,
     marginLeft: "auto",
   },
   assistantBubble: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceLight,
+    borderColor: colors.gray100,
     borderBottomLeftRadius: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
   },
   messageText: {
-    fontSize: 15,
-    color: "#2C3E50",
+    fontSize: typography.fontSize.base,
+    color: colors.gray900,
     lineHeight: 22,
   },
   userMessageText: {
-    color: "#2D5A27",
+    color: colors.surfaceLight,
   },
   typingContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   typingBubble: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    padding: 14,
-    borderRadius: 20,
+    backgroundColor: colors.surfaceLight,
+    padding: spacing.md,
+    borderRadius: borderRadius.xl,
     borderBottomLeftRadius: 4,
     gap: 4,
+    borderWidth: 1,
+    borderColor: colors.gray100,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
@@ -496,67 +503,76 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
   },
   suggestionsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 8,
+    gap: spacing.sm,
+    marginTop: spacing.sm,
     paddingLeft: 44,
   },
   suggestionChip: {
-    backgroundColor: "#F5FFF0",
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 16,
+    backgroundColor: colors.primaryLight + '10',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: "#A8E063",
+    borderColor: colors.primary + '30',
   },
   chipPressed: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
   },
   chipDisabled: {
     opacity: 0.5,
   },
   suggestionText: {
-    fontSize: 13,
-    color: "#2D5A27",
-    fontWeight: "500",
+    fontSize: typography.fontSize.xs,
+    color: colors.primary,
+    fontWeight: typography.fontWeight.bold,
   },
   suggestionTextDisabled: {
-    color: "#9BA1A6",
+    color: colors.gray400,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    backgroundColor: colors.surfaceLight,
     borderTopWidth: 1,
-    borderTopColor: "#E8E4DC",
-    gap: 12,
+    borderTopColor: colors.gray100,
+    gap: spacing.md,
   },
   input: {
     flex: 1,
-    backgroundColor: "#F5F5F0",
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#2C3E50",
-    maxHeight: 100,
+    backgroundColor: colors.gray50,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    fontSize: typography.fontSize.base,
+    color: colors.gray900,
+    maxHeight: 120,
+    borderWidth: 1,
+    borderColor: colors.gray100,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#A8E063",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   sendButtonDisabled: {
-    backgroundColor: "#E8E4DC",
+    backgroundColor: colors.gray200,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonPressed: {
     transform: [{ scale: 0.95 }],

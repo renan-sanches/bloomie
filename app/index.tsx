@@ -20,42 +20,11 @@ import {
 } from '@/components/ui/design-system';
 import { Logo } from '@/components/ui/logo';
 
-// Mock data for now (will be replaced with real data from Firestore in Phase 3)
-const MOCK_PLANTS = [
-  {
-    id: '1',
-    name: 'Monstera',
-    species: 'Monstera Deliciosa',
-    status: 'thirsty' as const,
-    location: 'Living Room',
-  },
-  {
-    id: '2',
-    name: 'Figgy',
-    species: 'Ficus Lyrata',
-    status: 'thriving' as const,
-    location: 'Bedroom Corner',
-  },
-  {
-    id: '3',
-    name: 'Snakey',
-    species: 'Sansevieria',
-    status: 'mist' as const,
-    location: 'Home Office',
-  },
-  {
-    id: '4',
-    name: 'Goldie',
-    species: 'Epipremnum Aureum',
-    status: 'growing' as const,
-    location: 'Kitchen Shelf',
-  },
-];
-
-type FilterType = 'all' | 'water' | 'healthy' | 'attention';
+import { useApp, type Plant } from '@/lib/store';
 
 export default function MyJungleScreen() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const { plants, isLoading } = useApp();
+  const [activeFilter, setActiveFilter] = useState<'all' | 'water' | 'healthy' | 'attention'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Get current hour for greeting
@@ -63,21 +32,28 @@ export default function MyJungleScreen() {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   // Filter plants based on active filter
-  const filteredPlants = MOCK_PLANTS.filter((plant) => {
+  const filteredPlants = (plants || []).filter((plant: Plant) => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'water') return plant.status === 'thirsty';
-    if (activeFilter === 'healthy') return plant.status === 'thriving';
-    if (activeFilter === 'attention') return plant.status === 'mist' || plant.status === 'growing';
+    if (activeFilter === 'healthy') return plant.status === 'thriving' || plant.status === 'growing';
+    if (activeFilter === 'attention') return plant.status === 'mist' || plant.status === 'thirsty';
     return true;
   });
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.subtitle}>Curating your jungle...</Text>
+      </View>
+    );
+  }
 
   const handlePlantPress = (plantId: string) => {
     router.push(`/plant/${plantId}` as any);
   };
 
   const handleAddPlant = () => {
-    // TODO: Navigate to add plant screen
-    console.log('Add plant');
+    router.push('/scan' as any);
   };
 
   return (
@@ -104,13 +80,13 @@ export default function MyJungleScreen() {
           {/* Stats */}
           <View style={styles.stats}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{MOCK_PLANTS.length}</Text>
+              <Text style={styles.statValue}>{plants.length}</Text>
               <Text style={styles.statLabel}>Plants</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {MOCK_PLANTS.filter(p => p.waterDue).length}
+                {plants.filter(p => p.status === 'thirsty').length}
               </Text>
               <Text style={styles.statLabel}>Need water</Text>
             </View>
@@ -204,7 +180,7 @@ export default function MyJungleScreen() {
                 style={viewMode === 'grid' ? styles.plantGridItem : styles.plantListItem}
               >
                 <PlantCard
-                  name={plant.name}
+                  name={plant.nickname}
                   species={plant.species}
                   status={plant.status}
                   location={plant.location}

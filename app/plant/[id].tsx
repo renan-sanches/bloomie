@@ -12,6 +12,7 @@ import {
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { colors, spacing, borderRadius, typography } from "@/components/ui/design-system";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useApp, getPlantStatus, getPersonalityTagline, formatTimeAgo, type Plant, type CareEvent } from "@/lib/store";
 import * as Haptics from "expo-haptics";
@@ -26,10 +27,10 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CARE_ACTIONS = [
-  { type: "water" as const, label: "Water", emoji: "💧", color: "#4FC3F7", bgColor: "#E3F2FD" },
-  { type: "mist" as const, label: "Mist", emoji: "💨", color: "#26C6DA", bgColor: "#E0F7FA" },
-  { type: "fertilize" as const, label: "Fertilize", emoji: "🌱", color: "#FFA726", bgColor: "#FFF3E0" },
-  { type: "rotate" as const, label: "Rotate", emoji: "🔄", color: "#B8A9E8", bgColor: "#F3E5F5" },
+  { type: "water" as const, label: "Water", emoji: "💧", color: colors.accentCyan, bgColor: colors.accentCyan + '15' },
+  { type: "mist" as const, label: "Mist", emoji: "💨", color: colors.accentCyan, bgColor: colors.accentCyan + '10' },
+  { type: "fertilize" as const, label: "Fertilize", emoji: "🌱", color: colors.accentOrange, bgColor: colors.accentOrange + '15' },
+  { type: "rotate" as const, label: "Rotate", emoji: "🔄", color: colors.accentPurple, bgColor: colors.accentPurple + '15' },
 ];
 
 const PLANT_EMOJIS: Record<string, string> = {
@@ -46,7 +47,7 @@ export default function PlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { plants, tasks, updatePlant, removePlant, completeTask, logCareEvent, addInsight } = useApp();
   const insets = useSafeAreaInsets();
-  
+
   const plant = plants.find((p) => p.id === id);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(plant?.nickname || "");
@@ -158,7 +159,7 @@ export default function PlantDetailScreen() {
 
   const handleConfirmDeath = async () => {
     triggerHaptic();
-    
+
     // Create memory insight
     await addInsight({
       plantId: plant.id,
@@ -259,7 +260,7 @@ export default function PlantDetailScreen() {
                   <Text style={styles.statBarValue}>{plant.hydrationLevel}%</Text>
                 </View>
                 <View style={styles.statBarTrack}>
-                  <View style={[styles.statBarFill, styles.hydrationFill, { width: `${plant.hydrationLevel}%` }]} />
+                  <View style={[styles.statBarFill, styles.hydrationFill, { width: `${plant.hydrationLevel ?? 0}%` }]} />
                 </View>
               </View>
               <View style={styles.statBar}>
@@ -268,7 +269,7 @@ export default function PlantDetailScreen() {
                   <Text style={styles.statBarValue}>{plant.lightExposure}%</Text>
                 </View>
                 <View style={styles.statBarTrack}>
-                  <View style={[styles.statBarFill, styles.lightFill, { width: `${plant.lightExposure}%` }]} />
+                  <View style={[styles.statBarFill, styles.lightFill, { width: `${plant.lightExposure ?? 0}%` }]} />
                 </View>
               </View>
               <View style={styles.statBar}>
@@ -277,7 +278,7 @@ export default function PlantDetailScreen() {
                   <Text style={styles.statBarValue}>{plant.humidityLevel}%</Text>
                 </View>
                 <View style={styles.statBarTrack}>
-                  <View style={[styles.statBarFill, styles.humidityFill, { width: `${plant.humidityLevel}%` }]} />
+                  <View style={[styles.statBarFill, styles.humidityFill, { width: `${plant.humidityLevel ?? 0}%` }]} />
                 </View>
               </View>
             </View>
@@ -477,12 +478,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingBottom: 12,
-    backgroundColor: "#FFF9F0",
+    backgroundColor: colors.surfaceLight,
     zIndex: 100,
     borderBottomWidth: 1,
-    borderBottomColor: "#E8E4DC",
+    borderBottomColor: colors.gray100,
   },
   headerBackButton: {
     width: 40,
@@ -491,9 +492,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
   },
   backButtonFloat: {
     position: "absolute",
@@ -511,13 +512,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 60,
     paddingBottom: 24,
-    backgroundColor: "#F5FFF0",
+    backgroundColor: colors.primaryLight + '20',
   },
   plantImageContainer: {
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
@@ -542,20 +543,20 @@ const styles = StyleSheet.create({
     bottom: -8,
     paddingHorizontal: 16,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: borderRadius.full,
   },
   statusText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.surfaceLight,
   },
   nameSection: {
     alignItems: "center",
   },
   plantName: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#2C3E50",
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
     marginBottom: 4,
   },
   editNameContainer: {
@@ -565,56 +566,58 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   nameInput: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#2C3E50",
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
     borderBottomWidth: 2,
-    borderBottomColor: "#A8E063",
+    borderBottomColor: colors.primary,
     paddingVertical: 4,
     minWidth: 150,
     textAlign: "center",
   },
   saveButton: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
   },
   saveButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2D5A27",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.surfaceLight,
   },
   plantSpecies: {
-    fontSize: 16,
-    color: "#687076",
+    fontSize: typography.fontSize.base,
+    color: colors.gray600,
     marginBottom: 8,
   },
   plantTagline: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
     fontStyle: "italic",
-    color: "#9BA1A6",
+    color: colors.gray500,
   },
   section: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
     marginBottom: 12,
   },
   healthCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.xl,
     padding: 20,
     flexDirection: "row",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
   healthScoreContainer: {
     marginRight: 20,
@@ -623,20 +626,20 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#F5FFF0",
+    backgroundColor: colors.primaryLight + '20',
     borderWidth: 6,
-    borderColor: "#A8E063",
+    borderColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   healthScoreValue: {
     fontSize: 32,
-    fontWeight: "800",
-    color: "#2D5A27",
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
   },
   healthScoreLabel: {
     fontSize: 12,
-    color: "#687076",
+    color: colors.gray600,
   },
   statBars: {
     flex: 1,
@@ -650,42 +653,42 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   statBarLabel: {
-    fontSize: 13,
-    color: "#687076",
+    fontSize: typography.fontSize.xs,
+    color: colors.gray600,
   },
   statBarValue: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
   },
   statBarTrack: {
     height: 8,
-    backgroundColor: "#E8E4DC",
-    borderRadius: 4,
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.full,
     overflow: "hidden",
   },
   statBarFill: {
     height: "100%",
-    borderRadius: 4,
+    borderRadius: borderRadius.full,
   },
   hydrationFill: {
-    backgroundColor: "#4FC3F7",
+    backgroundColor: colors.accentCyan,
   },
   lightFill: {
-    backgroundColor: "#FFD93D",
+    backgroundColor: colors.accentOrange,
   },
   humidityFill: {
-    backgroundColor: "#26C6DA",
+    backgroundColor: colors.accentCyan,
   },
   careActions: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: spacing.md,
   },
   careActionButton: {
     width: "47%",
     padding: 16,
-    borderRadius: 16,
+    borderRadius: borderRadius.lg,
     alignItems: "center",
   },
   careActionEmoji: {
@@ -693,29 +696,31 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   careActionLabel: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
     marginBottom: 4,
   },
   careActionDue: {
     fontSize: 12,
-    color: "#9BA1A6",
+    color: colors.gray500,
   },
   buttonPressed: {
     transform: [{ scale: 0.97 }],
     opacity: 0.9,
   },
   historyList: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.lg,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.gray100,
   },
   historyItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#E8E4DC",
+    borderBottomColor: colors.gray100,
   },
   historyEmoji: {
     fontSize: 24,
@@ -725,35 +730,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   historyType: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
   },
   historyDate: {
     fontSize: 12,
-    color: "#9BA1A6",
+    color: colors.gray500,
   },
   historyNote: {
     fontSize: 12,
-    color: "#687076",
+    color: colors.gray600,
     maxWidth: 100,
   },
   emptyHistory: {
-    backgroundColor: "#F5F5F0",
-    borderRadius: 16,
+    backgroundColor: colors.gray50,
+    borderRadius: borderRadius.lg,
     padding: 24,
     alignItems: "center",
   },
   emptyHistoryText: {
-    fontSize: 14,
-    color: "#9BA1A6",
+    fontSize: typography.fontSize.sm,
+    color: colors.gray400,
   },
   tipCard: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.lg,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.gray100,
   },
   tipEmoji: {
     fontSize: 24,
@@ -763,32 +770,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tipTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#2C3E50",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
     marginBottom: 4,
   },
   tipText: {
     fontSize: 13,
-    color: "#687076",
+    color: colors.gray600,
     lineHeight: 18,
   },
   dangerSection: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 32,
   },
   dangerButton: {
-    backgroundColor: "#FFF0F0",
+    backgroundColor: colors.gray50,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: borderRadius.md,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#FF6B6B",
+    borderColor: 'rgba(255, 107, 107, 0.3)',
   },
   dangerButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FF6B6B",
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: '#FF6B6B',
   },
   notFound: {
     flex: 1,

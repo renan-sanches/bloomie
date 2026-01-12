@@ -12,10 +12,16 @@ export function ScreenContainer({
     children,
     edges = ['top', 'bottom', 'left', 'right'],
     style,
+    containerClassName,
     ...props
 }: ScreenContainerProps) {
     return (
-        <SafeAreaView style={[styles.container, style]} edges={edges} {...props}>
+        <SafeAreaView
+            style={[styles.container, style]}
+            edges={edges}
+            className={containerClassName}
+            {...props}
+        >
             {children}
         </SafeAreaView>
     );

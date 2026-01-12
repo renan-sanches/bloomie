@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 import {
   View,
   Text,
@@ -139,13 +139,13 @@ export default function ScanScreen() {
         try {
           const fileName = `plant_${Date.now()}.jpg`;
           const destPath = `${FileSystem.documentDirectory}plants/${fileName}`;
-          
+
           // Ensure directory exists
           const dirInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}plants`);
           if (!dirInfo.exists) {
             await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}plants`, { intermediates: true });
           }
-          
+
           // Copy photo to permanent location
           await FileSystem.copyAsync({
             from: photo.uri,
@@ -227,6 +227,8 @@ export default function ScanScreen() {
       }] : [],
       careHistory: [],
       diagnosisHistory: [],
+      status: 'growing',
+      location: 'Living Room',
     };
 
     addPlant(newPlant);
@@ -252,7 +254,7 @@ export default function ScanScreen() {
   // Permission handling
   if (!permission) {
     return (
-      <ScreenContainer className="items-center justify-center">
+      <ScreenContainer containerClassName="items-center justify-center">
         <ActivityIndicator size="large" color="#A8E063" />
       </ScreenContainer>
     );
@@ -260,7 +262,7 @@ export default function ScanScreen() {
 
   if (!permission.granted) {
     return (
-      <ScreenContainer className="p-6">
+      <ScreenContainer containerClassName="p-6">
         <View style={styles.permissionContainer}>
           <View style={styles.permissionIcon}>
             <Text style={styles.permissionEmoji}>📷</Text>
@@ -342,8 +344,8 @@ export default function ScanScreen() {
                       {identifyResult.careLevel === "easy"
                         ? "Beginner"
                         : identifyResult.careLevel === "moderate"
-                        ? "Intermediate"
-                        : "Expert"}
+                          ? "Intermediate"
+                          : "Expert"}
                     </Text>
                   </View>
                 </View>
@@ -354,14 +356,14 @@ export default function ScanScreen() {
                     style={[
                       styles.toxicityBadge,
                       identifyResult.toxicity.toLowerCase().includes("non-toxic") ||
-                      identifyResult.toxicity.toLowerCase().includes("safe")
+                        identifyResult.toxicity.toLowerCase().includes("safe")
                         ? styles.safeBadge
                         : styles.toxicBadge,
                     ]}
                   >
                     <Text style={styles.toxicityText}>
                       {identifyResult.toxicity.toLowerCase().includes("non-toxic") ||
-                      identifyResult.toxicity.toLowerCase().includes("safe")
+                        identifyResult.toxicity.toLowerCase().includes("safe")
                         ? "🐾 Pet Safe"
                         : "⚠️ " + identifyResult.toxicity}
                     </Text>
@@ -422,10 +424,10 @@ export default function ScanScreen() {
                     healthResult.overallHealth === "healthy"
                       ? styles.healthyBadge
                       : healthResult.overallHealth === "mild-issues"
-                      ? styles.mildBadge
-                      : healthResult.overallHealth === "moderate-issues"
-                      ? styles.moderateBadge
-                      : styles.severeBadge,
+                        ? styles.mildBadge
+                        : healthResult.overallHealth === "moderate-issues"
+                          ? styles.moderateBadge
+                          : styles.severeBadge,
                   ]}
                 >
                   <Text style={styles.healthScoreNumber}>
@@ -439,10 +441,10 @@ export default function ScanScreen() {
                   {healthResult.overallHealth === "healthy"
                     ? "🌟 Looking Great!"
                     : healthResult.overallHealth === "mild-issues"
-                    ? "🌱 Minor Issues"
-                    : healthResult.overallHealth === "moderate-issues"
-                    ? "⚠️ Needs Attention"
-                    : "🚨 Urgent Care Needed"}
+                      ? "🌱 Minor Issues"
+                      : healthResult.overallHealth === "moderate-issues"
+                        ? "⚠️ Needs Attention"
+                        : "🚨 Urgent Care Needed"}
                 </Text>
 
                 {/* Urgent action */}
@@ -467,8 +469,8 @@ export default function ScanScreen() {
                               issue.severity === "mild"
                                 ? styles.mildSeverity
                                 : issue.severity === "moderate"
-                                ? styles.moderateSeverity
-                                : styles.severeSeverity,
+                                  ? styles.moderateSeverity
+                                  : styles.severeSeverity,
                             ]}
                           >
                             <Text style={styles.severityText}>{issue.severity}</Text>
@@ -563,8 +565,8 @@ export default function ScanScreen() {
                     ? "Identifying plant..."
                     : "Analyzing health..."
                   : mode === "identify"
-                  ? "Position plant in frame"
-                  : "Focus on problem area"}
+                    ? "Position plant in frame"
+                    : "Focus on problem area"}
               </Text>
             </View>
 

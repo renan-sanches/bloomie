@@ -5,6 +5,7 @@
 - [x] Generate custom app logo
 - [x] Update app.config.ts with branding
 - [x] Set up icon mappings for all tabs
+- [x] Update UI font to Plus Jakarta Sans
 
 ## Onboarding Flow
 - [x] Welcome screen with animated plants
