@@ -27,16 +27,6 @@
                     "order": "DESCENDING"
                 }
             ]
-        },
-        {
-            "collectionGroup": "careHistory",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "timestamp",
-                    "order": "DESCENDING"
-                }
-            ]
         }
     ],
     "fieldOverrides": []
