@@ -20,6 +20,10 @@ const SYMBOL_MAP: Record<string, string> = {
     'snowflake': '❄️',
     'drop.fill': '💧',
     'checkmark.seal.fill': '✅',
+    'heart.fill': '❤️',
+    'safari.fill': '🧭',
+    'photo.fill': '🖼️',
+    'camera.rotate': '🔄',
 };
 
 interface IconSymbolProps extends TextProps {

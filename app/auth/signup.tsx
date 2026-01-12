@@ -11,9 +11,10 @@ import {
     ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { signUpWithEmail } from '@/lib/auth';
+import { signUpWithEmail, signInWithGoogle } from '@/lib/auth';
 import { Logo } from '@/components/ui/logo';
 import { StatusBar } from 'expo-status-bar';
+import { colors } from '@/components/ui/design-system';
 
 export default function SignupScreen() {
     const [name, setName] = useState('');
@@ -45,6 +46,26 @@ export default function SignupScreen() {
 
         try {
             await signUpWithEmail(email, password, name);
+            // Navigate to home after successful signup
+            router.replace('/');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        if (Platform.OS !== 'web') {
+            setError('Google Sign-In is only available on web');
+            return;
+        }
+
+        setError('');
+        setLoading(true);
+
+        try {
+            await signInWithGoogle();
             // Navigate to onboarding after successful signup
             router.replace('/onboarding');
         } catch (err: any) {
@@ -147,6 +168,27 @@ export default function SignupScreen() {
                         )}
                     </Pressable>
 
+                    {Platform.OS === 'web' && (
+                        <>
+                            <View style={styles.divider}>
+                                <View style={styles.dividerLine} />
+                                <Text style={styles.dividerText}>or</Text>
+                                <View style={styles.dividerLine} />
+                            </View>
+
+                            <Pressable
+                                onPress={handleGoogleSignIn}
+                                disabled={loading}
+                                style={({ pressed }) => [
+                                    styles.googleButton,
+                                    pressed && styles.buttonPressed,
+                                ]}
+                            >
+                                <Text style={styles.googleButtonText}>Sign up with Google</Text>
+                            </Pressable>
+                        </>
+                    )}
+
                     <View style={styles.loginContainer}>
                         <Text style={styles.loginText}>Already have an account? </Text>
                         <Pressable
@@ -228,7 +270,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     signupButton: {
-        backgroundColor: '#4ade80',
+        backgroundColor: colors.primary,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
@@ -253,9 +295,38 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginLink: {
-        color: '#4ade80',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
+    },
+    googleButton: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        marginBottom: 16,
+    },
+    googleButtonText: {
+        color: '#0f172a',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    divider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 24,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#334155',
+    },
+    dividerText: {
+        color: '#64748b',
+        paddingHorizontal: 16,
+        fontSize: 14,
     },
     terms: {
         color: '#64748b',

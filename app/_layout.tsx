@@ -10,13 +10,14 @@ import {
 import { useEffect } from 'react';
 
 import 'react-native-gesture-handler';
-import { Tabs } from "expo-router";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets, SafeAreaProvider } from "react-native-safe-area-context";
 import { Platform } from "react-native";
 import { IconSymbol } from "@/components/icon-symbol";
 import { colors } from "@/components/ui/design-system";
 import { AppProvider } from "@/lib/app-provider";
+import { Header } from "@/components/header";
+import { View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -44,150 +45,103 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AppProvider>
-          <TabLayout />
+          <Header />
+          <View style={{ flex: 1 }}>
+            <TabLayout />
+          </View>
         </AppProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
 
-function TabLayout() {
-  const insets = useSafeAreaInsets();
-  const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 64 + bottomPadding;
+import { Drawer } from 'expo-router/drawer';
 
+// ...
+
+function TabLayout() {
   return (
-    <Tabs
+    <Drawer
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.gray400,
         headerShown: false,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          paddingTop: 12,
-          paddingBottom: bottomPadding,
-          paddingHorizontal: 16,
-          height: tabBarHeight,
-          backgroundColor: Platform.OS === 'web'
-            ? 'rgba(255, 255, 255, 0.9)'
-            : colors.surfaceLight,
-          borderTopWidth: 0,
-          // Glassmorphism effect for web
-          ...(Platform.OS === 'web' && {
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-          }),
-          // Shadow
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 12,
-          elevation: 8,
+        drawerActiveTintColor: colors.primary,
+        drawerInactiveTintColor: colors.gray900,
+        drawerLabelStyle: {
+          fontFamily: 'PlusJakartaSans-SemiBold',
+          marginLeft: -16,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-          marginTop: 4,
-        },
-        tabBarItemStyle: {
-          paddingVertical: 4,
-        },
+        drawerStyle: {
+          backgroundColor: colors.surfaceLight,
+          width: '80%',
+        }
       }}
     >
-      <Tabs.Screen
+      <Drawer.Screen
         name="index"
         options={{
           title: "My Jungle",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 28 : 24}
-              name="house.fill"
-              color={color}
-            />
+          drawerIcon: ({ color, size }: { color: string; size: number }) => (
+            <IconSymbol name="house.fill" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="calendar"
         options={{
           title: "Care",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 28 : 24}
-              name="calendar"
-              color={color}
-            />
+          drawerIcon: ({ color, size }: { color: string; size: number }) => (
+            <IconSymbol name="calendar" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="scan"
         options={{
           title: "Scan",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 28 : 24}
-              name="camera.fill"
-              color={color}
-            />
+          drawerIcon: ({ color, size }: { color: string; size: number }) => (
+            <IconSymbol name="camera.fill" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="discover"
         options={{
           title: "Discover",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 28 : 24}
-              name="leaf.fill"
-              color={color}
-            />
+          drawerIcon: ({ color, size }: { color: string; size: number }) => (
+            <IconSymbol name="leaf.fill" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 28 : 24}
-              name="person.fill"
-              color={color}
-            />
+          drawerIcon: ({ color, size }: { color: string; size: number }) => (
+            <IconSymbol name="person.fill" size={size} color={color} />
           ),
         }}
       />
 
       {/* Hidden screens */}
-      <Tabs.Screen
-        name="onboarding"
-        options={{
-          href: null, // Hide from tab bar
-        }}
-      />
-      <Tabs.Screen
+      <Drawer.Screen
         name="chat"
         options={{
-          href: null, // Hide from tab bar
+          drawerItemStyle: { display: 'none' }
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="plant"
         options={{
-          href: null, // Hide from tab bar
+          drawerItemStyle: { display: 'none' }
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="auth"
         options={{
-          href: null, // Hide from tab bar
+          drawerItemStyle: { display: 'none' },
+          swipeEnabled: false,
         }}
       />
-    </Tabs>
+    </Drawer>
   );
 }

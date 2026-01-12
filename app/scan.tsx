@@ -12,6 +12,8 @@ import {
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { ScreenContainer } from "@/components/screen-container";
+import { colors } from "@/components/ui/design-system";
+
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useApp, type Plant } from "@/lib/store";
 import { trpc } from "@/lib/trpc";
@@ -255,7 +257,7 @@ export default function ScanScreen() {
   if (!permission) {
     return (
       <ScreenContainer containerClassName="items-center justify-center">
-        <ActivityIndicator size="large" color="#A8E063" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </ScreenContainer>
     );
   }
@@ -533,17 +535,12 @@ export default function ScanScreen() {
         <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
           {/* Overlay */}
           <View style={styles.overlay}>
-            {/* Top controls */}
-            <View style={styles.topControls}>
-              <Pressable
-                onPress={toggleCamera}
-                style={({ pressed }) => [
-                  styles.iconButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <IconSymbol name="camera.rotate" size={24} color="#FFFFFF" />
-              </Pressable>
+
+            {/* Top Hint Pill */}
+            <View style={styles.topPillContainer}>
+              <View style={styles.topPill}>
+                <Text style={styles.topPillText}>Center leaf in frame</Text>
+              </View>
             </View>
 
             {/* Scan frame */}
@@ -553,81 +550,58 @@ export default function ScanScreen() {
                 <View style={[styles.corner, styles.topRight]} />
                 <View style={[styles.corner, styles.bottomLeft]} />
                 <View style={[styles.corner, styles.bottomRight]} />
-
-                {scanState === "scanning" && (
-                  <Animated.View style={[styles.scanLine, scanLineStyle]} />
-                )}
               </Animated.View>
-
-              <Text style={styles.scanHint}>
-                {scanState === "scanning"
-                  ? mode === "identify"
-                    ? "Identifying plant..."
-                    : "Analyzing health..."
-                  : mode === "identify"
-                    ? "Position plant in frame"
-                    : "Focus on problem area"}
-              </Text>
             </View>
 
-            {/* Mode selector */}
-            <View style={styles.modeSelector}>
-              <Pressable
-                onPress={() => {
-                  triggerHaptic();
-                  setMode("identify");
-                }}
-                style={[
-                  styles.modeButton,
-                  mode === "identify" && styles.modeButtonActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.modeButtonText,
-                    mode === "identify" && styles.modeButtonTextActive,
-                  ]}
-                >
-                  🔍 Identify
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  triggerHaptic();
-                  setMode("diagnose");
-                }}
-                style={[
-                  styles.modeButton,
-                  mode === "diagnose" && styles.modeButtonActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.modeButtonText,
-                    mode === "diagnose" && styles.modeButtonTextActive,
-                  ]}
-                >
-                  🩺 Diagnose
-                </Text>
-              </Pressable>
-            </View>
+            {/* Bottom Card Area */}
+            <View style={styles.bottomContainer}>
+              {scanState === "scanning" ? (
+                <View style={styles.scanningCard}>
+                  <View style={styles.scanningHeader}>
+                    <View style={styles.scanningIconContainer}>
+                      <ActivityIndicator color={colors.accentCyan} />
+                    </View>
+                    <View>
+                      <Text style={styles.scanningTitle}>Scanning...</Text>
+                      <Text style={styles.scanningSubtitle}>AI PROCESSING</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBarContainer}>
+                    <Text style={styles.progressText}>45%</Text>
+                    <View style={styles.progressBarBg}>
+                      <View style={[styles.progressBarFill, { width: '45%' }]} />
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.controlsContainer}>
+                  {/* Mode Selector (Simplified) */}
+                  <View style={styles.modeSelector}>
+                    <Pressable
+                      onPress={() => setMode('identify')}
+                      style={[styles.modePill, mode === 'identify' && styles.modePillActive]}
+                    >
+                      <Text style={[styles.modeText, mode === 'identify' && styles.modeTextActive]}>Identify</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setMode('diagnose')}
+                      style={[styles.modePill, mode === 'diagnose' && styles.modePillActive]}
+                    >
+                      <Text style={[styles.modeText, mode === 'diagnose' && styles.modeTextActive]}>Diagnose</Text>
+                    </Pressable>
+                  </View>
 
-            {/* Capture button */}
-            <View style={styles.captureContainer}>
-              <Pressable
-                onPress={handleCapture}
-                disabled={scanState === "scanning"}
-                style={({ pressed }) => [
-                  styles.captureButton,
-                  pressed && styles.captureButtonPressed,
-                  scanState === "scanning" && styles.captureButtonDisabled,
-                ]}
-              >
-                {scanState === "scanning" ? (
-                  <ActivityIndicator size="large" color="#A8E063" />
-                ) : (
-                  <View style={styles.captureInner} />
-                )}
+                  {/* Capture Button */}
+                  <Pressable onPress={handleCapture} style={styles.shutterOuter}>
+                    <View style={styles.shutterInner} />
+                  </Pressable>
+                </View>
+              )}
+
+              {/* Upload from Gallery Button */}
+              <Pressable style={styles.uploadButton}>
+                <IconSymbol name="photo.fill" size={20} color="#fff" />
+                <Text style={styles.uploadButtonText}>Upload from Gallery</Text>
               </Pressable>
             </View>
           </View>
@@ -646,21 +620,23 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.1)",
+    justifyContent: 'space-between',
   },
-  topControls: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    padding: 20,
-    paddingTop: 60,
+  topPillContainer: {
+    alignItems: 'center',
+    marginTop: 60,
   },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    alignItems: "center",
-    justifyContent: "center",
+  topPill: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  topPillText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
   scanFrameContainer: {
     flex: 1,
@@ -676,77 +652,127 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 40,
     height: 40,
-    borderColor: "#A8E063",
+    borderColor: colors.accentCyan,
     borderWidth: 4,
+    borderRadius: 12,
   },
-  topLeft: {
-    top: 0,
-    left: 0,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 12,
+  topLeft: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0 },
+  topRight: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0 },
+  bottomLeft: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0 },
+  bottomRight: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0 },
+
+  bottomContainer: {
+    padding: 24,
+    gap: 16,
   },
-  topRight: {
-    top: 0,
-    right: 0,
-    borderLeftWidth: 0,
-    borderBottomWidth: 0,
-    borderTopRightRadius: 12,
+  scanningCard: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: 24,
+    padding: 20,
+    width: '100%',
   },
-  bottomLeft: {
-    bottom: 0,
-    left: 0,
-    borderRightWidth: 0,
-    borderTopWidth: 0,
-    borderBottomLeftRadius: 12,
-  },
-  bottomRight: {
-    bottom: 0,
-    right: 0,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-    borderBottomRightRadius: 12,
-  },
-  scanLine: {
-    position: "absolute",
-    left: 20,
-    right: 20,
-    height: 2,
-    backgroundColor: "#A8E063",
-    shadowColor: "#A8E063",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 10,
-  },
-  scanHint: {
-    marginTop: 24,
-    fontSize: 16,
-    color: "#FFFFFF",
-    fontWeight: "600",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  modeSelector: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    paddingHorizontal: 20,
+  scanningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
     marginBottom: 20,
   },
-  modeButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  scanningIconContainer: {
+    width: 48,
+    height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: colors.backgroundLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.accentCyan,
   },
-  modeButtonActive: {
-    backgroundColor: "#A8E063",
+  scanningTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.gray900,
   },
-  modeButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#FFFFFF",
+  scanningSubtitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.accentCyan,
+    marginTop: 2,
+  },
+  progressBarContainer: {
+    gap: 8,
+  },
+  progressText: {
+    alignSelf: 'flex-end',
+    color: colors.accentPurple,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  progressBarBg: {
+    height: 8,
+    backgroundColor: colors.gray100,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.accentPurple,
+    borderRadius: 4,
+  },
+  controlsContainer: {
+    alignItems: 'center',
+    gap: 32,
+    marginBottom: 12,
+  },
+  modeSelector: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 30,
+    padding: 4,
+  },
+  modePill: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+  },
+  modePillActive: {
+    backgroundColor: '#fff',
+  },
+  modeText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  modeTextActive: {
+    color: colors.gray900,
+  },
+  shutterOuter: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shutterInner: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fff',
+  },
+  uploadButton: {
+    backgroundColor: colors.accentPurple, // Using accentPurple as distinct call to action like the mockup
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 24,
+    gap: 8,
+    marginBottom: Platform.OS === 'ios' ? 24 : 12,
+  },
+  uploadButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   modeButtonTextActive: {
     color: "#2D5A27",
@@ -783,9 +809,6 @@ const styles = StyleSheet.create({
   },
   // Permission styles
   permissionContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 32,
   },
   permissionIcon: {
@@ -815,7 +838,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   permissionButton: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 28,
@@ -852,7 +875,7 @@ const styles = StyleSheet.create({
   },
   confidenceBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
@@ -933,7 +956,7 @@ const styles = StyleSheet.create({
   funFactLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#B8860B",
+    color: colors.primary,
     marginBottom: 8,
   },
   funFactText: {
@@ -969,7 +992,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 28,
     gap: 8,
@@ -988,7 +1011,7 @@ const styles = StyleSheet.create({
   scanAgainText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#A8E063",
+    color: colors.primary,
   },
   // Error styles
   errorContent: {
@@ -1147,7 +1170,7 @@ const styles = StyleSheet.create({
   },
   recommendationBullet: {
     fontSize: 14,
-    color: "#A8E063",
+    color: colors.primary,
     fontWeight: "700",
   },
   recommendationText: {
