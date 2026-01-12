@@ -7,6 +7,8 @@ import {
   StyleSheet,
   RefreshControl,
   Linking,
+  TextInput,
+  LayoutAnimation,
 } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { colors, spacing, borderRadius, typography } from "@/components/ui/design-system";
@@ -51,6 +53,14 @@ export default function DiscoverScreen() {
   const { plants } = useApp();
   const [selectedCategory, setSelectedCategory] = useState("trending");
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filter states
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [petSafeOnly, setPetSafeOnly] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
+  const [selectedLight, setSelectedLight] = useState<string | null>(null);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -65,9 +75,54 @@ export default function DiscoverScreen() {
     }
   };
 
-  const filteredPlants = DISCOVERY_PLANTS.filter(
-    (plant) => plant.category === selectedCategory
-  );
+  const toggleFilters = () => {
+    triggerHaptic();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowFilters(!showFilters);
+  };
+
+  const resetFilters = () => {
+    triggerHaptic();
+    setMaxPrice(null);
+    setPetSafeOnly(false);
+    setSelectedDifficulty(null);
+    setSelectedLight(null);
+    setSearchQuery("");
+  };
+
+  const filteredPlants = DISCOVERY_PLANTS.filter((plant) => {
+    // Search query filter
+    if (searchQuery && !plant.name.toLowerCase().includes(searchQuery.toLowerCase()) && !plant.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+
+    // Category filter (only if no search query is active, or we can combine them)
+    if (!searchQuery && plant.category !== selectedCategory) {
+      return false;
+    }
+
+    // Price filter
+    if (maxPrice !== null && plant.price > maxPrice) {
+      return false;
+    }
+
+    // Pet safe filter
+    if (petSafeOnly && !plant.petSafe) {
+      return false;
+    }
+
+    // Difficulty filter
+    if (selectedDifficulty !== null && plant.difficulty !== selectedDifficulty) {
+      return false;
+    }
+
+    // Light needs filter
+    if (selectedLight !== null && plant.lightNeeds !== selectedLight) {
+      return false;
+    }
+
+    return true;
+  });
 
   // AI Recommendations based on user's plants
   const getRecommendations = () => {
@@ -153,6 +208,103 @@ export default function DiscoverScreen() {
       {/* Title */}
       <Text style={styles.title}>Discover</Text>
       <Text style={styles.subtitle}>Find your next plant obsession</Text>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <IconSymbol name="magnifyingglass" size={18} color={colors.gray400} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search plants..."
+            placeholderTextColor={colors.gray400}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <IconSymbol name="xmark" size={14} color={colors.gray400} />
+            </Pressable>
+          )}
+        </View>
+        <Pressable
+          onPress={toggleFilters}
+          style={[styles.filterButton, showFilters && styles.filterButtonActive]}
+        >
+          <IconSymbol name="slider.horizontal.3" size={20} color={showFilters ? colors.surfaceLight : colors.gray900} />
+        </Pressable>
+      </View>
+
+      {/* Expanded Filters */}
+      {showFilters && (
+        <View style={styles.filtersPanel}>
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>Max Price: {maxPrice ? `$${maxPrice}` : 'Any'}</Text>
+            <View style={styles.filterOptions}>
+              {[25, 50, 100].map((price) => (
+                <Pressable
+                  key={price}
+                  onPress={() => { triggerHaptic(); setMaxPrice(maxPrice === price ? null : price); }}
+                  style={[styles.filterOption, maxPrice === price && styles.filterOptionActive]}
+                >
+                  <Text style={[styles.filterOptionText, maxPrice === price && styles.filterOptionTextActive]}>
+                    Under ${price}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>Light Needs</Text>
+            <View style={styles.filterOptions}>
+              {['low', 'medium', 'high'].map((light) => (
+                <Pressable
+                  key={light}
+                  onPress={() => { triggerHaptic(); setSelectedLight(selectedLight === light ? null : light); }}
+                  style={[styles.filterOption, selectedLight === light && styles.filterOptionActive]}
+                >
+                  <Text style={[styles.filterOptionText, selectedLight === light && styles.filterOptionTextActive]}>
+                    {light.charAt(0).toUpperCase() + light.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>Difficulty</Text>
+            <View style={styles.filterOptions}>
+              {[1, 2, 3].map((diff) => (
+                <Pressable
+                  key={diff}
+                  onPress={() => { triggerHaptic(); setSelectedDifficulty(selectedDifficulty === diff ? null : diff); }}
+                  style={[styles.filterOption, selectedDifficulty === diff && styles.filterOptionActive]}
+                >
+                  <Text style={[styles.filterOptionText, selectedDifficulty === diff && styles.filterOptionTextActive]}>
+                    {'🌿'.repeat(diff)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.filterGroup}>
+            <View style={styles.filterRow}>
+              <Pressable
+                onPress={() => { triggerHaptic(); setPetSafeOnly(!petSafeOnly); }}
+                style={[styles.checkboxContainer, petSafeOnly && styles.checkboxActive]}
+              >
+                {petSafeOnly && <IconSymbol name="checkmark" size={12} color={colors.surfaceLight} />}
+              </Pressable>
+              <Text style={styles.filterLabelInline}>Pet Safe Only 🐾</Text>
+            </View>
+          </View>
+
+          <Pressable onPress={resetFilters} style={styles.resetButton}>
+            <Text style={styles.resetButtonText}>Reset Filters</Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Plant of the Week */}
       <Pressable
@@ -504,5 +656,114 @@ const styles = StyleSheet.create({
   buttonPressed: {
     transform: [{ scale: 0.97 }],
     opacity: 0.9,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    height: 48,
+    gap: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    color: colors.gray900,
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  filtersPanel: {
+    backgroundColor: colors.surfaceLight,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.gray100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  filterGroup: {
+    marginBottom: spacing.md,
+  },
+  filterLabel: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray700,
+    marginBottom: spacing.sm,
+  },
+  filterOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+  },
+  filterOption: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.gray50,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+  },
+  filterOptionActive: {
+    backgroundColor: colors.primaryLight + '20',
+    borderColor: colors.primary,
+  },
+  filterOptionText: {
+    fontSize: 12,
+    color: colors.gray600,
+  },
+  filterOptionTextActive: {
+    color: colors.primary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  checkboxContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxActive: {
+    backgroundColor: colors.primary,
+  },
+  filterLabelInline: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray700,
+  },
+  resetButton: {
+    marginTop: spacing.sm,
+    alignItems: "center",
+    paddingVertical: spacing.xs,
+  },
+  resetButtonText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.gray400,
+    textDecorationLine: "underline",
   },
 });

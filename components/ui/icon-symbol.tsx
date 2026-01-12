@@ -14,6 +14,12 @@ const SYMBOL_MAP: Record<string, string> = {
     'paperplane.fill': '✈',
     'plus': '+',
     'checkmark': '✓',
+    'magnifyingglass': '🔍',
+    'slider.horizontal.3': '⚙️',
+    'sparkles': '✨',
+    'snowflake': '❄️',
+    'drop.fill': '💧',
+    'checkmark.seal.fill': '✅',
 };
 
 interface IconSymbolProps extends TextProps {

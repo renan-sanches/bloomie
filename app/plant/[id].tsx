@@ -24,6 +24,8 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+import { PhotoComparisonSlider } from "@/components/photo-comparison-slider";
+import { SmartScheduleSuggestions } from "@/components/ui/smart-schedule-suggestions";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CARE_ACTIONS = [
@@ -45,7 +47,7 @@ const PLANT_EMOJIS: Record<string, string> = {
 
 export default function PlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { plants, tasks, updatePlant, removePlant, completeTask, logCareEvent, addInsight } = useApp();
+  const { plants, tasks, updatePlant, deletePlant, completeTask, logCare, addInsight } = useApp();
   const insets = useSafeAreaInsets();
 
   const plant = plants.find((p) => p.id === id);
@@ -141,7 +143,7 @@ export default function PlantDetailScreen() {
     }
 
     // Log the care event
-    await logCareEvent(plant.id, selectedAction.type, careNote || undefined);
+    await logCare(plant.id, selectedAction.type, careNote || undefined);
 
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -168,7 +170,7 @@ export default function PlantDetailScreen() {
       message: reflection || `You kept ${plant.nickname} alive for ${Math.floor((new Date().getTime() - new Date(plant.dateAdded).getTime()) / (1000 * 60 * 60 * 24))} days. 💚`,
     });
 
-    await removePlant(plant.id);
+    await deletePlant(plant.id);
     setShowDeathModal(false);
     // Use state to trigger navigation in useEffect to avoid navigation during render
     setShouldNavigateBack(true);
@@ -206,6 +208,8 @@ export default function PlantDetailScreen() {
           <View style={styles.plantImageContainer}>
             {plant.photo ? (
               <Image source={{ uri: plant.photo }} style={styles.plantPhoto} contentFit="cover" />
+            ) : plant.photos && plant.photos.length > 0 ? (
+              <Image source={{ uri: plant.photos[plant.photos.length - 1].uri }} style={styles.plantPhoto} contentFit="cover" />
             ) : (
               <Text style={styles.plantEmoji}>{plantEmoji}</Text>
             )}
@@ -284,6 +288,28 @@ export default function PlantDetailScreen() {
             </View>
           </View>
         </View>
+
+        {/* Growth Comparison (Slider) */}
+        {plant.photos && plant.photos.length >= 2 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Growth Journey</Text>
+              <View style={styles.growthBadge}>
+                <Text style={styles.growthBadgeText}>Before & After</Text>
+              </View>
+            </View>
+            <PhotoComparisonSlider
+              beforeUri={plant.photos[0].uri}
+              afterUri={plant.photos[plant.photos.length - 1].uri}
+            />
+            <Text style={styles.growthSummary}>
+              Seeing the progress of {plant.nickname} since {new Date(plant.photos[0].date).toLocaleDateString()}.
+            </Text>
+          </View>
+        )}
+
+        {/* Smart Suggestions */}
+        <SmartScheduleSuggestions plant={plant} />
 
         {/* Care Actions */}
         <View style={styles.section}>
@@ -605,6 +631,31 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.gray900,
     marginBottom: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  growthBadge: {
+    backgroundColor: colors.primaryLight + '30',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+  },
+  growthBadgeText: {
+    fontSize: 10,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    textTransform: 'uppercase',
+  },
+  growthSummary: {
+    fontSize: 12,
+    color: colors.gray500,
+    marginTop: 12,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   healthCard: {
     backgroundColor: colors.surfaceLight,

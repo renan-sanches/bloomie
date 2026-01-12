@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 
 import 'react-native-gesture-handler';
 import { Tabs } from "expo-router";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets, SafeAreaProvider } from "react-native-safe-area-context";
 import { Platform } from "react-native";
 import { IconSymbol } from "@/components/icon-symbol";
@@ -40,11 +41,13 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <AppProvider>
-        <TabLayout />
-      </AppProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppProvider>
+          <TabLayout />
+        </AppProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

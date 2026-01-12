@@ -43,9 +43,9 @@
 - [x] Stat bars (hydration, light, humidity)
 - [x] Care action buttons (Water, Mist, Fertilize, Rotate)
 - [x] Growth journal timeline
-- [ ] Photo comparison slider
+- [x] Photo comparison slider
 - [x] Care tips accordion
-- [ ] Smart schedule auto-tuning suggestions
+- [x] Smart schedule auto-tuning suggestions
 
 ## Care Calendar
 - [x] Monthly calendar view
