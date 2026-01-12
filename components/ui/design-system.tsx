@@ -137,7 +137,7 @@ interface PlantCardProps {
     name: string;
     species: string;
     image?: string;
-    status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+    status: 'thirsty' | 'mist' | 'fertilize' | 'thriving' | 'growing' | 'struggling' | 'dormant' | 'dead';
     location?: string;
     onPress?: () => void;
 }
@@ -147,6 +147,10 @@ const statusConfig = {
     thriving: { label: 'THRIVING', color: colors.primary },
     mist: { label: 'MIST ME', color: colors.accentCyan },
     growing: { label: 'GROWING', color: colors.accentPurple },
+    fertilize: { label: 'FERTILIZE', color: colors.accentOrange },
+    struggling: { label: 'STRUGGLING', color: colors.accentPink },
+    dormant: { label: 'DORMANT', color: colors.gray400 },
+    dead: { label: 'REST IN BLOOM', color: colors.gray600 },
 };
 
 export function PlantCard({ name, species, status, location, onPress }: PlantCardProps) {

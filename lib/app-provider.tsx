@@ -134,24 +134,33 @@ export function AppProvider({ children }: AppProviderProps) {
       // Convert Firestore plants to app plants format
       const appPlants: Plant[] = firestorePlants.map((plant) => ({
         id: plant.id,
-        nickname: plant.name,
+        nickname: plant.nickname,
         species: plant.species,
+        scientificName: plant.scientificName,
         location: plant.location,
-        imageUrl: plant.imageUrl,
-        healthScore: calculateHealthScore(plant),
-        wateringFrequencyDays: plant.careSchedule.water.frequency,
-        mistingFrequencyDays: plant.careSchedule.mist.frequency,
-        fertilizingFrequencyDays: plant.careSchedule.fertilize.frequency,
-        rotatingFrequencyDays: 7, // Default
-        lastWatered: plant.careSchedule.water.lastDone
-          ? plant.careSchedule.water.lastDone.toMillis().toString()
-          : undefined,
-        dateAdded: plant.createdAt?.toMillis().toString() || new Date().toISOString(),
-        notes: plant.notes ? [plant.notes] : [],
-        photos: [],
-        careHistory: [],
+        photo: plant.photo,
+        photos: plant.photos?.map(p => ({
+          id: p.id,
+          uri: p.uri,
+          date: p.date.toMillis().toString(),
+          note: p.note
+        })) || [],
+        dateAdded: plant.dateAdded?.toMillis().toString() || new Date().toISOString(),
+        lastWatered: plant.lastWatered?.toMillis().toString() || new Date().toISOString(),
+        wateringFrequencyDays: plant.wateringFrequencyDays || 7,
+        mistingFrequencyDays: plant.mistingFrequencyDays || 3,
+        fertilizingFrequencyDays: plant.fertilizingFrequencyDays || 30,
+        rotatingFrequencyDays: plant.rotatingFrequencyDays || 7,
+        healthScore: plant.healthScore || 100,
+        hydrationLevel: plant.hydrationLevel || 80,
+        lightExposure: plant.lightExposure || 70,
+        humidityLevel: plant.humidityLevel || 60,
+        personality: plant.personality || 'chill-vibes',
+        notes: plant.notes || [],
+        careHistory: [], // Subscriptions handled separately or fetched
         diagnosisHistory: [],
-        status: plant.status,
+        status: plant.status || 'growing',
+        deathReflection: plant.deathReflection,
       }));
 
       setPlants(appPlants);
@@ -186,29 +195,25 @@ export function AppProvider({ children }: AppProviderProps) {
       if (!user) return {} as Plant;
 
       const plantId = await createPlant(user.uid, {
-        name: plant.nickname,
+        nickname: plant.nickname,
         species: plant.species,
+        scientificName: plant.scientificName,
+        location: plant.location || 'Living Room',
+        photo: plant.photo,
+        photos: [],
+        lastWatered: null,
+        wateringFrequencyDays: plant.wateringFrequencyDays || 7,
+        mistingFrequencyDays: plant.mistingFrequencyDays || 3,
+        fertilizingFrequencyDays: plant.fertilizingFrequencyDays || 30,
+        rotatingFrequencyDays: 7,
+        healthScore: 100,
+        hydrationLevel: 80,
+        lightExposure: 70,
+        humidityLevel: 60,
+        personality: plant.personality || 'chill-vibes',
+        notes: plant.notes || [],
         status: 'growing',
-        location: plant.location || 'Unknown',
-        imageUrl: plant.imageUrl,
-        careSchedule: {
-          water: {
-            frequency: plant.wateringFrequencyDays || 7,
-            unit: 'days',
-            lastDone: null,
-          },
-          fertilize: {
-            frequency: plant.fertilizingFrequencyDays || 14,
-            unit: 'days',
-            lastDone: null,
-          },
-          mist: {
-            frequency: plant.mistingFrequencyDays || 3,
-            unit: 'days',
-            lastDone: null,
-          },
-        },
-      });
+      } as any);
 
       return { ...plant, id: plantId } as Plant;
     }, [user]),
@@ -216,13 +221,10 @@ export function AppProvider({ children }: AppProviderProps) {
     updatePlant: useCallback(async (id: string, updates: Partial<Plant>) => {
       if (!user) return;
 
-      await updatePlant(user.uid, id, {
-        name: updates.nickname,
-        species: updates.species,
-        location: updates.location,
-        status: updates.status,
-        imageUrl: updates.imageUrl,
-      });
+      const firestoreUpdates: any = { ...updates };
+      if (updates.nickname) firestoreUpdates.nickname = updates.nickname;
+
+      await updatePlant(user.uid, id, firestoreUpdates);
     }, [user]),
 
     deletePlant: useCallback(async (id: string) => {
@@ -332,15 +334,12 @@ export function AppProvider({ children }: AppProviderProps) {
 
 // Helper function to calculate health score from Firestore plant
 function calculateHealthScore(plant: FirestorePlant): number {
+  if (!plant.lastWatered) return 50; // Default for new plants
+
   const now = Date.now();
-  const waterLastDone = plant.careSchedule.water.lastDone?.toMillis() || 0;
-
-  if (!waterLastDone) return 50; // Default for new plants
-
+  const waterLastDone = plant.lastWatered.toMillis();
   const daysSinceWater = (now - waterLastDone) / (1000 * 60 * 60 * 24);
-  const waterFrequency = plant.careSchedule.water.unit === 'weeks'
-    ? plant.careSchedule.water.frequency * 7
-    : plant.careSchedule.water.frequency;
+  const waterFrequency = plant.wateringFrequencyDays || 7;
 
   // Calculate score based on how close to needing water
   const ratio = daysSinceWater / waterFrequency;

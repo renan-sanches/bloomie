@@ -83,5 +83,21 @@ export const trpc = {
                 };
             },
         },
+        analyzeGrowthProgress: {
+            useMutation: () => {
+                const [isLoading, setIsLoading] = useState(false);
+                return {
+                    mutateAsync: async (input: { beforeImageBase64: string; afterImageBase64: string; plantName: string }) => {
+                        setIsLoading(true);
+                        try {
+                            return await gemini.analyzeGrowthProgress(input.beforeImageBase64, input.afterImageBase64, input.plantName);
+                        } finally {
+                            setIsLoading(false);
+                        }
+                    },
+                    isLoading,
+                };
+            },
+        },
     },
 };

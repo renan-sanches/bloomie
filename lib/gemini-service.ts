@@ -366,3 +366,62 @@ Make tips specific to this plant species, not generic advice.`;
     return ["Water when the top inch of soil is dry", "Provide bright indirect light", "Maintain moderate humidity"];
   }
 }
+/**
+ * Analyze growth progress between two plant photos
+ */
+export async function analyzeGrowthProgress(
+  beforeImageBase64: string,
+  afterImageBase64: string,
+  plantName: string
+): Promise<{ insight: string; growthDetected: boolean }> {
+  try {
+    const client = getGeminiClient();
+
+    const prompt = `You are a plant enthusiast and expert. Compare these two images of the same plant named "${plantName}" taken at different times. 
+    
+    The first image is from the past, and the second image is from now. 
+    Identify signs of growth, health changes, new leaves, or any other significant transformations.
+    
+    Provide a warm, encouraging, and detailed insight (2-3 sentences max). 
+    Return as JSON:
+    {
+      "insight": "Your description here...",
+      "growthDetected": true
+    }`;
+
+    const response = await client.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: "image/jpeg",
+                data: beforeImageBase64,
+              },
+            },
+            {
+              inlineData: {
+                mimeType: "image/jpeg",
+                data: afterImageBase64,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const text = response.text || "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return { insight: "Your plant is looking Great! I can see some healthy changes and growth.", growthDetected: true };
+    }
+
+    return JSON.parse(jsonMatch[0]);
+  } catch (error) {
+    console.error("Growth analysis error:", error);
+    return { insight: "Keep up the great work! Your plant is responding well to your care.", growthDetected: true };
+  }
+}

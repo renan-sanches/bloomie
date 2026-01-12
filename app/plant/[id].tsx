@@ -8,6 +8,7 @@ import {
   TextInput,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
@@ -26,6 +27,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { PhotoComparisonSlider } from "@/components/photo-comparison-slider";
 import { SmartScheduleSuggestions } from "@/components/ui/smart-schedule-suggestions";
+import { trpc } from "@/lib/trpc";
+import { uriToBase64 } from "@/lib/image-utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CARE_ACTIONS = [
@@ -59,6 +62,10 @@ export default function PlantDetailScreen() {
   const [showDeathModal, setShowDeathModal] = useState(false);
   const [reflection, setReflection] = useState("");
   const [shouldNavigateBack, setShouldNavigateBack] = useState(false);
+  const [isAnalyzingGrowth, setIsAnalyzingGrowth] = useState(false);
+  const [growthInsight, setGrowthInsight] = useState<{ insight: string; growthDetected: boolean } | null>(null);
+
+  const analyzeGrowthMutation = trpc.ai.analyzeGrowthProgress.useMutation();
 
   const scrollY = useSharedValue(0);
 
@@ -152,6 +159,37 @@ export default function PlantDetailScreen() {
     setShowCareModal(false);
     setSelectedAction(null);
     setCareNote("");
+  };
+
+  const handleAnalyzeGrowth = async () => {
+    if (!plant.photos || plant.photos.length < 2) return;
+    triggerHaptic();
+    setIsAnalyzingGrowth(true);
+    setGrowthInsight(null);
+
+    try {
+      const beforePhoto = plant.photos[0];
+      const afterPhoto = plant.photos[plant.photos.length - 1];
+
+      const beforeBase64 = await uriToBase64(beforePhoto.uri);
+      const afterBase64 = await uriToBase64(afterPhoto.uri);
+
+      if (beforeBase64 && afterBase64) {
+        const result = await analyzeGrowthMutation.mutateAsync({
+          beforeImageBase64: beforeBase64,
+          afterImageBase64: afterBase64,
+          plantName: plant.nickname,
+        });
+        setGrowthInsight(result);
+      } else {
+        Alert.alert("Error", "Could not process images for AI analysis.");
+      }
+    } catch (error) {
+      console.error("Growth analysis error:", error);
+      Alert.alert("Error", "Something went wrong during analysis.");
+    } finally {
+      setIsAnalyzingGrowth(false);
+    }
   };
 
   const handleMarkAsDead = async () => {
@@ -302,6 +340,38 @@ export default function PlantDetailScreen() {
               beforeUri={plant.photos[0].uri}
               afterUri={plant.photos[plant.photos.length - 1].uri}
             />
+
+            {/* AI Growth Insight Button/Card */}
+            <View style={styles.aiInsightContainer}>
+              {growthInsight ? (
+                <View style={styles.growthInsightCard}>
+                  <View style={styles.insightHeader}>
+                    <IconSymbol name="sparkles" size={18} color={colors.primary} />
+                    <Text style={styles.insightTitle}>Bloomie's Growth Insight</Text>
+                  </View>
+                  <Text style={styles.growthInsightText}>{growthInsight.insight}</Text>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={handleAnalyzeGrowth}
+                  disabled={isAnalyzingGrowth}
+                  style={({ pressed }) => [
+                    styles.analyzeButton,
+                    pressed && styles.pressed,
+                    isAnalyzingGrowth && styles.disabled
+                  ]}
+                >
+                  {isAnalyzingGrowth ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <IconSymbol name="sparkles" size={16} color="#FFFFFF" />
+                      <Text style={styles.analyzeButtonText}>AI Growth Analysis</Text>
+                    </>
+                  )}
+                </Pressable>
+              )}
+            </View>
             <Text style={styles.growthSummary}>
               Seeing the progress of {plant.nickname} since {new Date(plant.photos[0].date).toLocaleDateString()}.
             </Text>
@@ -1002,5 +1072,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  aiInsightContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+  },
+  analyzeButton: {
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: borderRadius.lg,
+    gap: spacing.sm,
+  },
+  analyzeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.sm,
+  },
+  growthInsightCard: {
+    backgroundColor: colors.primaryLight + '10',
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.primaryLight + '30',
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  insightTitle: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    textTransform: 'uppercase',
+  },
+  growthInsightText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray700,
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  disabled: {
+    opacity: 0.7,
+  },
+  pressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
 });

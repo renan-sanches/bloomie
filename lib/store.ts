@@ -26,7 +26,7 @@ export interface Plant {
   photos: PlantPhoto[];
   careHistory: CareEvent[];
   diagnosisHistory: Diagnosis[];
-  status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+  status: 'thirsty' | 'mist' | 'fertilize' | 'thriving' | 'growing' | 'struggling' | 'dormant' | 'dead';
   location: string;
 }
 

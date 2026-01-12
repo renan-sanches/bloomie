@@ -79,8 +79,8 @@
 ## AI Features
 - [x] Bloomie Buddy chat interface
 - [x] Context-aware responses
-- [ ] Visual progress AI insights
-- [ ] Smart schedule tuning
+- [x] Visual progress AI insights
+- [x] Smart schedule tuning
 - [ ] Privacy-first messaging
 
 ## Retention & Social

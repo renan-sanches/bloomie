@@ -47,18 +47,29 @@ export interface UserProfile {
 
 export interface Plant {
     id: string;
-    name: string;
+    nickname: string;
     species: string;
-    status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+    scientificName?: string;
     location: string;
-    imageUrl?: string;
-    careSchedule: {
-        water: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
-        fertilize: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
-        mist: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
-    };
-    notes?: string;
-    createdAt: Timestamp;
+    photo?: string; // Main photo URL
+    photos?: Array<{ id: string; uri: string; date: Timestamp; note?: string }>;
+    dateAdded: Timestamp;
+    lastWatered?: Timestamp;
+    lastMisted?: Timestamp;
+    lastFertilized?: Timestamp;
+    lastRotated?: Timestamp;
+    wateringFrequencyDays: number;
+    mistingFrequencyDays: number;
+    fertilizingFrequencyDays: number;
+    rotatingFrequencyDays: number;
+    healthScore: number;
+    hydrationLevel?: number;
+    lightExposure?: number;
+    humidityLevel?: number;
+    personality?: 'drama-queen' | 'low-maintenance' | 'attention-seeker' | 'silent-treatment' | 'main-character' | 'chill-vibes';
+    notes: string[];
+    status: 'thirsty' | 'mist' | 'fertilize' | 'thriving' | 'growing' | 'struggling' | 'dormant' | 'dead';
+    deathReflection?: string;
     updatedAt: Timestamp;
 }
 
@@ -66,7 +77,7 @@ export interface CareActivity {
     id: string;
     plantId: string;
     plantName: string;
-    action: 'water' | 'fertilize' | 'mist' | 'prune' | 'repot';
+    action: 'water' | 'fertilize' | 'mist' | 'prune' | 'repot' | 'rotate';
     timestamp: Timestamp;
     notes?: string;
 }
@@ -180,12 +191,12 @@ export async function updateUserPreferences(
  */
 export async function createPlant(
     userId: string,
-    plantData: Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>
+    plantData: Omit<Plant, 'id' | 'dateAdded' | 'updatedAt'>
 ): Promise<string> {
     const plantsRef = collection(db, 'users', userId, 'plants');
     const docRef = await addDoc(plantsRef, {
         ...plantData,
-        createdAt: serverTimestamp(),
+        dateAdded: serverTimestamp(),
         updatedAt: serverTimestamp(),
     });
     return docRef.id;
@@ -290,11 +301,13 @@ export async function addCareActivity(
     };
 
     if (action === 'water') {
-        updateData['careSchedule.water.lastDone'] = serverTimestamp();
-    } else if (action === 'fertilize') {
-        updateData['careSchedule.fertilize.lastDone'] = serverTimestamp();
+        updateData.lastWatered = serverTimestamp();
     } else if (action === 'mist') {
-        updateData['careSchedule.mist.lastDone'] = serverTimestamp();
+        updateData.lastMisted = serverTimestamp();
+    } else if (action === 'fertilize') {
+        updateData.lastFertilized = serverTimestamp();
+    } else if (action === 'rotate') {
+        updateData.lastRotated = serverTimestamp();
     }
 
     await updateDoc(plantRef, updateData);
@@ -361,43 +374,3 @@ export function subscribeToCareHistory(
     });
 }
 
-/**
- * Calculate plant status based on care schedule
- * Returns appropriate status based on when the plant was last cared for
- */
-export function calculatePlantStatus(plant: Plant): Plant['status'] {
-    const now = Date.now();
-    const waterLastDone = plant.careSchedule.water.lastDone?.toMillis() || 0;
-    const mistLastDone = plant.careSchedule.mist.lastDone?.toMillis() || 0;
-
-    const daysSinceWater = (now - waterLastDone) / (1000 * 60 * 60 * 24);
-    const daysSinceMist = (now - mistLastDone) / (1000 * 60 * 60 * 24);
-
-    const waterFrequency =
-        plant.careSchedule.water.unit === 'weeks'
-            ? plant.careSchedule.water.frequency * 7
-            : plant.careSchedule.water.frequency;
-
-    const mistFrequency =
-        plant.careSchedule.mist.unit === 'weeks'
-            ? plant.careSchedule.mist.frequency * 7
-            : plant.careSchedule.mist.frequency;
-
-    // Needs water urgently
-    if (daysSinceWater >= waterFrequency) {
-        return 'thirsty';
-    }
-
-    // Needs misting
-    if (daysSinceMist >= mistFrequency && mistFrequency > 0) {
-        return 'mist';
-    }
-
-    // Recently cared for
-    if (daysSinceWater < waterFrequency * 0.5) {
-        return 'thriving';
-    }
-
-    // Default: growing well
-    return 'growing';
-}
