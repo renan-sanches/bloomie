@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   },
   modeText: {
     color: '#fff',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   modeTextActive: {
     color: colors.gray900,
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   modeButtonTextActive: {
     color: "#2D5A27",
@@ -825,7 +825,7 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 24,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
     marginBottom: 12,
     textAlign: "center",
@@ -836,6 +836,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 32,
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   permissionButton: {
     backgroundColor: colors.primary,

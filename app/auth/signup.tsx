@@ -66,8 +66,8 @@ export default function SignupScreen() {
 
         try {
             await signInWithGoogle();
-            // Navigate to onboarding after successful signup
-            router.replace('/onboarding');
+            // Navigate to home after successful signup
+            router.replace('/');
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -168,26 +168,26 @@ export default function SignupScreen() {
                         )}
                     </Pressable>
 
-                    {Platform.OS === 'web' && (
-                        <>
-                            <View style={styles.divider}>
-                                <View style={styles.dividerLine} />
-                                <Text style={styles.dividerText}>or</Text>
-                                <View style={styles.dividerLine} />
-                            </View>
 
-                            <Pressable
-                                onPress={handleGoogleSignIn}
-                                disabled={loading}
-                                style={({ pressed }) => [
-                                    styles.googleButton,
-                                    pressed && styles.buttonPressed,
-                                ]}
-                            >
-                                <Text style={styles.googleButtonText}>Sign up with Google</Text>
-                            </Pressable>
-                        </>
-                    )}
+                    <>
+                        <View style={styles.divider}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>or</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <Pressable
+                            onPress={handleGoogleSignIn}
+                            disabled={loading}
+                            style={({ pressed }) => [
+                                styles.googleButton,
+                                pressed && styles.buttonPressed,
+                            ]}
+                        >
+                            <Text style={styles.googleButtonText}>Sign up with Google</Text>
+                        </Pressable>
+                    </>
+
 
                     <View style={styles.loginContainer}>
                         <Text style={styles.loginText}>Already have an account? </Text>
@@ -228,12 +228,13 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: 'bold',
+        fontFamily: 'PlusJakartaSans-Bold',
         color: '#fff',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
+        fontFamily: 'PlusJakartaSans-Regular',
         color: '#94a3b8',
     },
     form: {
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
         color: '#e2e8f0',
         marginBottom: 8,
     },
@@ -267,6 +268,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 16,
         fontSize: 16,
+        fontFamily: 'PlusJakartaSans-Regular',
         color: '#fff',
     },
     signupButton: {
@@ -280,7 +282,7 @@ const styles = StyleSheet.create({
     signupButtonText: {
         color: '#0f172a',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'PlusJakartaSans-Bold',
     },
     buttonPressed: {
         opacity: 0.8,
@@ -293,11 +295,12 @@ const styles = StyleSheet.create({
     loginText: {
         color: '#94a3b8',
         fontSize: 14,
+        fontFamily: 'PlusJakartaSans-Regular',
     },
     loginLink: {
         color: colors.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
     googleButton: {
         backgroundColor: '#fff',
@@ -311,7 +314,7 @@ const styles = StyleSheet.create({
     googleButtonText: {
         color: '#0f172a',
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
     divider: {
         flexDirection: 'row',
@@ -327,6 +330,7 @@ const styles = StyleSheet.create({
         color: '#64748b',
         paddingHorizontal: 16,
         fontSize: 14,
+        fontFamily: 'PlusJakartaSans-Regular',
     },
     terms: {
         color: '#64748b',
@@ -334,5 +338,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 24,
         lineHeight: 18,
+        fontFamily: 'PlusJakartaSans-Regular',
     },
 });
