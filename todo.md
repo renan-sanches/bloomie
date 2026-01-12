@@ -27,7 +27,7 @@
 - [x] Floating action button (+)
 - [x] Empty state illustration
 - [x] Bloomie Insight cards
-- [ ] Seasonal event banner
+- [x] Seasonal event banner
 
 ## Smart Scan Interface
 - [x] Camera interface with scanning frame
@@ -66,7 +66,7 @@
 - [x] Level progression (Seedling → Plant Wizard)
 - [x] Achievement badges
 - [ ] Weekly challenges
-- [ ] Seasonal events and themes
+- [x] Seasonal events and themes
 
 ## Settings & Profile
 - [x] Profile header with avatar

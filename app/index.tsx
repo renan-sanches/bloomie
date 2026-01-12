@@ -19,6 +19,7 @@ import {
   borderRadius,
 } from '@/components/ui/design-system';
 import { Logo } from '@/components/ui/logo';
+import { SeasonalBanner } from '@/components/ui/seasonal-banner';
 
 import { useApp, type Plant } from '@/lib/store';
 
@@ -76,6 +77,10 @@ export default function MyJungleScreen() {
             <Text style={styles.greeting}>{greeting} 🌿</Text>
             <Text style={styles.subtitle}>Your jungle is thriving</Text>
           </View>
+
+          <SeasonalBanner
+            onPress={() => console.log('Seasonal banner pressed')}
+          />
 
           {/* Stats */}
           <View style={styles.stats}>
