@@ -1,35 +1,52 @@
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Platform } from "react-native";
-import { useColors } from "@/hooks/use-colors";
+import { IconSymbol } from "@/components/icon-symbol";
+import { colors } from "@/components/ui/design-system";
 
 export default function TabLayout() {
-  const colors = useColors();
   const insets = useSafeAreaInsets();
   const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 56 + bottomPadding;
+  const tabBarHeight = 64 + bottomPadding;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#A8E063", // Bloomie lime green
-        tabBarInactiveTintColor: colors.muted,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.gray400,
         headerShown: false,
-        tabBarButton: HapticTab,
         tabBarStyle: {
-          paddingTop: 8,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          paddingTop: 12,
           paddingBottom: bottomPadding,
+          paddingHorizontal: 16,
           height: tabBarHeight,
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          borderTopWidth: 0.5,
+          backgroundColor: Platform.OS === 'web'
+            ? 'rgba(255, 255, 255, 0.9)'
+            : colors.surfaceLight,
+          borderTopWidth: 0,
+          // Glassmorphism effect for web
+          ...(Platform.OS === 'web' && {
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }),
+          // Shadow
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 12,
+          elevation: 8,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "600",
+          marginTop: 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
         },
       }}
     >
@@ -37,35 +54,91 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "My Jungle",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={focused ? 28 : 24}
+              name="house.fill"
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
           title: "Care",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="calendar" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={focused ? 28 : 24}
+              name="calendar"
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="scan"
         options={{
           title: "Scan",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="camera.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={focused ? 28 : 24}
+              name="camera.fill"
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="discover"
         options={{
           title: "Discover",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="leaf.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={focused ? 28 : 24}
+              name="leaf.fill"
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="person.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={focused ? 28 : 24}
+              name="person.fill"
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* Hidden screens */}
+      <Tabs.Screen
+        name="onboarding"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="plant"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="auth"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>

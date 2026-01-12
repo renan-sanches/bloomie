@@ -1,149 +1,408 @@
+import React, { useState } from 'react';
 import {
   View,
   Text,
+  ScrollView,
   Pressable,
-  FlatList,
   StyleSheet,
-  RefreshControl,
-  Animated,
-} from "react-native";
-import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useApp, getGreeting, getPlantStatus, formatTimeAgo, type Plant } from "@/lib/store";
-import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
-import { Image } from "expo-image";
-import { BloomieBuddyButton } from "@/components/bloomie-buddy-button";
+  Platform,
+} from 'react-native';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import {
+  PlantCard,
+  FilterPill,
+  GradientButton,
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+} from '@/components/ui/design-system';
 
-// Plant illustrations for empty/default states
-const PLANT_ILLUSTRATIONS: Record<string, string> = {
-  monstera: "🪴",
-  fern: "🌿",
-  succulent: "🌵",
-  flower: "🌸",
-  cactus: "🌵",
-  palm: "🌴",
-  default: "🌱",
-};
+// Mock data for now (will be replaced with real data from Firestore in Phase 3)
+const MOCK_PLANTS = [
+  {
+    id: '1',
+    name: 'Monstera Deliciosa',
+    species: 'Monstera',
+    healthScore: 95,
+    waterDue: false,
+  },
+  {
+    id: '2',
+    name: 'Snake Plant',
+    species: 'Sansevieria',
+    healthScore: 88,
+    waterDue: true,
+  },
+  {
+    id: '3',
+    name: 'Pothos',
+    species: 'Epipremnum aureum',
+    healthScore: 72,
+    waterDue: false,
+  },
+  {
+    id: '4',
+    name: 'Fiddle Leaf Fig',
+    species: 'Ficus lyrata',
+    healthScore: 65,
+    waterDue: true,
+  },
+];
 
-export default function HomeScreen() {
-  const { plants, tasks, profile, preferences, insights, refreshData, completeTask } = useApp();
-  const [refreshing, setRefreshing] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+type FilterType = 'all' | 'water' | 'healthy' | 'attention';
 
-  // Check if onboarding is needed
-  useEffect(() => {
-    if (!preferences.onboardingCompleted) {
-      router.replace("/onboarding");
-    }
-  }, [preferences.onboardingCompleted]);
+export default function MyJungleScreen() {
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refreshData();
-    setRefreshing(false);
-  }, [refreshData]);
+  // Get current hour for greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  const triggerHaptic = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-  };
-
-  // Calculate stats
-  const todaysTasks = tasks.filter((t) => {
-    const dueDate = new Date(t.dueDate);
-    const today = new Date();
-    return (
-      dueDate.toDateString() === today.toDateString() &&
-      !t.completed
-    );
+  // Filter plants based on active filter
+  const filteredPlants = MOCK_PLANTS.filter((plant) => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'water') return plant.waterDue;
+    if (activeFilter === 'healthy') return plant.healthScore >= 80;
+    if (activeFilter === 'attention') return plant.healthScore < 70;
+    return true;
   });
 
-  const completedToday = tasks.filter((t) => {
-    if (!t.completedDate) return false;
-    const completedDate = new Date(t.completedDate);
-    const today = new Date();
-    return completedDate.toDateString() === today.toDateString();
-  }).length;
-
-  // Get active insights
-  const activeInsights = insights.filter((i) => !i.dismissed).slice(0, 2);
-
-  const handlePlantPress = (plant: Plant) => {
-    triggerHaptic();
-    router.push(`/plant/${plant.id}` as any);
+  const handlePlantPress = (plantId: string) => {
+    router.push(`/plant/${plantId}` as any);
   };
 
-  const handleQuickAction = async (plantId: string, action: "water" | "mist" | "fertilize" | "rotate") => {
-    triggerHaptic();
-    const task = tasks.find((t) => t.plantId === plantId && t.type === action && !t.completed);
-    if (task) {
-      await completeTask(task.id);
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    }
+  const handleAddPlant = () => {
+    // TODO: Navigate to add plant screen
+    console.log('Add plant');
   };
 
-  const renderPlantCard = ({ item }: { item: Plant }) => {
-    const status = getPlantStatus(item);
-    const plantEmoji = PLANT_ILLUSTRATIONS[item.species.toLowerCase()] || PLANT_ILLUSTRATIONS.default;
+  return (
+    <View style={styles.container}>
+      <StatusBar style="dark" />
 
-    return (
-      <Pressable
-        onPress={() => handlePlantPress(item)}
-        style={({ pressed }) => [
-          styles.plantCard,
-          viewMode === "list" && styles.plantCardList,
-          pressed && styles.cardPressed,
-        ]}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Plant Image or Emoji */}
-        <View style={[styles.plantImageContainer, viewMode === "list" && styles.plantImageContainerList]}>
-          {item.photo ? (
-            <Image source={{ uri: item.photo }} style={styles.plantImage} contentFit="cover" />
-          ) : (
-            <Text style={styles.plantEmoji}>{plantEmoji}</Text>
-          )}
-          {/* Status Badge */}
-          <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
-            {status.status === "happy" && <Text style={styles.statusIcon}>✓</Text>}
-            {status.status === "thirsty" && <Text style={styles.statusIcon}>💧</Text>}
-            {status.status === "needs-light" && <Text style={styles.statusIcon}>☀️</Text>}
-            {status.status === "needs-attention" && <Text style={styles.statusIcon}>!</Text>}
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>{greeting} 🌿</Text>
+            <Text style={styles.subtitle}>Your jungle is thriving</Text>
+          </View>
+
+          {/* Stats */}
+          <View style={styles.stats}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{MOCK_PLANTS.length}</Text>
+              <Text style={styles.statLabel}>Plants</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {MOCK_PLANTS.filter(p => p.waterDue).length}
+              </Text>
+              <Text style={styles.statLabel}>Need water</Text>
+            </View>
           </View>
         </View>
 
-        {/* Plant Info */}
-        <View style={[styles.plantInfo, viewMode === "list" && styles.plantInfoList]}>
-          <Text style={styles.plantNickname} numberOfLines={1}>{item.nickname}</Text>
-          <Text style={styles.plantSpecies} numberOfLines={1}>{item.species}</Text>
-          {item.lastWatered && (
-            <Text style={styles.lastWatered}>
-              Watered {formatTimeAgo(item.lastWatered)}
-            </Text>
-          )}
+        {/* Filter Pills */}
+        <View style={styles.filterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterScroll}
+          >
+            <FilterPill
+              label="All Plants"
+              active={activeFilter === 'all'}
+              onPress={() => setActiveFilter('all')}
+            />
+            <FilterPill
+              label="💧 Need Water"
+              active={activeFilter === 'water'}
+              onPress={() => setActiveFilter('water')}
+            />
+            <FilterPill
+              label="✨ Healthy"
+              active={activeFilter === 'healthy'}
+              onPress={() => setActiveFilter('healthy')}
+            />
+            <FilterPill
+              label="⚠️ Attention"
+              active={activeFilter === 'attention'}
+              onPress={() => setActiveFilter('attention')}
+            />
+          </ScrollView>
         </View>
 
-        {/* Quick Actions (visible on list view) */}
-        {viewMode === "list" && (
-          <View style={styles.quickActions}>
+        {/* View Mode Toggle */}
+        <View style={styles.viewModeContainer}>
+          <Text style={styles.resultsText}>
+            {filteredPlants.length} {filteredPlants.length === 1 ? 'plant' : 'plants'}
+          </Text>
+
+          <View style={styles.viewModeToggle}>
             <Pressable
-              onPress={() => handleQuickAction(item.id, "water")}
-              style={({ pressed }) => [styles.quickActionButton, styles.waterButton, pressed && styles.buttonPressed]}
+              onPress={() => setViewMode('grid')}
+              style={[
+                styles.viewModeButton,
+                viewMode === 'grid' && styles.viewModeButtonActive,
+              ]}
             >
-              <Text style={styles.quickActionIcon}>💧</Text>
+              <Text style={[
+                styles.viewModeIcon,
+                viewMode === 'grid' && styles.viewModeIconActive,
+              ]}>
+                ▦
+              </Text>
             </Pressable>
             <Pressable
-              onPress={() => handleQuickAction(item.id, "mist")}
-              style={({ pressed }) => [styles.quickActionButton, styles.mistButton, pressed && styles.buttonPressed]}
+              onPress={() => setViewMode('list')}
+              style={[
+                styles.viewModeButton,
+                viewMode === 'list' && styles.viewModeButtonActive,
+              ]}
             >
-              <Text style={styles.quickActionIcon}>💨</Text>
+              <Text style={[
+                styles.viewModeIcon,
+                viewMode === 'list' && styles.viewModeIconActive,
+              ]}>
+                ☰
+              </Text>
             </Pressable>
+          </View>
+        </View>
+
+        {/* Plants Grid/List */}
+        {filteredPlants.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateEmoji}>🌱</Text>
+            <Text style={styles.emptyStateTitle}>No plants found</Text>
+            <Text style={styles.emptyStateText}>
+              {activeFilter === 'all'
+                ? 'Add your first plant to get started'
+                : 'Try a different filter'}
+            </Text>
+          </View>
+        ) : (
+          <View style={viewMode === 'grid' ? styles.plantsGrid : styles.plantsList}>
+            {filteredPlants.map((plant) => (
+              <View
+                key={plant.id}
+                style={viewMode === 'grid' ? styles.plantGridItem : styles.plantListItem}
+              >
+                <PlantCard
+                  name={plant.name}
+                  species={plant.species}
+                  healthScore={plant.healthScore}
+                  waterDue={plant.waterDue}
+                  onPress={() => handlePlantPress(plant.id)}
+                />
+              </View>
+            ))}
           </View>
         )}
-      </Pressable>
-    );
-  };
+
+        {/* Bottom Spacing for FAB */}
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+
+      {/* Floating Action Button */}
+      <View style={styles.fabContainer}>
+        <Pressable
+          onPress={handleAddPlant}
+          style={({ pressed }) => [
+            styles.fab,
+            pressed && styles.fabPressed,
+          ]}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.backgroundLight,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100, // Space for FAB
+  },
+
+  // Header
+  header: {
+    marginBottom: spacing.xl,
+  },
+  greeting: {
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontSize: typography.fontSize.base,
+    color: colors.gray500,
+    marginBottom: spacing.lg,
+  },
+
+  // Stats
+  stats: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray500,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: colors.gray200,
+    marginHorizontal: spacing.lg,
+  },
+
+  // Filters
+  filterContainer: {
+    marginBottom: spacing.lg,
+  },
+  filterScroll: {
+    gap: spacing.sm,
+    paddingRight: spacing.lg,
+  },
+
+  // View Mode
+  viewModeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  resultsText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.gray600,
+  },
+  viewModeToggle: {
+    flexDirection: 'row',
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.md,
+    padding: 4,
+  },
+  viewModeButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  viewModeButtonActive: {
+    backgroundColor: colors.surfaceLight,
+  },
+  viewModeIcon: {
+    fontSize: typography.fontSize.lg,
+    color: colors.gray400,
+  },
+  viewModeIconActive: {
+    color: colors.primary,
+  },
+
+  // Plants Grid/List
+  plantsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -spacing.xs,
+  },
+  plantGridItem: {
+    width: '50%',
+    paddingHorizontal: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  plantsList: {
+    gap: spacing.md,
+  },
+  plantListItem: {
+    width: '100%',
+  },
+
+  // Empty State
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: spacing['3xl'],
+  },
+  emptyStateEmoji: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  emptyStateTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
+    marginBottom: spacing.sm,
+  },
+  emptyStateText: {
+    fontSize: typography.fontSize.base,
+    color: colors.gray500,
+    textAlign: 'center',
+  },
+
+  // FAB
+  fabContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 100 : 90,
+    right: spacing.lg,
+  },
+  fab: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  fabPressed: {
+    transform: [{ scale: 0.95 }],
+    opacity: 0.9,
+  },
+  fabIcon: {
+    fontSize: 32,
+    color: colors.surfaceLight,
+    fontWeight: typography.fontWeight.bold,
+  },
+
+  bottomSpacer: {
+    height: 40,
+  },
+});
