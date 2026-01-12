@@ -10,23 +10,27 @@ module.exports = {
         extend: {
             colors: {
                 // Primary greens
-                primary: '#4ade80',
-                'primary-dark': '#16a34a',
-                'primary-light': '#86efac',
+                primary: '#64b478',
+                'primary-dark': '#4a8a5b',
+                'primary-light': '#a8d5b4', // Computed lighter shade of #64b478
 
-                // Accent colors from Stitch design
-                'accent-pink': '#f43f5e',
-                'accent-purple': '#8b5cf6',
-                'accent-orange': '#f9a620',
-                'accent-cyan': '#26d0ce',
-                'accent-coral': '#f15a5e',
-                'accent-alert': '#ef4444',
+                // Accent colors from Guidelines
+                'accent-water': '#66BBE6',
+                'accent-mist': '#A3E0E0',
+                'accent-fert': '#E6B08A',
+                'accent-pink': '#F48FB1',
+                'accent-purple': '#CE93D8',
+                'accent-orange': '#FFB74D',
+                'accent-cyan': '#66BBE6', // Map to water for backward compatibility
+                'accent-coral': '#E6B08A', // Map to fert for backward compatibility
+                'accent-alert': '#F48FB1', // Map to pink
 
                 // Backgrounds
-                'background-light': '#f8fafc',
+                'background-light': '#F8F9F8', // bg-page from guidelines
                 'background-dark': '#0f172a',
                 'surface-light': '#ffffff',
                 'surface-dark': '#2c3630',
+                'text-dark': '#131614', // Carbon Text
             },
             fontFamily: {
                 sans: ['PlusJakartaSans-Regular', 'sans-serif'],

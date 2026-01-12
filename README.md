@@ -81,6 +81,36 @@ bloomie/
 - `npm run build:web` - Build for web deployment
 - `npm run deploy:web` - Deploy to Firebase Hosting
 
+## Deployment
+
+### 🌐 Web (Firebase Hosting)
+
+1.  **Preparation**:
+    ```bash
+    npm run build:web
+    ```
+2.  **Deployment**:
+    ```bash
+    npm run deploy:web
+    ```
+    *Note: Requires `firebase login` and project initialization.*
+
+### 📱 Mobile (EAS Build)
+
+1.  **Setup**:
+    ```bash
+    npm install -g eas-cli
+    eas login
+    eas build:configure
+    ```
+2.  **Build**:
+    - Android: `eas build --platform android`
+    - iOS: `eas build --platform ios`
+3.  **Submit**:
+    ```bash
+    eas submit
+    ```
+
 ## Design System
 
 The app uses a custom design system inspired by the Stitch concept:

@@ -4,20 +4,23 @@ import { View, Text, Pressable, StyleSheet, ViewStyle, TextStyle } from 'react-n
 // Design System Colors
 export const colors = {
     // Primary greens
-    primary: '#4ade80',
-    primaryDark: '#16a34a',
-    primaryLight: '#86efac',
+    primary: '#64b478',
+    primaryDark: '#4a8a5b',
+    primaryLight: '#a8d5b4',
 
     // Accent colors
-    accentPink: '#f43f5e',
-    accentPurple: '#8b5cf6',
-    accentOrange: '#f9a620',
-    accentCyan: '#26d0ce',
-    accentCoral: '#f15a5e',
-    accentAlert: '#ef4444',
+    accentWater: '#66BBE6',
+    accentMist: '#A3E0E0',
+    accentFert: '#E6B08A',
+    accentPink: '#F48FB1',
+    accentPurple: '#CE93D8',
+    accentOrange: '#FFB74D',
+    accentCyan: '#66BBE6', // Aliased
+    accentCoral: '#E6B08A', // Aliased
+    accentAlert: '#F48FB1', // Aliased
 
     // Backgrounds
-    backgroundLight: '#f8fafc',
+    backgroundLight: '#F8F9F8',
     backgroundDark: '#0f172a',
     surfaceLight: '#ffffff',
     surfaceDark: '#2c3630',
@@ -32,7 +35,7 @@ export const colors = {
     gray600: '#475569',
     gray700: '#334155',
     gray800: '#1e293b',
-    gray900: '#0f172a',
+    gray900: '#131614', // Carbon Text from Guidelines
 };
 
 // Typography
@@ -143,11 +146,11 @@ interface PlantCardProps {
 }
 
 const statusConfig = {
-    thirsty: { label: 'THIRSTY', color: colors.accentPink },
+    thirsty: { label: 'THIRSTY', color: colors.accentWater },
     thriving: { label: 'THRIVING', color: colors.primary },
-    mist: { label: 'MIST ME', color: colors.accentCyan },
+    mist: { label: 'MIST ME', color: colors.accentMist },
     growing: { label: 'GROWING', color: colors.accentPurple },
-    fertilize: { label: 'FERTILIZE', color: colors.accentOrange },
+    fertilize: { label: 'FERTILIZE', color: colors.accentFert },
     struggling: { label: 'STRUGGLING', color: colors.accentPink },
     dormant: { label: 'DORMANT', color: colors.gray400 },
     dead: { label: 'REST IN BLOOM', color: colors.gray600 },
@@ -299,7 +302,7 @@ const styles = StyleSheet.create({
     },
     plantCardName: {
         fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         flex: 1,
     },
@@ -354,7 +357,7 @@ const styles = StyleSheet.create({
     healthBadgeText: {
         color: colors.surfaceLight,
         fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
     },
 
     // Water Badge
@@ -367,7 +370,7 @@ const styles = StyleSheet.create({
     waterBadgeText: {
         color: colors.accentCyan,
         fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.medium,
+        fontFamily: typography.fontFamily.brand,
     },
 
     // Status Badge
@@ -379,7 +382,7 @@ const styles = StyleSheet.create({
     statusBadgeText: {
         color: colors.surfaceLight,
         fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
     },
 
     // Filter Pill
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
     },
     filterPillText: {
         fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
+        fontFamily: typography.fontFamily.brand,
         color: colors.gray700,
     },
     filterPillTextActive: {
@@ -423,7 +426,7 @@ const styles = StyleSheet.create({
     gradientButtonText: {
         color: colors.surfaceLight,
         fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
     },
     buttonPressed: {
         opacity: 0.9,

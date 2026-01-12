@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { signInWithEmail, signInWithGoogle, resetPassword } from '@/lib/auth';
 import { Logo } from '@/components/ui/logo';
 import { StatusBar } from 'expo-status-bar';
+import { colors } from '@/components/ui/design-system';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -275,12 +276,12 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     forgotText: {
-        color: '#4ade80',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
     },
     loginButton: {
-        backgroundColor: '#4ade80',
+        backgroundColor: colors.primary,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     signupLink: {
-        color: '#4ade80',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
     },

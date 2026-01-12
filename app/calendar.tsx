@@ -312,8 +312,8 @@ export default function CalendarScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#A8E063"
-            colors={["#A8E063"]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -348,13 +348,14 @@ const styles = StyleSheet.create({
   },
   streakDays: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.accentOrange,
   },
   streakMessage: {
     fontSize: typography.fontSize.sm,
     color: colors.accentOrange,
     opacity: 0.8,
+    fontFamily: typography.fontFamily.body,
   },
   viewToggle: {
     flexDirection: "row",
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray500,
   },
   toggleTextActive: {
@@ -405,12 +406,12 @@ const styles = StyleSheet.create({
   calendarNav: {
     fontSize: typography.fontSize.xl,
     color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     paddingHorizontal: spacing.sm,
   },
   calendarMonth: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
   },
   calendarWeekdays: {
@@ -421,7 +422,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray400,
   },
   calendarGrid: {
@@ -445,16 +446,16 @@ const styles = StyleSheet.create({
   },
   calendarDayText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray700,
   },
   calendarDayTextToday: {
     color: colors.primaryDark,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
   },
   calendarDayTextSelected: {
     color: colors.surfaceLight,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
   },
   taskDots: {
     flexDirection: "row",
@@ -468,7 +469,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: spacing.md,
   },
@@ -534,13 +535,14 @@ const styles = StyleSheet.create({
   },
   taskPlantName: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 2,
   },
   taskType: {
     fontSize: typography.fontSize.sm,
     color: colors.gray600,
+    fontFamily: typography.fontFamily.body,
   },
   completeButton: {
     backgroundColor: colors.primary,
@@ -550,7 +552,7 @@ const styles = StyleSheet.create({
   },
   completeButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.surfaceLight,
   },
   buttonPressed: {
@@ -567,7 +569,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: spacing.sm,
   },
@@ -575,5 +577,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.gray600,
     textAlign: "center",
+    fontFamily: typography.fontFamily.body,
   },
 });

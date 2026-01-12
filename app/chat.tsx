@@ -136,12 +136,22 @@ export default function ChatScreen() {
       }));
   }, [messages]);
 
+  useEffect(() => {
+    if (plants.length > 0) {
+      const plantSuggestions = plants.slice(0, 3).map((p) => `How is ${p.nickname} doing?`);
+      setCurrentSuggestions([...plantSuggestions, "What should I do today?"]);
+    }
+  }, [plants]);
+
   const getUserContext = useCallback(() => {
     return {
       plants: plants.map((p) => ({
         nickname: p.nickname,
         species: p.species,
         healthScore: p.healthScore,
+        location: p.location,
+        potSize: p.potSize,
+        personality: p.personality,
       })),
       pendingTasks: tasks.filter((t) => !t.completed).length,
       streakDays: profile.streakDays,
@@ -415,7 +425,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
   },
   headerSubtitle: {
@@ -529,7 +539,7 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: typography.fontSize.xs,
     color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
   },
   suggestionTextDisabled: {
     color: colors.gray400,

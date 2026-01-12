@@ -46,7 +46,18 @@ export const trpc = {
                     mutateAsync: async (input: {
                         message: string;
                         history?: any[];
-                        context?: any
+                        context?: {
+                            plants?: Array<{
+                                nickname: string;
+                                species: string;
+                                healthScore: number;
+                                location?: string;
+                                potSize?: string;
+                                personality?: string;
+                            }>;
+                            pendingTasks?: number;
+                            streakDays?: number;
+                        }
                     }) => {
                         setIsLoading(true);
                         try {

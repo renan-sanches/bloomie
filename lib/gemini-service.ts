@@ -215,7 +215,14 @@ export async function chatWithBloomie(
   message: string,
   conversationHistory: ChatMessage[],
   userContext?: {
-    plants?: Array<{ nickname: string; species: string; healthScore: number }>;
+    plants?: Array<{
+      nickname: string;
+      species: string;
+      healthScore: number;
+      location?: string;
+      potSize?: string;
+      personality?: string;
+    }>;
     pendingTasks?: number;
     streakDays?: number;
   }
@@ -225,7 +232,9 @@ export async function chatWithBloomie(
 
     const contextInfo = userContext
       ? `
-User's plant collection: ${userContext.plants?.map((p) => `${p.nickname} (${p.species}, health: ${p.healthScore}%)`).join(", ") || "No plants yet"}
+User's plant collection: ${userContext.plants?.map((p) =>
+        `${p.nickname || p.species} (${p.species}, Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}, Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'})`
+      ).join("; ") || "No plants yet"}
 Pending care tasks: ${userContext.pendingTasks || 0}
 Current streak: ${userContext.streakDays || 0} days
 `
@@ -272,7 +281,14 @@ export async function* streamChatWithBloomie(
   message: string,
   conversationHistory: ChatMessage[],
   userContext?: {
-    plants?: Array<{ nickname: string; species: string; healthScore: number }>;
+    plants?: Array<{
+      nickname: string;
+      species: string;
+      healthScore: number;
+      location?: string;
+      potSize?: string;
+      personality?: string;
+    }>;
     pendingTasks?: number;
     streakDays?: number;
   }
@@ -282,7 +298,9 @@ export async function* streamChatWithBloomie(
 
     const contextInfo = userContext
       ? `
-User's plant collection: ${userContext.plants?.map((p) => `${p.nickname} (${p.species}, health: ${p.healthScore}%)`).join(", ") || "No plants yet"}
+User's plant collection: ${userContext.plants?.map((p) =>
+        `${p.nickname || p.species} (${p.species}, Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}, Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'})`
+      ).join("; ") || "No plants yet"}
 Pending care tasks: ${userContext.pendingTasks || 0}
 Current streak: ${userContext.streakDays || 0} days
 `

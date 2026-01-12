@@ -366,12 +366,12 @@ const styles = StyleSheet.create({
     },
     levelBadgeText: {
         fontSize: 14,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.surfaceLight,
     },
     username: {
         fontSize: typography.fontSize['2xl'],
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         marginBottom: 4,
     },
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     },
     nameInput: {
         fontSize: typography.fontSize['2xl'],
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         borderBottomWidth: 2,
         borderBottomColor: colors.primary,
@@ -399,12 +399,12 @@ const styles = StyleSheet.create({
     },
     saveButtonText: {
         fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.brand,
         color: colors.surfaceLight,
     },
     levelName: {
         fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
         color: colors.primary,
         marginBottom: 16,
     },
@@ -428,6 +428,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: colors.gray500,
         textAlign: "center",
+        fontFamily: typography.fontFamily.body,
     },
     statsRow: {
         flexDirection: "row",
@@ -440,13 +441,14 @@ const styles = StyleSheet.create({
     },
     statValue: {
         fontSize: 22,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
     },
     statLabel: {
         fontSize: 12,
         color: colors.gray500,
         marginTop: 2,
+        fontFamily: typography.fontFamily.body,
     },
     statDivider: {
         width: 1,
@@ -458,7 +460,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         marginBottom: 12,
     },
@@ -494,7 +496,7 @@ const styles = StyleSheet.create({
     },
     achievementName: {
         fontSize: 11,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
         color: colors.gray800,
         textAlign: "center",
     },
@@ -505,6 +507,7 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: colors.gray400,
         marginTop: 2,
+        fontFamily: typography.fontFamily.body,
     },
     settingsCard: {
         backgroundColor: colors.surfaceLight,
@@ -530,13 +533,14 @@ const styles = StyleSheet.create({
     },
     settingLabel: {
         fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
         color: colors.gray900,
         marginBottom: 2,
     },
     settingDescription: {
         fontSize: 13,
         color: colors.gray500,
+        fontFamily: typography.fontFamily.body,
     },
     settingDivider: {
         height: 1,
@@ -562,7 +566,7 @@ const styles = StyleSheet.create({
     },
     unitText: {
         fontSize: 14,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
         color: colors.gray500,
     },
     unitTextActive: {
@@ -584,7 +588,7 @@ const styles = StyleSheet.create({
     },
     signOutButtonText: {
         fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: '#ef4444',
     },
     appInfo: {
@@ -593,7 +597,7 @@ const styles = StyleSheet.create({
     },
     appName: {
         fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         marginBottom: 4,
     },
@@ -601,10 +605,11 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: colors.gray400,
         marginBottom: 8,
+        fontFamily: typography.fontFamily.body,
     },
     appTagline: {
         fontSize: 14,
         color: colors.primary,
-        fontWeight: typography.fontWeight.semibold,
+        fontFamily: typography.fontFamily.brand,
     },
 });

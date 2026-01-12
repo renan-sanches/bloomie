@@ -22,6 +22,7 @@ export interface Plant {
   lightExposure?: number;
   humidityLevel?: number;
   personality?: PlantPersonality;
+  potSize?: string;
   notes: string[];
   photos: PlantPhoto[];
   careHistory: CareEvent[];
@@ -177,15 +178,15 @@ export function getGreeting(): string {
 
 export function getPlantStatus(plant: Plant): { status: string; message: string; color: string } {
   if (plant.healthScore >= 80) {
-    return { status: "happy", message: "Thriving", color: "#4ade80" };
+    return { status: "happy", message: "Thriving", color: "#64b478" }; // primary
   }
   if ((plant.hydrationLevel ?? 100) < 30) {
-    return { status: "thirsty", message: "Needs Water", color: "#26d0ce" };
+    return { status: "thirsty", message: "Needs Water", color: "#66BBE6" }; // accent-water
   }
   if ((plant.lightExposure ?? 100) < 40) {
-    return { status: "needs-light", message: "Needs Light", color: "#f9a620" };
+    return { status: "needs-light", message: "Needs Light", color: "#FFB74D" }; // accent-orange
   }
-  return { status: "needs-attention", message: "Needs Care", color: "#f43f5e" };
+  return { status: "needs-attention", message: "Needs Care", color: "#F48FB1" }; // accent-pink
 }
 
 export function getPersonalityTagline(plant: Plant): string {

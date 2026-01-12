@@ -18,8 +18,6 @@ import {
   spacing,
   borderRadius,
 } from '@/components/ui/design-system';
-import { Logo } from '@/components/ui/logo';
-import { SeasonalBanner } from '@/components/ui/seasonal-banner';
 
 import { useApp, type Plant } from '@/lib/store';
 
@@ -61,11 +59,6 @@ export default function MyJungleScreen() {
     <View style={styles.container}>
       <StatusBar style="dark" />
 
-      {/* Header with Logo */}
-      <View style={styles.headerContainer}>
-        <Logo size="medium" />
-      </View>
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -78,9 +71,7 @@ export default function MyJungleScreen() {
             <Text style={styles.subtitle}>Your jungle is thriving</Text>
           </View>
 
-          <SeasonalBanner
-            onPress={() => console.log('Seasonal banner pressed')}
-          />
+
 
           {/* Stats */}
           <View style={styles.stats}>
@@ -202,6 +193,19 @@ export default function MyJungleScreen() {
 
       {/* Floating Action Button */}
       <View style={styles.fabContainer}>
+        {/* Chat Tool FAB */}
+        <Pressable
+          onPress={() => router.push('/chat')}
+          style={({ pressed }) => [
+            styles.fab,
+            styles.chatFab,
+            pressed && styles.fabPressed,
+          ]}
+        >
+          <Text style={styles.fabIcon}>💬</Text>
+        </Pressable>
+
+        {/* Add Plant FAB */}
         <Pressable
           onPress={handleAddPlant}
           style={({ pressed }) => [
@@ -221,39 +225,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.backgroundLight,
   },
-
-  // Header with Logo
-  headerContainer: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    backgroundColor: colors.surfaceLight,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray200,
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  logoIcon: {
-    width: 44,
-    height: 44,
-    backgroundColor: colors.primary + '20',
-    borderRadius: borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoEmoji: {
-    fontSize: 28,
-  },
-  logoText: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.gray900,
-    letterSpacing: -0.5,
-  },
-
   scrollView: {
     flex: 1,
   },
@@ -269,12 +240,13 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray500,
     marginBottom: spacing.lg,
   },
@@ -297,12 +269,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.primary,
     marginBottom: spacing.xs,
   },
   statLabel: {
     fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray500,
   },
   statDivider: {
@@ -329,7 +302,7 @@ const styles = StyleSheet.create({
   },
   resultsText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray600,
   },
   viewModeToggle: {
@@ -383,7 +356,7 @@ const styles = StyleSheet.create({
   },
   emptyStateTitle: {
     fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: spacing.sm,
   },
@@ -391,6 +364,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.gray500,
     textAlign: 'center',
+    fontFamily: typography.fontFamily.body,
   },
 
   // FAB
@@ -398,6 +372,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 100 : 90,
     right: spacing.lg,
+    alignItems: 'center',
+    gap: 16,
   },
   fab: {
     width: 64,
@@ -411,6 +387,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 12,
+  },
+  chatFab: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: colors.gray200,
   },
   fabPressed: {
     transform: [{ scale: 0.95 }],

@@ -379,8 +379,8 @@ export default function DiscoverScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#A8E063"
-            colors={["#A8E063"]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -400,12 +400,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray600,
     marginBottom: spacing.xl,
   },
@@ -427,7 +428,7 @@ const styles = StyleSheet.create({
   },
   potwBadgeText: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.surfaceLight,
   },
   potwContent: {
@@ -443,7 +444,7 @@ const styles = StyleSheet.create({
   },
   potwName: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
@@ -451,10 +452,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.gray600,
     marginBottom: 6,
+    fontFamily: typography.fontFamily.body,
   },
   potwPrice: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.accentOrange,
   },
   recommendationsSection: {
@@ -462,12 +464,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray500,
     marginBottom: spacing.md,
   },
@@ -500,14 +503,14 @@ const styles = StyleSheet.create({
   },
   recommendationName: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray900,
     textAlign: "center",
     marginBottom: 4,
   },
   recommendationPrice: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.primary,
   },
   categoryTabs: {
@@ -536,7 +539,7 @@ const styles = StyleSheet.create({
   },
   categoryLabel: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray600,
   },
   categoryLabelActive: {
@@ -576,7 +579,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.surfaceLight,
   },
   petSafeBadge: {
@@ -603,7 +606,7 @@ const styles = StyleSheet.create({
   },
   plantName: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
@@ -612,6 +615,7 @@ const styles = StyleSheet.create({
     color: colors.gray600,
     lineHeight: 20,
     marginBottom: spacing.md,
+    fontFamily: typography.fontFamily.body,
   },
   difficultyContainer: {
     flexDirection: "row",
@@ -632,6 +636,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.gray400,
     fontStyle: 'italic',
+    fontFamily: typography.fontFamily.body,
   },
   cardActions: {
     flexDirection: "row",
@@ -646,7 +651,7 @@ const styles = StyleSheet.create({
   },
   shopButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.surfaceLight,
   },
   cardPressed: {
@@ -675,6 +680,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray900,
   },
   filterButton: {
@@ -706,7 +712,7 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
     color: colors.gray700,
     marginBottom: spacing.sm,
   },
@@ -730,10 +736,11 @@ const styles = StyleSheet.create({
   filterOptionText: {
     fontSize: 12,
     color: colors.gray600,
+    fontFamily: typography.fontFamily.body,
   },
   filterOptionTextActive: {
     color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.brand,
   },
   filterRow: {
     flexDirection: "row",
@@ -754,6 +761,7 @@ const styles = StyleSheet.create({
   },
   filterLabelInline: {
     fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
     color: colors.gray700,
   },
   resetButton: {
@@ -765,5 +773,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: colors.gray400,
     textDecorationLine: "underline",
+    fontFamily: typography.fontFamily.body,
   },
 });

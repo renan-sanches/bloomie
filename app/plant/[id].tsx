@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
   },
   backButtonFloat: {
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.surfaceLight,
   },
   nameSection: {
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
   },
   plantName: {
     fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     borderBottomWidth: 2,
     borderBottomColor: colors.primary,
@@ -679,18 +679,20 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.surfaceLight,
   },
   plantSpecies: {
     fontSize: typography.fontSize.base,
     color: colors.gray600,
     marginBottom: 8,
+    fontFamily: typography.fontFamily.body,
   },
   plantTagline: {
     fontSize: typography.fontSize.sm,
     fontStyle: "italic",
     color: colors.gray500,
+    fontFamily: typography.fontFamily.body,
   },
   section: {
     paddingHorizontal: spacing.lg,
@@ -698,7 +700,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 12,
   },
@@ -716,7 +718,7 @@ const styles = StyleSheet.create({
   },
   growthBadgeText: {
     fontSize: 10,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.primary,
     textTransform: 'uppercase',
   },
@@ -726,6 +728,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textAlign: 'center',
     fontStyle: 'italic',
+    fontFamily: typography.fontFamily.body,
   },
   healthCard: {
     backgroundColor: colors.surfaceLight,
@@ -755,7 +758,7 @@ const styles = StyleSheet.create({
   },
   healthScoreValue: {
     fontSize: 32,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.primary,
   },
   healthScoreLabel: {
@@ -776,10 +779,11 @@ const styles = StyleSheet.create({
   statBarLabel: {
     fontSize: typography.fontSize.xs,
     color: colors.gray600,
+    fontFamily: typography.fontFamily.body,
   },
   statBarValue: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
   },
   statBarTrack: {
@@ -933,7 +937,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   backButton: {
-    backgroundColor: "#A8E063",
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

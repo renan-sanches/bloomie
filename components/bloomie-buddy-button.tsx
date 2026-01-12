@@ -76,6 +76,10 @@ export function BloomieBuddyButton({ showHint = false }: Props) {
   );
 }
 
+import { colors } from "@/components/ui/design-system";
+
+// ... existing code ...
+
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
@@ -90,13 +94,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#2D5A27",
+    shadowColor: colors.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
     borderWidth: 2,
-    borderColor: "#A8E063",
+    borderColor: colors.primary,
   },
   buttonPressed: {
     transform: [{ scale: 0.95 }],
@@ -106,7 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   hintBubble: {
-    backgroundColor: "#2D5A27",
+    backgroundColor: colors.primaryDark,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -129,6 +133,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 6,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "#2D5A27",
+    borderTopColor: colors.primaryDark,
   },
 });
