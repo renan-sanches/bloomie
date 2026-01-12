@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface LogoProps {
     size?: 'small' | 'medium' | 'large';
@@ -11,7 +12,7 @@ export function Logo({ size = 'medium' }: LogoProps) {
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.icon, { fontSize: iconSize }]}>🪴</Text>
+            <Ionicons name="leaf" size={iconSize} color="#4ade80" />
             <Text style={[styles.text, { fontSize: textSize }]}>Bloomie</Text>
         </View>
     );
@@ -22,9 +23,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-    },
-    icon: {
-        color: '#4ade80', // primary green
     },
     text: {
         fontWeight: '700',

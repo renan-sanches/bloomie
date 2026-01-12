@@ -137,13 +137,20 @@ interface PlantCardProps {
     name: string;
     species: string;
     image?: string;
-    healthScore: number;
-    waterDue?: boolean;
+    status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+    location?: string;
     onPress?: () => void;
 }
 
-export function PlantCard({ name, species, healthScore, waterDue, onPress }: PlantCardProps) {
-    const healthColor = healthScore >= 80 ? colors.primary : healthScore >= 50 ? colors.accentOrange : colors.accentAlert;
+const statusConfig = {
+    thirsty: { label: 'THIRSTY', color: colors.accentPink },
+    thriving: { label: 'THRIVING', color: colors.primary },
+    mist: { label: 'MIST ME', color: colors.accentCyan },
+    growing: { label: 'GROWING', color: colors.accentPurple },
+};
+
+export function PlantCard({ name, species, status, location, onPress }: PlantCardProps) {
+    const statusInfo = statusConfig[status];
 
     return (
         <Pressable
@@ -155,24 +162,26 @@ export function PlantCard({ name, species, healthScore, waterDue, onPress }: Pla
             ]}
         >
             <View style={styles.plantCardImagePlaceholder}>
+                {/* Status badge overlaid on image */}
+                <View style={[styles.statusBadgeOverlay, { backgroundColor: statusInfo.color }]}>
+                    <Text style={styles.statusBadgeText}>{statusInfo.label}</Text>
+                </View>
                 <Text style={styles.plantCardEmoji}>🌿</Text>
             </View>
 
             <View style={styles.plantCardContent}>
-                <Text style={styles.plantCardName}>{name}</Text>
+                <View style={styles.plantCardHeader}>
+                    <Text style={styles.plantCardName}>{name}</Text>
+                    <Text style={styles.plantCardArrow}>→</Text>
+                </View>
                 <Text style={styles.plantCardSpecies}>{species}</Text>
 
-                <View style={styles.plantCardFooter}>
-                    <View style={[styles.healthBadge, { backgroundColor: healthColor }]}>
-                        <Text style={styles.healthBadgeText}>{healthScore}%</Text>
+                {location && (
+                    <View style={styles.plantCardLocation}>
+                        <Text style={styles.locationDot}>📍</Text>
+                        <Text style={styles.locationText}>{location}</Text>
                     </View>
-
-                    {waterDue && (
-                        <View style={styles.waterBadge}>
-                            <Text style={styles.waterBadgeText}>💧 Water due</Text>
-                        </View>
-                    )}
-                </View>
+                )}
             </View>
         </Pressable>
     );
@@ -271,6 +280,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: spacing.md,
+        position: 'relative',
     },
     plantCardEmoji: {
         fontSize: 64,
@@ -278,20 +288,57 @@ const styles = StyleSheet.create({
     plantCardContent: {
         gap: spacing.xs,
     },
+    plantCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
     plantCardName: {
         fontSize: typography.fontSize.lg,
         fontWeight: typography.fontWeight.bold,
         color: colors.gray900,
+        flex: 1,
+    },
+    plantCardArrow: {
+        fontSize: typography.fontSize.lg,
+        color: colors.gray400,
     },
     plantCardSpecies: {
         fontSize: typography.fontSize.sm,
         color: colors.gray500,
+        fontStyle: 'italic',
+    },
+    plantCardLocation: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+        marginTop: spacing.xs,
+    },
+    locationDot: {
+        fontSize: 12,
+    },
+    locationText: {
+        fontSize: typography.fontSize.xs,
+        color: colors.gray600,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
     plantCardFooter: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.sm,
         marginTop: spacing.sm,
+    },
+
+    // Status Badge Overlay on Image
+    statusBadgeOverlay: {
+        position: 'absolute',
+        top: spacing.md,
+        left: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
+        borderRadius: borderRadius.full,
+        zIndex: 10,
     },
 
     // Health Badge

@@ -24,31 +24,31 @@ import { Logo } from '@/components/ui/logo';
 const MOCK_PLANTS = [
   {
     id: '1',
-    name: 'Monstera Deliciosa',
-    species: 'Monstera',
-    healthScore: 95,
-    waterDue: false,
+    name: 'Monstera',
+    species: 'Monstera Deliciosa',
+    status: 'thirsty' as const,
+    location: 'Living Room',
   },
   {
     id: '2',
-    name: 'Snake Plant',
-    species: 'Sansevieria',
-    healthScore: 88,
-    waterDue: true,
+    name: 'Figgy',
+    species: 'Ficus Lyrata',
+    status: 'thriving' as const,
+    location: 'Bedroom Corner',
   },
   {
     id: '3',
-    name: 'Pothos',
-    species: 'Epipremnum aureum',
-    healthScore: 72,
-    waterDue: false,
+    name: 'Snakey',
+    species: 'Sansevieria',
+    status: 'mist' as const,
+    location: 'Home Office',
   },
   {
     id: '4',
-    name: 'Fiddle Leaf Fig',
-    species: 'Ficus lyrata',
-    healthScore: 65,
-    waterDue: true,
+    name: 'Goldie',
+    species: 'Epipremnum Aureum',
+    status: 'growing' as const,
+    location: 'Kitchen Shelf',
   },
 ];
 
@@ -65,9 +65,9 @@ export default function MyJungleScreen() {
   // Filter plants based on active filter
   const filteredPlants = MOCK_PLANTS.filter((plant) => {
     if (activeFilter === 'all') return true;
-    if (activeFilter === 'water') return plant.waterDue;
-    if (activeFilter === 'healthy') return plant.healthScore >= 80;
-    if (activeFilter === 'attention') return plant.healthScore < 70;
+    if (activeFilter === 'water') return plant.status === 'thirsty';
+    if (activeFilter === 'healthy') return plant.status === 'thriving';
+    if (activeFilter === 'attention') return plant.status === 'mist' || plant.status === 'growing';
     return true;
   });
 
@@ -206,8 +206,8 @@ export default function MyJungleScreen() {
                 <PlantCard
                   name={plant.name}
                   species={plant.species}
-                  healthScore={plant.healthScore}
-                  waterDue={plant.waterDue}
+                  status={plant.status}
+                  location={plant.location}
                   onPress={() => handlePlantPress(plant.id)}
                 />
               </View>
