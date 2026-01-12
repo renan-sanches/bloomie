@@ -1,0 +1,338 @@
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    setDoc,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    onSnapshot,
+    Timestamp,
+    serverTimestamp,
+} from 'firebase/firestore';
+import { db } from './firebase.config';
+
+// Types
+export interface UserProfile {
+    uid: string;
+    email: string;
+    displayName: string;
+    photoURL?: string;
+    createdAt: Timestamp;
+    preferences: {
+        notificationsEnabled: boolean;
+        theme: 'light' | 'dark';
+    };
+}
+
+export interface Plant {
+    id: string;
+    name: string;
+    species: string;
+    status: 'thirsty' | 'thriving' | 'mist' | 'growing';
+    location: string;
+    imageUrl?: string;
+    careSchedule: {
+        water: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
+        fertilize: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
+        mist: { frequency: number; unit: 'days' | 'weeks'; lastDone: Timestamp | null };
+    };
+    notes?: string;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
+export interface CareActivity {
+    id: string;
+    plantId: string;
+    plantName: string;
+    action: 'water' | 'fertilize' | 'mist' | 'prune' | 'repot';
+    timestamp: Timestamp;
+    notes?: string;
+}
+
+// ========================================
+// USER PROFILE OPERATIONS
+// ========================================
+
+/**
+ * Create a new user profile document
+ */
+export async function createUserProfile(
+    uid: string,
+    email: string,
+    displayName: string
+): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await setDoc(userRef, {
+        uid,
+        email,
+        displayName,
+        photoURL: null,
+        createdAt: serverTimestamp(),
+        preferences: {
+            notificationsEnabled: true,
+            theme: 'light',
+        },
+    });
+}
+
+/**
+ * Get user profile
+ */
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        return userSnap.data() as UserProfile;
+    }
+    return null;
+}
+
+/**
+ * Update user profile
+ */
+export async function updateUserProfile(
+    uid: string,
+    data: Partial<UserProfile>
+): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, data);
+}
+
+// ========================================
+// PLANT OPERATIONS
+// ========================================
+
+/**
+ * Create a new plant
+ */
+export async function createPlant(
+    userId: string,
+    plantData: Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> {
+    const plantsRef = collection(db, 'users', userId, 'plants');
+    const docRef = await addDoc(plantsRef, {
+        ...plantData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+}
+
+/**
+ * Get all plants for a user
+ */
+export async function getUserPlants(userId: string): Promise<Plant[]> {
+    const plantsRef = collection(db, 'users', userId, 'plants');
+    const q = query(plantsRef, orderBy('updatedAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    })) as Plant[];
+}
+
+/**
+ * Get a single plant by ID
+ */
+export async function getPlant(userId: string, plantId: string): Promise<Plant | null> {
+    const plantRef = doc(db, 'users', userId, 'plants', plantId);
+    const plantSnap = await getDoc(plantRef);
+
+    if (plantSnap.exists()) {
+        return { id: plantSnap.id, ...plantSnap.data() } as Plant;
+    }
+    return null;
+}
+
+/**
+ * Update a plant
+ */
+export async function updatePlant(
+    userId: string,
+    plantId: string,
+    data: Partial<Plant>
+): Promise<void> {
+    const plantRef = doc(db, 'users', userId, 'plants', plantId);
+    await updateDoc(plantRef, {
+        ...data,
+        updatedAt: serverTimestamp(),
+    });
+}
+
+/**
+ * Delete a plant
+ */
+export async function deletePlant(userId: string, plantId: string): Promise<void> {
+    const plantRef = doc(db, 'users', userId, 'plants', plantId);
+    await deleteDoc(plantRef);
+}
+
+/**
+ * Subscribe to real-time updates for user's plants
+ */
+export function subscribeToUserPlants(
+    userId: string,
+    callback: (plants: Plant[]) => void
+): () => void {
+    const plantsRef = collection(db, 'users', userId, 'plants');
+    const q = query(plantsRef, orderBy('updatedAt', 'desc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const plants = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as Plant[];
+        callback(plants);
+    });
+}
+
+// ========================================
+// CARE HISTORY OPERATIONS
+// ========================================
+
+/**
+ * Add a care activity to history
+ */
+export async function addCareActivity(
+    userId: string,
+    plantId: string,
+    plantName: string,
+    action: CareActivity['action'],
+    notes?: string
+): Promise<string> {
+    const historyRef = collection(db, 'users', userId, 'careHistory');
+    const docRef = await addDoc(historyRef, {
+        plantId,
+        plantName,
+        action,
+        timestamp: serverTimestamp(),
+        notes: notes || null,
+    });
+
+    // Also update the plant's last care timestamp
+    const plantRef = doc(db, 'users', userId, 'plants', plantId);
+    const updateData: any = {
+        updatedAt: serverTimestamp(),
+    };
+
+    if (action === 'water') {
+        updateData['careSchedule.water.lastDone'] = serverTimestamp();
+    } else if (action === 'fertilize') {
+        updateData['careSchedule.fertilize.lastDone'] = serverTimestamp();
+    } else if (action === 'mist') {
+        updateData['careSchedule.mist.lastDone'] = serverTimestamp();
+    }
+
+    await updateDoc(plantRef, updateData);
+
+    return docRef.id;
+}
+
+/**
+ * Get care history (optionally filtered by plant)
+ */
+export async function getCareHistory(
+    userId: string,
+    plantId?: string,
+    limitCount: number = 50
+): Promise<CareActivity[]> {
+    const historyRef = collection(db, 'users', userId, 'careHistory');
+
+    let q = query(historyRef, orderBy('timestamp', 'desc'), limit(limitCount));
+
+    if (plantId) {
+        q = query(
+            historyRef,
+            where('plantId', '==', plantId),
+            orderBy('timestamp', 'desc'),
+            limit(limitCount)
+        );
+    }
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    })) as CareActivity[];
+}
+
+/**
+ * Subscribe to real-time care history updates
+ */
+export function subscribeToCareHistory(
+    userId: string,
+    plantId: string | null,
+    callback: (history: CareActivity[]) => void,
+    limitCount: number = 50
+): () => void {
+    const historyRef = collection(db, 'users', userId, 'careHistory');
+
+    let q = query(historyRef, orderBy('timestamp', 'desc'), limit(limitCount));
+
+    if (plantId) {
+        q = query(
+            historyRef,
+            where('plantId', '==', plantId),
+            orderBy('timestamp', 'desc'),
+            limit(limitCount)
+        );
+    }
+
+    return onSnapshot(q, (snapshot) => {
+        const history = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as CareActivity[];
+        callback(history);
+    });
+}
+
+/**
+ * Calculate plant status based on care schedule
+ * Returns appropriate status based on when the plant was last cared for
+ */
+export function calculatePlantStatus(plant: Plant): Plant['status'] {
+    const now = Date.now();
+    const waterLastDone = plant.careSchedule.water.lastDone?.toMillis() || 0;
+    const mistLastDone = plant.careSchedule.mist.lastDone?.toMillis() || 0;
+
+    const daysSinceWater = (now - waterLastDone) / (1000 * 60 * 60 * 24);
+    const daysSinceMist = (now - mistLastDone) / (1000 * 60 * 60 * 24);
+
+    const waterFrequency =
+        plant.careSchedule.water.unit === 'weeks'
+            ? plant.careSchedule.water.frequency * 7
+            : plant.careSchedule.water.frequency;
+
+    const mistFrequency =
+        plant.careSchedule.mist.unit === 'weeks'
+            ? plant.careSchedule.mist.frequency * 7
+            : plant.careSchedule.mist.frequency;
+
+    // Needs water urgently
+    if (daysSinceWater >= waterFrequency) {
+        return 'thirsty';
+    }
+
+    // Needs misting
+    if (daysSinceMist >= mistFrequency && mistFrequency > 0) {
+        return 'mist';
+    }
+
+    // Recently cared for
+    if (daysSinceWater < waterFrequency * 0.5) {
+        return 'thriving';
+    }
+
+    // Default: growing well
+    return 'growing';
+}

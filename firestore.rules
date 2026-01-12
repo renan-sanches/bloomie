@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isOwner(userId);
+      
+      // Plants subcollection
+      match /plants/{plantId} {
+        // Users can only access their own plants
+        allow read, write: if isOwner(userId);
+        
+        // Validation for plant creation/update
+        allow create: if isOwner(userId) 
+          && request.resource.data.name is string
+          && request.resource.data.species is string
+          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing']
+          && request.resource.data.location is string;
+        
+        allow update: if isOwner(userId)
+          && request.resource.data.name is string
+          && request.resource.data.species is string
+          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing']
+          && request.resource.data.location is string;
+      }
+      
+      // Care history subcollection
+      match /careHistory/{historyId} {
+        // Users can only access their own care history
+        allow read: if isOwner(userId);
+        
+        // Users can create care history entries
+        allow create: if isOwner(userId)
+          && request.resource.data.plantId is string
+          && request.resource.data.plantName is string
+          && request.resource.data.action in ['water', 'fertilize', 'mist', 'prune', 'repot']
+          && request.resource.data.timestamp is timestamp;
+        
+        // Prevent updates and deletes to maintain history integrity
+        allow update, delete: if false;
+      }
+    }
+  }
+}
