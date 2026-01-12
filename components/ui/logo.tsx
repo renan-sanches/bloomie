@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { colors } from '@/components/ui/design-system';
@@ -22,11 +22,20 @@ export function Logo({ size = 'medium', variant = 'default' }: LogoProps) {
                         borderRadius: 12,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 2,
-                        elevation: 2,
+                        ...Platform.select({
+                            ios: {
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 2,
+                            },
+                            android: {
+                                elevation: 2,
+                            },
+                            web: {
+                                boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+                            }
+                        })
                     }}
                 >
                     <IconSymbol name="leaf.fill" size={20} color="white" />

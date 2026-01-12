@@ -66,13 +66,16 @@ function TabLayout() {
         headerShown: false,
         drawerActiveTintColor: colors.primary,
         drawerInactiveTintColor: colors.gray900,
+        drawerType: Platform.OS === 'web' ? 'permanent' : 'front',
         drawerLabelStyle: {
           fontFamily: 'PlusJakartaSans-SemiBold',
           marginLeft: -16,
         },
         drawerStyle: {
           backgroundColor: colors.surfaceLight,
-          width: '80%',
+          width: Platform.OS === 'web' ? 280 : '80%',
+          borderRightWidth: 1,
+          borderRightColor: colors.gray100,
         }
       }}
     >
