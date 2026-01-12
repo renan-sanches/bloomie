@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { signInWithEmail, signInWithGoogle, resetPassword } from '@/lib/auth';
+import { Logo } from '@/components/ui/logo';
 import { StatusBar } from 'expo-status-bar';
 
 export default function LoginScreen() {
@@ -91,8 +92,8 @@ export default function LoginScreen() {
             >
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.logo}>🌱</Text>
-                    <Text style={styles.title}>Welcome to Bloomie</Text>
+                    <Logo size="large" />
+                    <Text style={styles.title}>Welcome Back</Text>
                     <Text style={styles.subtitle}>Sign in to manage your plant jungle</Text>
                 </View>
 

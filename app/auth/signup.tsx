@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { signUpWithEmail } from '@/lib/auth';
+import { Logo } from '@/components/ui/logo';
 import { StatusBar } from 'expo-status-bar';
 
 export default function SignupScreen() {
@@ -65,8 +66,8 @@ export default function SignupScreen() {
             >
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.logo}>🌱</Text>
-                    <Text style={styles.title}>Join Bloomie</Text>
+                    <Logo size="large" />
+                    <Text style={styles.title}>Create Account</Text>
                     <Text style={styles.subtitle}>Start your plant care journey today</Text>
                 </View>
 

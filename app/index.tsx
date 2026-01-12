@@ -83,6 +83,16 @@ export default function MyJungleScreen() {
     <View style={styles.container}>
       <StatusBar style="dark" />
 
+      {/* Header with Logo */}
+      <View style={styles.headerContainer}>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoIcon}>
+            <Text style={styles.logoEmoji}>🪴</Text>
+          </View>
+          <Text style={styles.logoText}>Bloomie</Text>
+        </View>
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -234,11 +244,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.backgroundLight,
   },
+
+  // Header with Logo
+  headerContainer: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.surfaceLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray200,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  logoIcon: {
+    width: 44,
+    height: 44,
+    backgroundColor: colors.primary + '20',
+    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoEmoji: {
+    fontSize: 28,
+  },
+  logoText: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.gray900,
+    letterSpacing: -0.5,
+  },
+
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingBottom: 100, // Space for FAB
   },
