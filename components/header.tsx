@@ -34,6 +34,10 @@ export function Header() {
                         style={({ pressed }) => ({
                             opacity: pressed ? 0.7 : 1,
                             marginRight: 4,
+                            width: 44,
+                            height: 44,
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         })}
                     >
                         {/* We need to hook this up. For now just placing the visual. */}
@@ -47,8 +51,8 @@ export function Header() {
                 {/* Search Button */}
                 <Pressable
                     style={({ pressed }) => ({
-                        width: 40,
-                        height: 40,
+                        width: 44,
+                        height: 44,
                         backgroundColor: Platform.OS === 'web' ? '#ffffff' : colors.surfaceLight,
                         borderRadius: 20,
                         shadowColor: '#000',

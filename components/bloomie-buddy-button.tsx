@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#FFFFFF",
   },
   hintArrow: {

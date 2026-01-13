@@ -118,20 +118,32 @@ interface CardProps {
 }
 
 export function Card({ children, style, onPress }: CardProps) {
-    const Component = onPress ? Pressable : View;
+    if (onPress) {
+        return (
+            <Pressable
+                onPress={onPress}
+                style={({ pressed }) => [
+                    styles.card,
+                    shadows.softGreen,
+                    pressed && styles.cardPressed,
+                    style,
+                ]}
+            >
+                {children}
+            </Pressable>
+        );
+    }
 
     return (
-        <Component
-            onPress={onPress}
-            style={({ pressed }: any) => [
+        <View
+            style={[
                 styles.card,
                 shadows.softGreen,
-                pressed && styles.cardPressed,
                 style,
             ]}
         >
             {children}
-        </Component>
+        </View>
     );
 }
 

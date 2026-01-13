@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: 'bold',
+        fontFamily: 'PlusJakartaSans-Bold',
         color: '#fff',
         marginBottom: 8,
     },
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
         color: '#e2e8f0',
         marginBottom: 8,
     },
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     forgotText: {
         color: colors.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
     loginButton: {
         backgroundColor: colors.primary,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     loginButtonText: {
         color: '#0f172a',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'PlusJakartaSans-Bold',
     },
     googleButton: {
         backgroundColor: '#fff',
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     googleButtonText: {
         color: '#0f172a',
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
     buttonPressed: {
         opacity: 0.8,
@@ -335,6 +335,6 @@ const styles = StyleSheet.create({
     signupLink: {
         color: colors.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
 });

@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   },
   careActionLabel: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     marginBottom: 4,
   },
   careActionDue: {
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   },
   historyType: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
   },
   historyDate: {
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   },
   tipTitle: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.gray900,
     marginBottom: 4,
   },
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
   },
   dangerButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: '#FF6B6B',
   },
   notFound: {
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2D5A27",
   },
   modalOverlay: {
@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   modalBody: {
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
   },
   modalActionText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
     marginBottom: 24,
   },
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
   },
   completeButtonText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#FFFFFF",
   },
   deathModalContent: {
@@ -1026,7 +1026,7 @@ const styles = StyleSheet.create({
   },
   deathTitle: {
     fontSize: 22,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
     marginBottom: 8,
     textAlign: "center",
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#687076",
   },
   confirmDeathButton: {
@@ -1074,7 +1074,7 @@ const styles = StyleSheet.create({
   },
   confirmDeathText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#FFFFFF",
   },
   aiInsightContainer: {
@@ -1092,7 +1092,7 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     color: '#FFFFFF',
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     fontSize: typography.fontSize.sm,
   },
   growthInsightCard: {
@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
   },
   insightTitle: {
     fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.display,
     color: colors.primary,
     textTransform: 'uppercase',
   },

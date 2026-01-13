@@ -12,39 +12,40 @@ interface LogoProps {
 export function Logo({ size = 'medium', variant = 'default' }: LogoProps) {
     if (variant === 'brand') {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
                 <View
                     style={{
-                        width: 32,
-                        height: 32,
+                        width: 56,
+                        height: 56,
                         backgroundColor: colors.primary,
-                        transform: [{ rotate: '3deg' }],
-                        borderRadius: 12,
+                        transform: [{ rotate: '-10deg' }],
+                        borderRadius: 16,
                         alignItems: 'center',
                         justifyContent: 'center',
                         ...Platform.select({
                             ios: {
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 2,
+                                shadowColor: colors.primary,
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.2,
+                                shadowRadius: 8,
                             },
                             android: {
-                                elevation: 2,
+                                elevation: 8,
                             },
                             web: {
-                                boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+                                boxShadow: `0px 4px 16px rgba(100, 180, 120, 0.2)`,
                             }
                         })
                     }}
                 >
-                    <IconSymbol name="leaf.fill" size={20} color="white" />
+                    {/* Using leaf.fill as eco icon - Material Symbols would require additional setup */}
+                    <IconSymbol name="leaf.fill" size={30} color="white" />
                 </View>
                 <Text
                     style={{
                         fontFamily: 'PlusJakartaSans-ExtraBold',
-                        fontSize: 20,
-                        color: '#131614',
+                        fontSize: 28,
+                        color: colors.gray900,
                         letterSpacing: -0.5
                     }}
                 >
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     text: {
-        fontWeight: '700',
+        fontFamily: 'PlusJakartaSans-Bold',
         color: '#0f172a', // gray-900
         letterSpacing: -0.5,
     },

@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
     },
     card: {
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     },
     suggestionTitle: {
         fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
         color: colors.gray900,
         marginBottom: 2,
     },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     applyButtonText: {
         color: colors.surfaceLight,
         fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.display,
     },
     pressed: {
         opacity: 0.8,

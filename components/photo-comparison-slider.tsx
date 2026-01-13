@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     labelText: {
         color: '#FFFFFF',
         fontSize: 10,
-        fontWeight: 'bold',
+        fontFamily: 'PlusJakartaSans-Bold',
         textTransform: 'uppercase',
     },
 });

@@ -403,7 +403,6 @@ const styles = StyleSheet.create({
   fabIcon: {
     fontSize: 32,
     color: colors.surfaceLight,
-    fontWeight: typography.fontWeight.bold,
   },
 
   bottomSpacer: {

@@ -77,20 +77,18 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         fontSize: 10,
-        fontWeight: '800',
+        fontFamily: 'PlusJakartaSans-ExtraBold',
         color: '#2D5A27', // Forest Green
         letterSpacing: 1,
     },
     title: {
         fontSize: typography.fontSize.lg,
-        fontWeight: '800',
         color: '#2D5A27', // Forest Green
         fontFamily: 'PlusJakartaSans-ExtraBold',
         marginBottom: 4,
     },
     subtitle: {
         fontSize: typography.fontSize.sm,
-        fontWeight: '500',
         color: 'rgba(45, 90, 39, 0.8)', // Forest Green with opacity
         fontFamily: 'PlusJakartaSans-Medium',
         lineHeight: 18,

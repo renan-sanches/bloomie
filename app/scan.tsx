@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   topPillText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   scanFrameContainer: {
     flex: 1,
@@ -689,12 +689,12 @@ const styles = StyleSheet.create({
   },
   scanningTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Bold',
     color: colors.gray900,
   },
   scanningSubtitle: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Bold',
     color: colors.accentCyan,
     marginTop: 2,
   },
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
   progressText: {
     alignSelf: 'flex-end',
     color: colors.accentPurple,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Bold',
     fontSize: 14,
   },
   progressBarBg: {
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   },
   permissionButtonText: {
     fontSize: 17,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2D5A27",
   },
   // Result styles
@@ -868,7 +868,7 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   resultContent: {
@@ -883,12 +883,12 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2D5A27",
   },
   plantName: {
     fontSize: 28,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   scientificName: {
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
   },
   careValue: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2C3E50",
     textAlign: "center",
   },
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
   },
   toxicityText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2C3E50",
   },
   funFactCard: {
@@ -956,7 +956,7 @@ const styles = StyleSheet.create({
   },
   funFactLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: colors.primary,
     marginBottom: 8,
   },
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 17,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2D5A27",
   },
   scanAgainButton: {
@@ -1011,7 +1011,7 @@ const styles = StyleSheet.create({
   },
   scanAgainText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: colors.primary,
   },
   // Error styles
@@ -1025,7 +1025,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 22,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
     marginBottom: 8,
   },
@@ -1058,7 +1058,7 @@ const styles = StyleSheet.create({
   },
   healthScoreNumber: {
     fontSize: 36,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   healthScoreLabel: {
@@ -1067,7 +1067,7 @@ const styles = StyleSheet.create({
   },
   healthStatus: {
     fontSize: 22,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
     textAlign: "center",
   },
@@ -1080,7 +1080,7 @@ const styles = StyleSheet.create({
   },
   urgentTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#C62828",
     marginBottom: 8,
   },
@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
   },
   issuesTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   issueCard: {
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
   },
   issueName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2C3E50",
     flex: 1,
   },
@@ -1132,7 +1132,7 @@ const styles = StyleSheet.create({
   },
   severityText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2C3E50",
     textTransform: "capitalize",
   },
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
   },
   treatmentLabel: {
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: "#2D5A27",
     marginBottom: 4,
   },
@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
   },
   recommendationsTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
     color: "#2C3E50",
   },
   recommendationItem: {
@@ -1172,7 +1172,7 @@ const styles = StyleSheet.create({
   recommendationBullet: {
     fontSize: 14,
     color: colors.primary,
-    fontWeight: "700",
+    fontFamily: 'PlusJakartaSans-Bold',
   },
   recommendationText: {
     fontSize: 14,
