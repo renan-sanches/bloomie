@@ -1,5 +1,7 @@
 # Bloomie 🌱
 
+**Live Demo:** [https://bloomie-app-a4a5e.web.app](https://bloomie-app-a4a5e.web.app)
+
 A modern plant care companion app built with React Native (Expo Router) and Firebase.
 
 ## Features
