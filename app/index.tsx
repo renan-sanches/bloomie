@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,9 @@ import {
 } from '@/components/ui/design-system';
 
 import { useApp, type Plant } from '@/lib/store';
+
+// Memoized PlantCard for better performance
+const MemoizedPlantCard = React.memo(PlantCard);
 
 export default function MyJungleScreen() {
   const { plants, isLoading } = useApp();
@@ -47,13 +50,13 @@ export default function MyJungleScreen() {
     );
   }
 
-  const handlePlantPress = (plantId: string) => {
+  const handlePlantPress = useCallback((plantId: string) => {
     router.push(`/plant/${plantId}` as any);
-  };
+  }, []);
 
-  const handleAddPlant = () => {
+  const handleAddPlant = useCallback(() => {
     router.push('/scan' as any);
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -175,7 +178,7 @@ export default function MyJungleScreen() {
                 key={plant.id}
                 style={viewMode === 'grid' ? styles.plantGridItem : styles.plantListItem}
               >
-                <PlantCard
+                <MemoizedPlantCard
                   name={plant.nickname}
                   species={plant.species}
                   status={plant.status}

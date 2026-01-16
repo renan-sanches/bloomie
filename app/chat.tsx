@@ -158,13 +158,13 @@ export default function ChatScreen() {
     };
   }, [plants, tasks, profile]);
 
-  const triggerHaptic = () => {
+  const triggerHaptic = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-  };
+  }, []);
 
-  const handleSend = async (text?: string) => {
+  const handleSend = useCallback(async (text?: string) => {
     const messageText = text || inputText.trim();
     if (!messageText || isTyping) return;
 
@@ -234,7 +234,12 @@ export default function ChatScreen() {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
-  };
+  }, [inputText, isTyping, triggerHaptic, getConversationHistory, getUserContext, chatMutation]);
+
+  const handleBackPress = useCallback(() => {
+    triggerHaptic();
+    router.back();
+  }, [triggerHaptic]);
 
   const generateSuggestions = (userMessage: string, response: string) => {
     const lowerMessage = userMessage.toLowerCase();
@@ -308,7 +313,7 @@ export default function ChatScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => { triggerHaptic(); router.back(); }} style={styles.backButton}>
+          <Pressable onPress={handleBackPress} style={styles.backButton}>
             <IconSymbol name="chevron.left" size={24} color="#2C3E50" />
           </Pressable>
           <View style={styles.headerInfo}>

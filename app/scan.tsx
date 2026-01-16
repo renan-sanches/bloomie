@@ -129,7 +129,8 @@ export default function ScanScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync({
         base64: true,
-        quality: 0.7,
+        quality: 0.5,
+        exif: false, // Don't need EXIF data
       });
 
       if (!photo?.base64) {
