@@ -11,9 +11,11 @@ import {
     where,
     orderBy,
     limit,
+    startAfter,
     onSnapshot,
     Timestamp,
     serverTimestamp,
+    DocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from './firebase.config';
 
@@ -316,13 +318,14 @@ export async function addCareActivity(
 }
 
 /**
- * Get care history (optionally filtered by plant)
+ * Get care history (optionally filtered by plant) with pagination support
  */
 export async function getCareHistory(
     userId: string,
-    plantId?: string,
-    limitCount: number = 50
-): Promise<CareActivity[]> {
+    plantId?: string | null,
+    limitCount: number = 20,
+    startAfterDoc?: DocumentSnapshot
+): Promise<{ activities: CareActivity[], lastDoc: DocumentSnapshot | null }> {
     const historyRef = collection(db, 'users', userId, 'careHistory');
 
     let q = query(historyRef, orderBy('timestamp', 'desc'), limit(limitCount));
@@ -336,11 +339,19 @@ export async function getCareHistory(
         );
     }
 
+    if (startAfterDoc) {
+        q = query(q, startAfter(startAfterDoc));
+    }
+
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const activities = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
     })) as CareActivity[];
+
+    const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+    return { activities, lastDoc };
 }
 
 /**
@@ -371,6 +382,65 @@ export function subscribeToCareHistory(
             ...doc.data(),
         })) as CareActivity[];
         callback(history);
+    });
+}
+
+/**
+ * Task Management Functions
+ */
+
+export interface CareTask {
+    id: string;
+    plantId: string;
+    type: "water" | "mist" | "fertilize" | "rotate";
+    dueDate: string;
+    completed: boolean;
+    completedDate?: string;
+    snoozedUntil?: string;
+    xpEarned?: number;
+}
+
+/**
+ * Create a new care task
+ */
+export async function createTask(userId: string, task: Omit<CareTask, 'id'>): Promise<string> {
+    const tasksRef = collection(db, `users/${userId}/tasks`);
+    const docRef = await addDoc(tasksRef, {
+        ...task,
+        createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+}
+
+/**
+ * Update an existing task
+ */
+export async function updateTask(userId: string, taskId: string, updates: Partial<CareTask>): Promise<void> {
+    const taskRef = doc(db, `users/${userId}/tasks/${taskId}`);
+    await updateDoc(taskRef, updates);
+}
+
+/**
+ * Delete a task
+ */
+export async function deleteTask(userId: string, taskId: string): Promise<void> {
+    const taskRef = doc(db, `users/${userId}/tasks/${taskId}`);
+    await deleteDoc(taskRef);
+}
+
+/**
+ * Subscribe to real-time task updates
+ */
+export function subscribeToTasks(userId: string, callback: (tasks: CareTask[]) => void): () => void {
+    const tasksRef = collection(db, `users/${userId}/tasks`);
+    const q = query(tasksRef, orderBy('dueDate', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const tasks = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as CareTask[];
+        callback(tasks);
     });
 }
 
