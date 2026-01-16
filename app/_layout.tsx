@@ -8,6 +8,7 @@ import {
   PlusJakartaSans_800ExtraBold
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
 
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -15,7 +16,7 @@ import { useSafeAreaInsets, SafeAreaProvider } from "react-native-safe-area-cont
 import { Platform } from "react-native";
 import { IconSymbol } from "@/components/icon-symbol";
 import { colors } from "@/components/ui/design-system";
-import { AppProvider } from "@/lib/app-provider";
+import { AppProvider, useApp } from "@/lib/app-provider";
 import { Header } from "@/components/header";
 import { View } from "react-native";
 
@@ -45,14 +46,39 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AppProvider>
-          <Header />
-          <View style={{ flex: 1 }}>
-            <TabLayout />
-          </View>
+          <AuthGuard>
+            <Header />
+            <View style={{ flex: 1 }}>
+              <TabLayout />
+            </View>
+          </AuthGuard>
         </AppProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+// Authentication guard component
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useApp();
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+
+    if (!user && !inAuthGroup) {
+      // Redirect unauthenticated users to login
+      router.replace('/auth/login');
+    } else if (user && inAuthGroup) {
+      // Redirect authenticated users away from auth pages
+      router.replace('/');
+    }
+  }, [user, isLoading, segments, router]);
+
+  return <>{children}</>;
 }
 
 import { Drawer } from 'expo-router/drawer';
