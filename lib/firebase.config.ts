@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -29,13 +29,29 @@ let auth;
 if (Platform.OS === 'web') {
     auth = getAuth(app);
 } else {
-    // Use AsyncStorage for React Native
-    auth = initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage),
-    });
+    try {
+        // Use AsyncStorage for React Native
+        auth = initializeAuth(app, {
+            persistence: getReactNativePersistence(AsyncStorage),
+        });
+    } catch (error) {
+        // Auth already initialized, get existing instance
+        auth = getAuth(app);
+    }
 }
 
 // Initialize Firestore
 const db = getFirestore(app);
+
+// Enable offline persistence for web
+if (Platform.OS === 'web') {
+    enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === 'failed-precondition') {
+            console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+        } else if (err.code === 'unimplemented') {
+            console.warn('The current browser does not support offline persistence');
+        }
+    });
+}
 
 export { app, auth, db };
