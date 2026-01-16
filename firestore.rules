@@ -23,16 +23,16 @@ service cloud.firestore {
         allow read, write: if isOwner(userId);
         
         // Validation for plant creation/update
-        allow create: if isOwner(userId) 
-          && request.resource.data.name is string
+        allow create: if isOwner(userId)
+          && request.resource.data.nickname is string
           && request.resource.data.species is string
-          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing']
+          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing', 'fertilize', 'struggling', 'dormant', 'dead']
           && request.resource.data.location is string;
-        
+
         allow update: if isOwner(userId)
-          && request.resource.data.name is string
+          && request.resource.data.nickname is string
           && request.resource.data.species is string
-          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing']
+          && request.resource.data.status in ['thirsty', 'thriving', 'mist', 'growing', 'fertilize', 'struggling', 'dormant', 'dead']
           && request.resource.data.location is string;
       }
       
@@ -45,7 +45,7 @@ service cloud.firestore {
         allow create: if isOwner(userId)
           && request.resource.data.plantId is string
           && request.resource.data.plantName is string
-          && request.resource.data.action in ['water', 'fertilize', 'mist', 'prune', 'repot']
+          && request.resource.data.action in ['water', 'fertilize', 'mist', 'prune', 'repot', 'rotate']
           && request.resource.data.timestamp is timestamp;
         
         // Prevent updates and deletes to maintain history integrity
