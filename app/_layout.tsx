@@ -16,7 +16,8 @@ import { useSafeAreaInsets, SafeAreaProvider } from "react-native-safe-area-cont
 import { Platform } from "react-native";
 import { IconSymbol } from "@/components/icon-symbol";
 import { colors } from "@/components/ui/design-system";
-import { AppProvider, useApp } from "@/lib/app-provider";
+import { AppProvider } from "@/lib/app-provider";
+import { useApp } from "@/lib/store";
 import { Header } from "@/components/header";
 import { View } from "react-native";
 

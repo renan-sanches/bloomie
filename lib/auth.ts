@@ -10,9 +10,18 @@ import {
     signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
+    Auth,
 } from 'firebase/auth';
-import { auth } from './firebase.config';
+import { auth as firebaseAuth } from './firebase.config';
 import { Platform } from 'react-native';
+
+// Helper to ensure auth is available (type-safe)
+function getAuthInstance(): Auth {
+    if (!firebaseAuth) {
+        throw new Error('Firebase Auth is not initialized. Please check your Firebase configuration.');
+    }
+    return firebaseAuth;
+}
 
 // Auth error messages
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
@@ -45,7 +54,7 @@ export async function signUpWithEmail(
     displayName?: string
 ): Promise<User> {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(getAuthInstance(), email, password);
 
         // Update display name if provided
         if (displayName && userCredential.user) {
@@ -63,7 +72,7 @@ export async function signUpWithEmail(
  */
 export async function signInWithEmail(email: string, password: string): Promise<User> {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(getAuthInstance(), email, password);
         return userCredential.user;
     } catch (error) {
         throw new Error(getAuthErrorMessage(error));
@@ -80,7 +89,7 @@ export async function signInWithGoogle(): Promise<User> {
 
     try {
         const provider = new GoogleAuthProvider();
-        const userCredential = await signInWithPopup(auth, provider);
+        const userCredential = await signInWithPopup(getAuthInstance(), provider);
         return userCredential.user;
     } catch (error) {
         throw new Error(getAuthErrorMessage(error));
@@ -92,7 +101,7 @@ export async function signInWithGoogle(): Promise<User> {
  */
 export async function signOut(): Promise<void> {
     try {
-        await firebaseSignOut(auth);
+        await firebaseSignOut(getAuthInstance());
     } catch (error) {
         throw new Error('Failed to sign out. Please try again.');
     }
@@ -103,7 +112,7 @@ export async function signOut(): Promise<void> {
  */
 export async function resetPassword(email: string): Promise<void> {
     try {
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(getAuthInstance(), email);
     } catch (error) {
         throw new Error(getAuthErrorMessage(error));
     }
@@ -113,19 +122,19 @@ export async function resetPassword(email: string): Promise<void> {
  * Get current authenticated user
  */
 export function getCurrentUser(): User | null {
-    return auth.currentUser;
+    return getAuthInstance().currentUser;
 }
 
 /**
  * Listen to auth state changes
  */
 export function onAuthChange(callback: (user: User | null) => void): () => void {
-    return onAuthStateChanged(auth, callback);
+    return onAuthStateChanged(getAuthInstance(), callback);
 }
 
 /**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-    return auth.currentUser !== null;
+    return getAuthInstance().currentUser !== null;
 }
