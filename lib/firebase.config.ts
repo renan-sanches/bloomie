@@ -3,25 +3,33 @@ import { getAuth, initializeAuth, browserLocalPersistence, browserSessionPersist
 import { getFirestore, enableIndexedDbPersistence, type Firestore } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
-// Helper to safely get environment variables
-function getEnvVar(key: string): string | undefined {
-    return Constants.expoConfig?.extra?.[key] || process.env[key];
-}
+// Firebase configuration from environment variables
+// Note: We access process.env.EXPO_PUBLIC_* directly to allow the bundler to inline these values.
+const firebaseConfig = {
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
 
 // Validate Firebase configuration
 function validateFirebaseConfig() {
-    const requiredVars = [
-        'EXPO_PUBLIC_FIREBASE_API_KEY',
-        'EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN',
-        'EXPO_PUBLIC_FIREBASE_PROJECT_ID',
-        'EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET',
-        'EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-        'EXPO_PUBLIC_FIREBASE_APP_ID',
-    ];
+    const requiredVars = {
+        'EXPO_PUBLIC_FIREBASE_API_KEY': firebaseConfig.apiKey,
+        'EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN': firebaseConfig.authDomain,
+        'EXPO_PUBLIC_FIREBASE_PROJECT_ID': firebaseConfig.projectId,
+        'EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET': firebaseConfig.storageBucket,
+        'EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID': firebaseConfig.messagingSenderId,
+        'EXPO_PUBLIC_FIREBASE_APP_ID': firebaseConfig.appId,
+    };
 
-    const missing = requiredVars.filter(varName => !getEnvVar(varName));
+    const missing = Object.entries(requiredVars)
+        .filter(([_, value]) => !value)
+        .map(([key]) => key);
 
     if (missing.length > 0) {
         const errorMsg = `Missing required Firebase environment variables: ${missing.join(', ')}. Please check your .env file.`;
@@ -36,17 +44,6 @@ function validateFirebaseConfig() {
 
     return true;
 }
-
-// Firebase configuration from environment variables
-const firebaseConfig = {
-    apiKey: getEnvVar('EXPO_PUBLIC_FIREBASE_API_KEY'),
-    authDomain: getEnvVar('EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN'),
-    projectId: getEnvVar('EXPO_PUBLIC_FIREBASE_PROJECT_ID'),
-    storageBucket: getEnvVar('EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET'),
-    messagingSenderId: getEnvVar('EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
-    appId: getEnvVar('EXPO_PUBLIC_FIREBASE_APP_ID'),
-    measurementId: getEnvVar('EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID'),
-};
 
 // Validate before initializing
 const isConfigValid = validateFirebaseConfig();
