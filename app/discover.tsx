@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -90,39 +90,41 @@ export default function DiscoverScreen() {
     setSearchQuery("");
   };
 
-  const filteredPlants = DISCOVERY_PLANTS.filter((plant) => {
-    // Search query filter
-    if (searchQuery && !plant.name.toLowerCase().includes(searchQuery.toLowerCase()) && !plant.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
+  const filteredPlants = useMemo(() => {
+    return DISCOVERY_PLANTS.filter((plant) => {
+      // Search query filter
+      if (searchQuery && !plant.name.toLowerCase().includes(searchQuery.toLowerCase()) && !plant.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
 
-    // Category filter (only if no search query is active, or we can combine them)
-    if (!searchQuery && plant.category !== selectedCategory) {
-      return false;
-    }
+      // Category filter (only if no search query is active, or we can combine them)
+      if (!searchQuery && plant.category !== selectedCategory) {
+        return false;
+      }
 
-    // Price filter
-    if (maxPrice !== null && plant.price > maxPrice) {
-      return false;
-    }
+      // Price filter
+      if (maxPrice !== null && plant.price > maxPrice) {
+        return false;
+      }
 
-    // Pet safe filter
-    if (petSafeOnly && !plant.petSafe) {
-      return false;
-    }
+      // Pet safe filter
+      if (petSafeOnly && !plant.petSafe) {
+        return false;
+      }
 
-    // Difficulty filter
-    if (selectedDifficulty !== null && plant.difficulty !== selectedDifficulty) {
-      return false;
-    }
+      // Difficulty filter
+      if (selectedDifficulty !== null && plant.difficulty !== selectedDifficulty) {
+        return false;
+      }
 
-    // Light needs filter
-    if (selectedLight !== null && plant.lightNeeds !== selectedLight) {
-      return false;
-    }
+      // Light needs filter
+      if (selectedLight !== null && plant.lightNeeds !== selectedLight) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [searchQuery, selectedCategory, maxPrice, petSafeOnly, selectedDifficulty, selectedLight]);
 
   // AI Recommendations based on user's plants
   const getRecommendations = () => {
