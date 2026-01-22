@@ -259,10 +259,11 @@ export async function deletePlant(userId: string, plantId: string): Promise<void
  */
 export function subscribeToUserPlants(
     userId: string,
-    callback: (plants: Plant[]) => void
+    callback: (plants: Plant[]) => void,
+    limitCount: number = 100
 ): () => void {
     const plantsRef = collection(db, 'users', userId, 'plants');
-    const q = query(plantsRef, orderBy('updatedAt', 'desc'));
+    const q = query(plantsRef, orderBy('updatedAt', 'desc'), limit(limitCount));
 
     return onSnapshot(q, (snapshot) => {
         const plants = snapshot.docs.map((doc) => ({
