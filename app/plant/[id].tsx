@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -113,7 +113,9 @@ export default function PlantDetailScreen() {
   const plantEmoji = PLANT_EMOJIS[plant.species.toLowerCase()] || PLANT_EMOJIS.default;
 
   // Get pending tasks for this plant
-  const plantTasks = tasks.filter((t) => t.plantId === plant.id && !t.completed);
+  const plantTasks = useMemo(() => {
+    return tasks.filter((t) => t.plantId === plant.id && !t.completed);
+  }, [tasks, plant.id]);
 
   const getNextDueDate = (type: CareEvent["type"]) => {
     const task = plantTasks.find((t) => t.type === type);
