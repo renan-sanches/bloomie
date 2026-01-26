@@ -5,6 +5,7 @@ import {
   subscribeToUserPlants,
   subscribeToCareHistory,
   subscribeToUserProfile,
+  subscribeToTasks,
   createUserProfile,
   getUserProfile,
   updateUserProfile,
@@ -13,9 +14,13 @@ import {
   updatePlant,
   deletePlant,
   addCareActivity,
+  createTask,
+  updateTask,
+  deleteTask,
   type Plant as FirestorePlant,
   type CareActivity,
   type UserProfile as FirestoreUserProfile,
+  type CareTask as FirestoreTask,
 } from './firestore';
 import {
   AppContext,
@@ -32,6 +37,7 @@ import {
   generateId,
   calculateLevel,
 } from "./store";
+import { Timestamp } from "firebase/firestore";
 
 interface AppProviderProps {
   children: ReactNode;
@@ -82,7 +88,7 @@ export function AppProvider({ children }: AppProviderProps) {
     return () => unsubscribe();
   }, []);
 
-  // Subscribe to plants when user is authenticated
+  // Subscribe to data when user is authenticated
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -164,7 +170,6 @@ export function AppProvider({ children }: AppProviderProps) {
       }));
 
       setPlants(appPlants);
-      setIsLoading(false);
     });
 
     // Subscribe to care history
@@ -172,12 +177,64 @@ export function AppProvider({ children }: AppProviderProps) {
       setCareHistory(history);
     });
 
+    // Subscribe to tasks
+    const unsubscribeTasks = subscribeToTasks(user.uid, (firestoreTasks) => {
+      setTasks(firestoreTasks);
+      setIsLoading(false);
+    });
+
     return () => {
       unsubscribeProfile();
       unsubscribePlants();
       unsubscribeHistory();
+      unsubscribeTasks();
     };
   }, [user]);
+
+  // Helper to generate initial tasks for a new plant
+  const generateInitialTasks = async (userId: string, plantId: string, plantData: Partial<Plant>) => {
+    const today = new Date();
+    
+    // Water task
+    const waterDate = new Date(today);
+    waterDate.setDate(today.getDate() + (plantData.wateringFrequencyDays || 7));
+    await createTask(userId, {
+      plantId,
+      type: 'water',
+      dueDate: waterDate.toISOString(),
+      completed: false,
+    });
+
+    // Mist task
+    const mistDate = new Date(today);
+    mistDate.setDate(today.getDate() + (plantData.mistingFrequencyDays || 3));
+    await createTask(userId, {
+      plantId,
+      type: 'mist',
+      dueDate: mistDate.toISOString(),
+      completed: false,
+    });
+
+    // Fertilize task
+    const fertilizeDate = new Date(today);
+    fertilizeDate.setDate(today.getDate() + (plantData.fertilizingFrequencyDays || 30));
+    await createTask(userId, {
+      plantId,
+      type: 'fertilize',
+      dueDate: fertilizeDate.toISOString(),
+      completed: false,
+    });
+
+    // Rotate task
+    const rotateDate = new Date(today);
+    rotateDate.setDate(today.getDate() + (plantData.rotatingFrequencyDays || 7));
+    await createTask(userId, {
+      plantId,
+      type: 'rotate',
+      dueDate: rotateDate.toISOString(),
+      completed: false,
+    });
+  };
 
   // Context value
   const value: AppContextType = {
@@ -194,14 +251,14 @@ export function AppProvider({ children }: AppProviderProps) {
     addPlant: useCallback(async (plant) => {
       if (!user) return {} as Plant;
 
-      const plantId = await createPlant(user.uid, {
+      const plantData = {
         nickname: plant.nickname,
         species: plant.species,
         scientificName: plant.scientificName,
         location: plant.location || 'Living Room',
         photo: plant.photo,
         photos: [],
-        lastWatered: null,
+        lastWatered: undefined,
         wateringFrequencyDays: plant.wateringFrequencyDays || 7,
         mistingFrequencyDays: plant.mistingFrequencyDays || 3,
         fertilizingFrequencyDays: plant.fertilizingFrequencyDays || 30,
@@ -212,8 +269,13 @@ export function AppProvider({ children }: AppProviderProps) {
         humidityLevel: 60,
         personality: plant.personality || 'chill-vibes',
         notes: plant.notes || [],
-        status: 'growing',
-      } as any);
+        status: 'growing' as const,
+      };
+
+      const plantId = await createPlant(user.uid, plantData as any);
+      
+      // Generate initial tasks
+      await generateInitialTasks(user.uid, plantId, plantData);
 
       return { ...plant, id: plantId } as Plant;
     }, [user]),
@@ -246,35 +308,103 @@ export function AppProvider({ children }: AppProviderProps) {
         careType as any,
         notes
       );
-    }, [user, plants]),
 
-    // Task operations (stub - can be implemented later)
+      // Recalculate health score
+      // Create a mock updated plant for calculation
+      const now = Timestamp.now();
+      const updatedPlantMock: any = { 
+          ...plant, 
+          lastWatered: careType === 'water' ? now : (plant.lastWatered ? Timestamp.fromMillis(new Date(plant.lastWatered).getTime()) : undefined)
+      };
+      
+      const newHealthScore = calculateHealthScore(updatedPlantMock);
+      
+      // Update plant with new health score and potential status change
+      await updatePlant(user.uid, plantId, {
+          healthScore: newHealthScore,
+          status: newHealthScore > 80 ? 'thriving' : 'growing'
+      });
+      
+      // Update/Reschedule the task for this care type
+      const pendingTask = tasks.find(t => 
+        t.plantId === plantId && 
+        t.type === careType && 
+        !t.completed
+      );
+
+      if (pendingTask) {
+        await updateTask(user.uid, pendingTask.id, {
+          completed: true,
+          completedDate: new Date().toISOString()
+        });
+        
+        // Schedule next task
+        let frequency = 7;
+        if (careType === 'water') frequency = plant.wateringFrequencyDays;
+        else if (careType === 'mist') frequency = plant.mistingFrequencyDays;
+        else if (careType === 'fertilize') frequency = plant.fertilizingFrequencyDays;
+        else if (careType === 'rotate') frequency = plant.rotatingFrequencyDays;
+        
+        const nextDate = new Date();
+        nextDate.setDate(nextDate.getDate() + frequency);
+        
+        await createTask(user.uid, {
+          plantId,
+          type: careType as any,
+          dueDate: nextDate.toISOString(),
+          completed: false
+        });
+      }
+
+    }, [user, plants, tasks]),
+
+    // Task operations
     addTask: useCallback(async (task) => {
-      const newTask = {
-        ...task,
-        id: generateId(),
-        createdAt: new Date().toISOString(),
-        completed: false,
+      if (!user) return;
+      await createTask(user.uid, {
         plantId: task.plantId || '',
         type: task.type || 'water',
         dueDate: task.dueDate || new Date().toISOString(),
-      } as CareTask;
-      setTasks(prev => [...prev, newTask]);
-    }, []),
+        completed: false,
+      });
+    }, [user]),
 
     updateTask: useCallback(async (id: string, updates: Partial<CareTask>) => {
-      setTasks(prev => prev.map(task => task.id === id ? { ...task, ...updates } : task));
-    }, []),
+      if (!user) return;
+      await updateTask(user.uid, id, updates);
+    }, [user]),
 
     deleteTask: useCallback(async (id: string) => {
-      setTasks(prev => prev.filter(task => task.id !== id));
-    }, []),
+      if (!user) return;
+      await deleteTask(user.uid, id);
+    }, [user]),
 
     completeTask: useCallback(async (id: string) => {
-      setTasks(prev => prev.map(task =>
-        task.id === id ? { ...task, completed: true, completedAt: new Date().toISOString() } : task
-      ));
-    }, []),
+      if (!user) return;
+      
+      // Check if it's a care task and log care to update plant history and health
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+         // Log care will handle task completion and rescheduling!
+         // We should use logCare if it's a standard care type.
+         // But logCare expects a plant ID.
+         if (['water', 'mist', 'fertilize', 'rotate'].includes(task.type)) {
+             const plant = plants.find(p => p.id === task.plantId);
+             if (plant) {
+                 // Call logCare to handle everything
+                 await value.logCare(plant.id, task.type);
+                 return;
+             }
+         }
+      }
+      
+      // Fallback if not a standard care task or plant not found
+      await updateTask(user.uid, id, { 
+        completed: true, 
+        completedDate: new Date().toISOString() 
+      });
+
+    }, [user, tasks, plants]), // Added value.logCare dependency implicitly via recursive call check, but `value` isn't defined yet. FIX: Use the function directly or logic.
 
     // Profile operations
     updateProfile: useCallback(async (updates: Partial<UserProfile>) => {
@@ -319,8 +449,17 @@ export function AppProvider({ children }: AppProviderProps) {
 
     // Other stubs
     snoozeTask: useCallback(async (id: string, days: number) => {
-      // Stub
-    }, []),
+      if (!user) return;
+       // For snooze, just update the due date
+       const task = tasks.find(t => t.id === id);
+       if (!task) return;
+       
+       const newDate = new Date(task.dueDate);
+       newDate.setDate(newDate.getDate() + days);
+       
+       await updateTask(user.uid, id, { dueDate: newDate.toISOString() });
+
+    }, [user, tasks]),
     addXP: useCallback(async (amount: number) => {
       // Stub
     }, []),

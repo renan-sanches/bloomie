@@ -7,16 +7,17 @@ import {
   StyleSheet,
   Platform,
   ActivityIndicator,
-  ScrollView,
+  ImageBackground,
+  Dimensions,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { ScreenContainer } from "@/components/screen-container";
-import { colors } from "@/components/ui/design-system";
-
+import { colors, borderRadius, typography } from "@/components/ui/design-system";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useApp, type Plant } from "@/lib/store";
 import { trpc } from "@/lib/trpc";
+import { router } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -24,6 +25,9 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
+  withSpring,
+  SlideInDown,
+  FadeIn,
 } from "react-native-reanimated";
 
 type ScanMode = "identify" | "diagnose";
@@ -67,6 +71,8 @@ type HealthResult = {
   error?: string;
 };
 
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<ScanMode>("identify");
@@ -81,9 +87,10 @@ export default function ScanScreen() {
   const identifyMutation = trpc.ai.identifyPlant.useMutation();
   const diagnoseMutation = trpc.ai.diagnosePlantHealth.useMutation();
 
-  // Scanning animation
+  // Animations
   const scanLineY = useSharedValue(0);
   const pulseScale = useSharedValue(1);
+  const resultSheetTranslateY = useSharedValue(SCREEN_HEIGHT);
 
   useEffect(() => {
     if (scanState === "scanning") {
@@ -103,14 +110,24 @@ export default function ScanScreen() {
       scanLineY.value = 0;
       pulseScale.value = 1;
     }
-  }, [scanState, scanLineY, pulseScale]);
+
+    if (scanState === "result") {
+      resultSheetTranslateY.value = withSpring(0, { damping: 15 });
+    } else {
+      resultSheetTranslateY.value = SCREEN_HEIGHT;
+    }
+  }, [scanState, scanLineY, pulseScale, resultSheetTranslateY]);
 
   const scanLineStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: scanLineY.value * 200 }],
+    transform: [{ translateY: scanLineY.value * 280 }],
   }));
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],
+  }));
+
+  const resultSheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: resultSheetTranslateY.value }],
   }));
 
   const triggerHaptic = () => {
@@ -130,34 +147,31 @@ export default function ScanScreen() {
       const photo = await cameraRef.current.takePictureAsync({
         base64: true,
         quality: 0.5,
-        exif: false, // Don't need EXIF data
+        exif: false,
       });
 
       if (!photo?.base64) {
         throw new Error("Failed to capture photo");
       }
 
-      // Save the photo to app's document directory for persistent storage
+      // Save photo locally
       if (photo.uri && Platform.OS !== "web") {
         try {
           const fileName = `plant_${Date.now()}.jpg`;
+          // @ts-ignore
           const destPath = `${FileSystem.documentDirectory}plants/${fileName}`;
 
-          // Ensure directory exists
+          // @ts-ignore
           const dirInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}plants`);
           if (!dirInfo.exists) {
+            // @ts-ignore
             await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}plants`, { intermediates: true });
           }
 
-          // Copy photo to permanent location
-          await FileSystem.copyAsync({
-            from: photo.uri,
-            to: destPath,
-          });
+          await FileSystem.copyAsync({ from: photo.uri, to: destPath });
           capturedPhotoUri = destPath;
         } catch (saveError) {
           console.warn("Failed to save photo locally:", saveError);
-          // Fall back to original URI
           capturedPhotoUri = photo.uri;
         }
       } else if (photo.uri) {
@@ -165,15 +179,11 @@ export default function ScanScreen() {
       }
 
       if (mode === "identify") {
-        const result = await identifyMutation.mutateAsync({
-          imageBase64: photo.base64,
-        });
+        const result = await identifyMutation.mutateAsync({ imageBase64: photo.base64 });
         setIdentifyResult(result);
         setScanState(result.success ? "result" : "error");
       } else {
-        const result = await diagnoseMutation.mutateAsync({
-          imageBase64: photo.base64,
-        });
+        const result = await diagnoseMutation.mutateAsync({ imageBase64: photo.base64 });
         setHealthResult(result);
         setScanState(result.success ? "result" : "error");
       }
@@ -185,61 +195,40 @@ export default function ScanScreen() {
       console.error("Scan error:", error);
       setScanState("error");
       capturedPhotoUri = null;
-      if (mode === "identify") {
-        setIdentifyResult({
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to analyze image",
-        });
-      } else {
-        setHealthResult({
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to analyze image",
-        });
-      }
     }
   };
 
-  const handleAddPlant = () => {
+  const handleAddPlant = async () => {
     if (!identifyResult?.success || !identifyResult.commonName) return;
 
     triggerHaptic();
 
-    const newPlant: Plant = {
-      id: Date.now().toString(),
-      nickname: identifyResult.commonName,
-      species: identifyResult.commonName,
-      scientificName: identifyResult.scientificName,
-      photo: capturedPhotoUri || undefined, // Use the captured photo
-      dateAdded: new Date().toISOString(),
-      lastWatered: new Date().toISOString(),
-      wateringFrequencyDays: 7,
-      mistingFrequencyDays: 3,
-      fertilizingFrequencyDays: 30,
-      rotatingFrequencyDays: 7,
-      healthScore: 100,
-      hydrationLevel: 80,
-      lightExposure: 70,
-      humidityLevel: 60,
-      personality: "chill-vibes",
-      notes: identifyResult.description ? [identifyResult.description] : [],
-      photos: capturedPhotoUri ? [{
-        id: Date.now().toString(),
-        uri: capturedPhotoUri,
-        date: new Date().toISOString(),
-        note: "Initial photo from plant identification",
-      }] : [],
-      careHistory: [],
-      diagnosisHistory: [],
-      status: 'growing',
-      location: 'Living Room',
-    };
+    try {
+      const newPlant: any = {
+        nickname: identifyResult.commonName,
+        species: identifyResult.commonName,
+        scientificName: identifyResult.scientificName,
+        photo: capturedPhotoUri || undefined,
+        wateringFrequencyDays: 7, // Default, logic should be smarter
+        mistingFrequencyDays: 3,
+        fertilizingFrequencyDays: 30,
+        notes: identifyResult.description ? [identifyResult.description] : [],
+        location: 'Living Room',
+      };
 
-    addPlant(newPlant);
-    capturedPhotoUri = null;
-    resetScan();
-
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Add to store (and firestore)
+      await addPlant(newPlant);
+      
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      
+      // Navigate to home or dashboard
+      resetScan();
+      router.push("/");
+      
+    } catch (e) {
+      console.error("Error adding plant", e);
     }
   };
 
@@ -249,936 +238,251 @@ export default function ScanScreen() {
     setHealthResult(null);
   };
 
-  const toggleCamera = () => {
-    triggerHaptic();
-    setFacing((current) => (current === "back" ? "front" : "back"));
-  };
-
   // Permission handling
-  if (!permission) {
-    return (
-      <ScreenContainer containerClassName="items-center justify-center">
-        <ActivityIndicator size="large" color={colors.primary} />
-      </ScreenContainer>
-    );
-  }
-
+  if (!permission) return <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>;
   if (!permission.granted) {
     return (
-      <ScreenContainer containerClassName="p-6">
-        <View style={styles.permissionContainer}>
-          <View style={styles.permissionIcon}>
-            <Text style={styles.permissionEmoji}>📷</Text>
-          </View>
-          <Text style={styles.permissionTitle}>Camera Access Needed</Text>
-          <Text style={styles.permissionText}>
-            Bloomie needs camera access to identify your plants and check their health.
-          </Text>
-          <Pressable
-            onPress={requestPermission}
-            style={({ pressed }) => [
-              styles.permissionButton,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Text style={styles.permissionButtonText}>Enable Camera</Text>
-          </Pressable>
-        </View>
+      <ScreenContainer containerClassName="p-6 justify-center items-center">
+        <Text style={styles.permissionTitle}>Camera Access Needed</Text>
+        <Pressable onPress={requestPermission} style={styles.permissionButton}>
+          <Text style={styles.permissionButtonText}>Enable Camera</Text>
+        </Pressable>
       </ScreenContainer>
     );
   }
 
-  // Result screen
-  if (scanState === "result" || scanState === "error") {
+  // Result View (Bottom Sheet)
+  const renderResult = () => {
+    if (scanState !== "result" && scanState !== "error") return null;
+
+    const isDiagnose = mode === "diagnose";
+    const data = isDiagnose ? healthResult : identifyResult;
+    const success = data?.success;
+
+    // Determine colors and content based on result
+    const title = !success 
+      ? "Scan Failed" 
+      : isDiagnose 
+        ? "Diagnosis Complete" 
+        : "Plant Identified";
+        
+    const subtitle = !success
+      ? (data?.error || "Could not analyze image")
+      : isDiagnose
+        ? (healthResult?.overallHealth === 'healthy' 
+            ? "Your plant looks healthy and thriving!" 
+            : healthResult?.issues?.[0]?.description || "Issues detected.")
+        : (identifyResult?.description || "A beautiful addition to your collection.");
+
+    const iconName = !success ? "exclamationmark.triangle.fill" : isDiagnose ? "heart.text.square.fill" : "leaf.fill";
+    const iconColor = !success ? colors.error : isDiagnose ? colors.bloomiePink || "#FF4081" : colors.primary;
+    
+    // Background Image
     return (
-      <ScreenContainer>
-        <ScrollView contentContainerStyle={styles.resultContainer}>
-          {/* Header */}
+      <View style={[StyleSheet.absoluteFill, { zIndex: 20 }]}>
+        <ImageBackground 
+          source={{ uri: capturedPhotoUri || undefined }} 
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        >
+          {/* Fallback for blur */}
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.6)' }]} />
+          
+          {/* Header Actions */}
           <View style={styles.resultHeader}>
-            <Pressable onPress={resetScan} style={styles.backButton}>
-              <IconSymbol name="chevron.left" size={24} color="#2C3E50" />
-            </Pressable>
-            <Text style={styles.resultTitle}>
-              {mode === "identify" ? "Plant Identified" : "Health Report"}
-            </Text>
-            <View style={{ width: 40 }} />
+             <Pressable onPress={resetScan} style={styles.closeButton}>
+                <IconSymbol name="xmark" size={20} color="#fff" />
+             </Pressable>
           </View>
 
-          {mode === "identify" && identifyResult ? (
-            identifyResult.success ? (
-              <View style={styles.resultContent}>
-                {/* Confidence badge */}
-                <View style={styles.confidenceBadge}>
-                  <Text style={styles.confidenceText}>
-                    {identifyResult.confidence}% Match
-                  </Text>
-                </View>
-
-                {/* Plant name */}
-                <Text style={styles.plantName}>{identifyResult.commonName}</Text>
-                <Text style={styles.scientificName}>
-                  {identifyResult.scientificName}
-                </Text>
-
-                {/* Description */}
-                <Text style={styles.description}>{identifyResult.description}</Text>
-
-                {/* Care info cards */}
-                <View style={styles.careGrid}>
-                  <View style={styles.careCard}>
-                    <Text style={styles.careIcon}>💧</Text>
-                    <Text style={styles.careLabel}>Water</Text>
-                    <Text style={styles.careValue}>{identifyResult.wateringFrequency}</Text>
-                  </View>
-                  <View style={styles.careCard}>
-                    <Text style={styles.careIcon}>☀️</Text>
-                    <Text style={styles.careLabel}>Light</Text>
-                    <Text style={styles.careValue}>{identifyResult.lightRequirements}</Text>
-                  </View>
-                  <View style={styles.careCard}>
-                    <Text style={styles.careIcon}>💨</Text>
-                    <Text style={styles.careLabel}>Humidity</Text>
-                    <Text style={styles.careValue}>{identifyResult.humidity}</Text>
-                  </View>
-                  <View style={styles.careCard}>
-                    <Text style={styles.careIcon}>🎯</Text>
-                    <Text style={styles.careLabel}>Difficulty</Text>
-                    <Text style={styles.careValue}>
-                      {identifyResult.careLevel === "easy"
-                        ? "Beginner"
-                        : identifyResult.careLevel === "moderate"
-                          ? "Intermediate"
-                          : "Expert"}
+          {/* Bottom Sheet */}
+          <Animated.View style={[styles.bottomSheet, resultSheetStyle]}>
+            <View style={styles.dragIndicator} />
+            
+            <View style={styles.sheetContent}>
+              <Text style={styles.sheetTitle}>{title}</Text>
+              
+              <View style={styles.iconContainer}>
+                 <View style={[styles.iconCircle, { backgroundColor: iconColor + '20' }]}>
+                    <IconSymbol name={iconName} size={32} color={iconColor} />
+                 </View>
+                 {isDiagnose && healthResult?.overallHealth !== 'healthy' && (
+                    <Text style={[styles.statusText, { color: iconColor }]}>
+                       {healthResult?.issues?.[0]?.name || "Issue Detected"}
                     </Text>
-                  </View>
-                </View>
-
-                {/* Toxicity warning */}
-                {identifyResult.toxicity && (
-                  <View
-                    style={[
-                      styles.toxicityBadge,
-                      identifyResult.toxicity.toLowerCase().includes("non-toxic") ||
-                        identifyResult.toxicity.toLowerCase().includes("safe")
-                        ? styles.safeBadge
-                        : styles.toxicBadge,
-                    ]}
-                  >
-                    <Text style={styles.toxicityText}>
-                      {identifyResult.toxicity.toLowerCase().includes("non-toxic") ||
-                        identifyResult.toxicity.toLowerCase().includes("safe")
-                        ? "🐾 Pet Safe"
-                        : "⚠️ " + identifyResult.toxicity}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Fun fact */}
-                {identifyResult.funFact && (
-                  <View style={styles.funFactCard}>
-                    <Text style={styles.funFactLabel}>🌟 Fun Fact</Text>
-                    <Text style={styles.funFactText}>{identifyResult.funFact}</Text>
-                  </View>
-                )}
-
-                {/* Alternatives */}
-                {identifyResult.alternatives && identifyResult.alternatives.length > 0 && (
-                  <View style={styles.alternativesSection}>
-                    <Text style={styles.alternativesTitle}>Could also be:</Text>
-                    {identifyResult.alternatives.map((alt, index) => (
-                      <View key={index} style={styles.alternativeItem}>
-                        <Text style={styles.alternativeName}>{alt.commonName}</Text>
-                        <Text style={styles.alternativeConfidence}>
-                          {alt.confidence}%
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Add to collection button */}
-                <Pressable
-                  onPress={handleAddPlant}
-                  style={({ pressed }) => [
-                    styles.addButton,
-                    pressed && styles.buttonPressed,
-                  ]}
-                >
-                  <IconSymbol name="plus" size={20} color="#FFFFFF" />
-                  <Text style={styles.addButtonText}>Add to My Jungle</Text>
-                </Pressable>
+                 )}
+                 {mode === 'identify' && success && (
+                    <Text style={styles.plantNameText}>{identifyResult?.commonName}</Text>
+                 )}
               </View>
-            ) : (
-              <View style={styles.errorContent}>
-                <Text style={styles.errorEmoji}>🔍</Text>
-                <Text style={styles.errorTitle}>Couldn't Identify</Text>
-                <Text style={styles.errorText}>
-                  {identifyResult.error || "Try taking a clearer photo of the plant."}
-                </Text>
+
+              <Text style={styles.sheetSubtitle}>{subtitle}</Text>
+
+              <View style={styles.actionButtons}>
+                 {mode === 'identify' && success && (
+                   <Pressable 
+                      style={[styles.actionButton, styles.primaryButton]}
+                      onPress={handleAddPlant}
+                   >
+                      <IconSymbol name="plus.circle.fill" size={20} color="#fff" />
+                      <Text style={styles.primaryButtonText}>Add to My Jungle</Text>
+                   </Pressable>
+                 )}
+                 
+                 {mode === 'diagnose' && success && (
+                   <Pressable style={[styles.actionButton, styles.secondaryButton]}>
+                      <IconSymbol name="bandage.fill" size={20} color="#fff" />
+                      <Text style={styles.primaryButtonText}>How to fix it</Text>
+                   </Pressable>
+                 )}
+                 
+                 {!success && (
+                   <Pressable 
+                      style={[styles.actionButton, styles.primaryButton]}
+                      onPress={resetScan}
+                   >
+                      <Text style={styles.primaryButtonText}>Try Again</Text>
+                   </Pressable>
+                 )}
               </View>
-            )
-          ) : mode === "diagnose" && healthResult ? (
-            healthResult.success ? (
-              <View style={styles.resultContent}>
-                {/* Health score */}
-                <View
-                  style={[
-                    styles.healthScoreBadge,
-                    healthResult.overallHealth === "healthy"
-                      ? styles.healthyBadge
-                      : healthResult.overallHealth === "mild-issues"
-                        ? styles.mildBadge
-                        : healthResult.overallHealth === "moderate-issues"
-                          ? styles.moderateBadge
-                          : styles.severeBadge,
-                  ]}
-                >
-                  <Text style={styles.healthScoreNumber}>
-                    {healthResult.healthScore}%
-                  </Text>
-                  <Text style={styles.healthScoreLabel}>Health Score</Text>
-                </View>
-
-                {/* Status */}
-                <Text style={styles.healthStatus}>
-                  {healthResult.overallHealth === "healthy"
-                    ? "🌟 Looking Great!"
-                    : healthResult.overallHealth === "mild-issues"
-                      ? "🌱 Minor Issues"
-                      : healthResult.overallHealth === "moderate-issues"
-                        ? "⚠️ Needs Attention"
-                        : "🚨 Urgent Care Needed"}
-                </Text>
-
-                {/* Urgent action */}
-                {healthResult.urgentAction && (
-                  <View style={styles.urgentCard}>
-                    <Text style={styles.urgentTitle}>⚡ Immediate Action</Text>
-                    <Text style={styles.urgentText}>{healthResult.urgentAction}</Text>
-                  </View>
-                )}
-
-                {/* Issues */}
-                {healthResult.issues && healthResult.issues.length > 0 && (
-                  <View style={styles.issuesSection}>
-                    <Text style={styles.issuesTitle}>Issues Found</Text>
-                    {healthResult.issues.map((issue, index) => (
-                      <View key={index} style={styles.issueCard}>
-                        <View style={styles.issueHeader}>
-                          <Text style={styles.issueName}>{issue.name}</Text>
-                          <View
-                            style={[
-                              styles.severityBadge,
-                              issue.severity === "mild"
-                                ? styles.mildSeverity
-                                : issue.severity === "moderate"
-                                  ? styles.moderateSeverity
-                                  : styles.severeSeverity,
-                            ]}
-                          >
-                            <Text style={styles.severityText}>{issue.severity}</Text>
-                          </View>
-                        </View>
-                        <Text style={styles.issueDescription}>{issue.description}</Text>
-                        <View style={styles.treatmentBox}>
-                          <Text style={styles.treatmentLabel}>💊 Treatment:</Text>
-                          <Text style={styles.treatmentText}>{issue.treatment}</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Recommendations */}
-                {healthResult.recommendations && healthResult.recommendations.length > 0 && (
-                  <View style={styles.recommendationsSection}>
-                    <Text style={styles.recommendationsTitle}>Recommendations</Text>
-                    {healthResult.recommendations.map((rec, index) => (
-                      <View key={index} style={styles.recommendationItem}>
-                        <Text style={styles.recommendationBullet}>✓</Text>
-                        <Text style={styles.recommendationText}>{rec}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ) : (
-              <View style={styles.errorContent}>
-                <Text style={styles.errorEmoji}>🔬</Text>
-                <Text style={styles.errorTitle}>Analysis Failed</Text>
-                <Text style={styles.errorText}>
-                  {healthResult.error || "Try taking a clearer photo of the plant."}
-                </Text>
-              </View>
-            )
-          ) : null}
-
-          {/* Scan again button */}
-          <Pressable
-            onPress={resetScan}
-            style={({ pressed }) => [
-              styles.scanAgainButton,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Text style={styles.scanAgainText}>Scan Another Plant</Text>
-          </Pressable>
-        </ScrollView>
-      </ScreenContainer>
+            </View>
+          </Animated.View>
+        </ImageBackground>
+      </View>
     );
-  }
+  };
 
-  // Camera view
   return (
-    <ScreenContainer edges={["left", "right"]}>
-      <View style={styles.container}>
-        {/* Camera */}
-        <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
+    <View style={styles.container}>
+      {/* Camera View */}
+      <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
           {/* Overlay */}
           <View style={styles.overlay}>
-
+            
             {/* Top Hint Pill */}
-            <View style={styles.topPillContainer}>
+            <Animated.View entering={FadeIn.delay(500)} style={styles.topPillContainer}>
               <View style={styles.topPill}>
-                <Text style={styles.topPillText}>Center leaf in frame</Text>
+                <Text style={styles.topPillText}>
+                   {mode === 'identify' ? "Center plant in frame" : "Focus on the issue"}
+                </Text>
               </View>
-            </View>
+            </Animated.View>
 
-            {/* Scan frame */}
-            <View style={styles.scanFrameContainer}>
-              <Animated.View style={[styles.scanFrame, pulseStyle]}>
-                <View style={[styles.corner, styles.topLeft]} />
-                <View style={[styles.corner, styles.topRight]} />
-                <View style={[styles.corner, styles.bottomLeft]} />
-                <View style={[styles.corner, styles.bottomRight]} />
-              </Animated.View>
-            </View>
-
-            {/* Bottom Card Area */}
-            <View style={styles.bottomContainer}>
-              {scanState === "scanning" ? (
-                <View style={styles.scanningCard}>
-                  <View style={styles.scanningHeader}>
-                    <View style={styles.scanningIconContainer}>
-                      <ActivityIndicator color={colors.accentCyan} />
-                    </View>
-                    <View>
-                      <Text style={styles.scanningTitle}>Scanning...</Text>
-                      <Text style={styles.scanningSubtitle}>AI PROCESSING</Text>
-                    </View>
-                  </View>
-                  <View style={styles.progressBarContainer}>
-                    <Text style={styles.progressText}>45%</Text>
-                    <View style={styles.progressBarBg}>
-                      <View style={[styles.progressBarFill, { width: '45%' }]} />
-                    </View>
-                  </View>
+            {/* Scan Frame */}
+            {scanState === "scanning" ? (
+                <View style={styles.center}>
+                   <Animated.View style={[styles.scanFrame, pulseStyle]}>
+                      <View style={[styles.corner, styles.topLeft]} />
+                      <View style={[styles.corner, styles.topRight]} />
+                      <View style={[styles.corner, styles.bottomLeft]} />
+                      <View style={[styles.corner, styles.bottomRight]} />
+                      <Animated.View style={[styles.scanLine, scanLineStyle]} />
+                   </Animated.View>
+                   <Text style={styles.scanningText}>Scanning...</Text>
                 </View>
-              ) : (
-                <View style={styles.controlsContainer}>
-                  {/* Mode Selector (Simplified) */}
-                  <View style={styles.modeSelector}>
-                    <Pressable
-                      onPress={() => setMode('identify')}
-                      style={[styles.modePill, mode === 'identify' && styles.modePillActive]}
-                    >
-                      <Text style={[styles.modeText, mode === 'identify' && styles.modeTextActive]}>Identify</Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => setMode('diagnose')}
-                      style={[styles.modePill, mode === 'diagnose' && styles.modePillActive]}
-                    >
-                      <Text style={[styles.modeText, mode === 'diagnose' && styles.modeTextActive]}>Diagnose</Text>
-                    </Pressable>
-                  </View>
+            ) : (
+                <View style={{ flex: 1 }} />
+            )}
 
-                  {/* Capture Button */}
-                  <Pressable onPress={handleCapture} style={styles.shutterOuter}>
-                    <View style={styles.shutterInner} />
-                  </Pressable>
+            {/* Bottom Controls */}
+            {scanState !== "scanning" && (
+                <View style={styles.bottomControls}>
+                   <View style={styles.modeSelector}>
+                      <Pressable 
+                         onPress={() => { triggerHaptic(); setMode('identify'); }}
+                         style={[styles.modePill, mode === 'identify' && styles.modePillActive]}
+                      >
+                         <Text style={[styles.modeText, mode === 'identify' && styles.modeTextActive]}>Identify</Text>
+                      </Pressable>
+                      <Pressable 
+                         onPress={() => { triggerHaptic(); setMode('diagnose'); }}
+                         style={[styles.modePill, mode === 'diagnose' && styles.modePillActive]}
+                      >
+                         <Text style={[styles.modeText, mode === 'diagnose' && styles.modeTextActive]}>Diagnose</Text>
+                      </Pressable>
+                   </View>
+
+                   <View style={styles.captureRow}>
+                      <View style={{ width: 40 }} /> 
+                      <Pressable onPress={handleCapture} style={styles.shutterOuter}>
+                         <View style={styles.shutterInner} />
+                      </Pressable>
+                      <Pressable style={styles.galleryButton}>
+                         <IconSymbol name="photo.fill" size={24} color="#fff" />
+                      </Pressable>
+                   </View>
                 </View>
-              )}
-
-              {/* Upload from Gallery Button */}
-              <Pressable style={styles.uploadButton}>
-                <IconSymbol name="photo.fill" size={20} color="#fff" />
-                <Text style={styles.uploadButtonText}>Upload from Gallery</Text>
-              </Pressable>
-            </View>
+            )}
           </View>
-        </CameraView>
-      </View>
-    </ScreenContainer>
+      </CameraView>
+      
+      {/* Result Layer */}
+      {renderResult()}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)",
-    justifyContent: 'space-between',
-  },
-  topPillContainer: {
-    alignItems: 'center',
-    marginTop: 60,
-  },
-  topPill: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  topPillText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-  },
-  scanFrameContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scanFrame: {
-    width: 280,
-    height: 280,
-    position: "relative",
-  },
-  corner: {
-    position: "absolute",
-    width: 40,
-    height: 40,
-    borderColor: colors.accentCyan,
-    borderWidth: 4,
-    borderRadius: 12,
-  },
+  container: { flex: 1, backgroundColor: '#000' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  camera: { flex: 1 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.1)', justifyContent: 'space-between', paddingBottom: 40 },
+  
+  topPillContainer: { alignItems: 'center', marginTop: 60 },
+  topPill: { backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  topPillText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  
+  scanFrame: { width: 280, height: 280, position: 'relative' },
+  corner: { position: 'absolute', width: 40, height: 40, borderColor: colors.accentCyan || '#00E5FF', borderWidth: 4, borderRadius: 12 },
   topLeft: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0 },
   topRight: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0 },
   bottomLeft: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0 },
   bottomRight: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0 },
+  scanLine: { position: 'absolute', left: 0, right: 0, height: 2, backgroundColor: colors.accentCyan || '#00E5FF', shadowColor: colors.accentCyan || '#00E5FF', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } },
+  scanningText: { color: '#fff', marginTop: 20, fontSize: 18, fontWeight: '600', letterSpacing: 1 },
+  
+  bottomControls: { alignItems: 'center', gap: 30 },
+  modeSelector: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 30, padding: 4 },
+  modePill: { paddingVertical: 8, paddingHorizontal: 20, borderRadius: 24 },
+  modePillActive: { backgroundColor: '#fff' },
+  modeText: { color: '#fff', fontWeight: '600' },
+  modeTextActive: { color: '#000' },
+  
+  captureRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingHorizontal: 40 },
+  shutterOuter: { width: 80, height: 80, borderRadius: 40, borderWidth: 4, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  shutterInner: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff' },
+  galleryButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
 
-  bottomContainer: {
-    padding: 24,
-    gap: 16,
-  },
-  scanningCard: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: 24,
-    padding: 20,
-    width: '100%',
-  },
-  scanningHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  scanningIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.backgroundLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.accentCyan,
-  },
-  scanningTitle: {
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: colors.gray900,
-  },
-  scanningSubtitle: {
-    fontSize: 12,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: colors.accentCyan,
-    marginTop: 2,
-  },
-  progressBarContainer: {
-    gap: 8,
-  },
-  progressText: {
-    alignSelf: 'flex-end',
-    color: colors.accentPurple,
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 14,
-  },
-  progressBarBg: {
-    height: 8,
-    backgroundColor: colors.gray100,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: colors.accentPurple,
-    borderRadius: 4,
-  },
-  controlsContainer: {
-    alignItems: 'center',
-    gap: 32,
-    marginBottom: 12,
-  },
-  modeSelector: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 30,
-    padding: 4,
-  },
-  modePill: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 24,
-  },
-  modePillActive: {
-    backgroundColor: '#fff',
-  },
-  modeText: {
-    color: '#fff',
-    fontFamily: 'PlusJakartaSans-SemiBold',
-  },
-  modeTextActive: {
-    color: colors.gray900,
-  },
-  shutterOuter: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 4,
-    borderColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shutterInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#fff',
-  },
-  uploadButton: {
-    backgroundColor: colors.accentPurple, // Using accentPurple as distinct call to action like the mockup
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 24,
-    gap: 8,
-    marginBottom: Platform.OS === 'ios' ? 24 : 12,
-  },
-  uploadButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-  },
-  modeButtonTextActive: {
-    color: "#2D5A27",
-  },
-  captureContainer: {
-    alignItems: "center",
-    paddingBottom: 40,
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 4,
-    borderColor: "#FFFFFF",
-  },
-  captureButtonPressed: {
-    transform: [{ scale: 0.95 }],
-  },
-  captureButtonDisabled: {
-    opacity: 0.7,
-  },
-  captureInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FFFFFF",
-  },
-  buttonPressed: {
-    transform: [{ scale: 0.97 }],
-    opacity: 0.9,
-  },
-  // Permission styles
-  permissionContainer: {
-    padding: 32,
-  },
-  permissionIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F5FFF0",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  permissionEmoji: {
-    fontSize: 48,
-  },
-  permissionTitle: {
-    fontSize: 24,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  permissionText: {
-    fontSize: 16,
-    color: "#687076",
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 32,
-    fontFamily: 'PlusJakartaSans-Regular',
-  },
-  permissionButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 28,
-  },
-  permissionButtonText: {
-    fontSize: 17,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2D5A27",
-  },
-  // Result styles
-  resultContainer: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  resultHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  resultTitle: {
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-  },
-  resultContent: {
-    gap: 16,
-  },
-  confidenceBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.primary,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  confidenceText: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2D5A27",
-  },
-  plantName: {
-    fontSize: 28,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-  },
-  scientificName: {
-    fontSize: 16,
-    fontStyle: "italic",
-    color: "#687076",
-    marginTop: -8,
-  },
-  description: {
-    fontSize: 15,
-    color: "#2C3E50",
-    lineHeight: 22,
-  },
-  careGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginTop: 8,
-  },
-  careCard: {
-    width: "47%",
-    backgroundColor: "#F5FFF0",
-    padding: 16,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  careIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  careLabel: {
-    fontSize: 13,
-    color: "#687076",
-    marginBottom: 4,
-  },
-  careValue: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2C3E50",
-    textAlign: "center",
-  },
-  toxicityBadge: {
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  safeBadge: {
-    backgroundColor: "#E8F5E9",
-  },
-  toxicBadge: {
-    backgroundColor: "#FFF3E0",
-  },
-  toxicityText: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2C3E50",
-  },
-  funFactCard: {
-    backgroundColor: "#FFF9E6",
-    padding: 16,
-    borderRadius: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FFD93D",
-  },
-  funFactLabel: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: colors.primary,
-    marginBottom: 8,
-  },
-  funFactText: {
-    fontSize: 14,
-    color: "#2C3E50",
-    lineHeight: 20,
-  },
-  alternativesSection: {
-    marginTop: 8,
-  },
-  alternativesTitle: {
-    fontSize: 14,
-    color: "#687076",
-    marginBottom: 8,
-  },
-  alternativeItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E8E4DC",
-  },
-  alternativeName: {
-    fontSize: 15,
-    color: "#2C3E50",
-  },
-  alternativeConfidence: {
-    fontSize: 14,
-    color: "#687076",
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 28,
-    gap: 8,
-    marginTop: 8,
-  },
-  addButtonText: {
-    fontSize: 17,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2D5A27",
-  },
-  scanAgainButton: {
-    alignItems: "center",
-    paddingVertical: 16,
-    marginTop: 16,
-  },
-  scanAgainText: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: colors.primary,
-  },
-  // Error styles
-  errorContent: {
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-  errorEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  errorTitle: {
-    fontSize: 22,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-    marginBottom: 8,
-  },
-  errorText: {
-    fontSize: 15,
-    color: "#687076",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  // Health result styles
-  healthScoreBadge: {
-    alignSelf: "center",
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  healthyBadge: {
-    backgroundColor: "#E8F5E9",
-  },
-  mildBadge: {
-    backgroundColor: "#FFF9E6",
-  },
-  moderateBadge: {
-    backgroundColor: "#FFF3E0",
-  },
-  severeBadge: {
-    backgroundColor: "#FFEBEE",
-  },
-  healthScoreNumber: {
-    fontSize: 36,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-  },
-  healthScoreLabel: {
-    fontSize: 14,
-    color: "#687076",
-  },
-  healthStatus: {
-    fontSize: 22,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-    textAlign: "center",
-  },
-  urgentCard: {
-    backgroundColor: "#FFEBEE",
-    padding: 16,
-    borderRadius: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#EF5350",
-  },
-  urgentTitle: {
-    fontSize: 15,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#C62828",
-    marginBottom: 8,
-  },
-  urgentText: {
-    fontSize: 14,
-    color: "#2C3E50",
-    lineHeight: 20,
-  },
-  issuesSection: {
-    gap: 12,
-  },
-  issuesTitle: {
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-  },
-  issueCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E8E4DC",
-    gap: 8,
-  },
-  issueHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  issueName: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2C3E50",
-    flex: 1,
-  },
-  severityBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-  },
-  mildSeverity: {
-    backgroundColor: "#FFF9E6",
-  },
-  moderateSeverity: {
-    backgroundColor: "#FFF3E0",
-  },
-  severeSeverity: {
-    backgroundColor: "#FFEBEE",
-  },
-  severityText: {
-    fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2C3E50",
-    textTransform: "capitalize",
-  },
-  issueDescription: {
-    fontSize: 14,
-    color: "#687076",
-    lineHeight: 20,
-  },
-  treatmentBox: {
-    backgroundColor: "#F5FFF0",
-    padding: 12,
-    borderRadius: 12,
-  },
-  treatmentLabel: {
-    fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: "#2D5A27",
-    marginBottom: 4,
-  },
-  treatmentText: {
-    fontSize: 14,
-    color: "#2C3E50",
-    lineHeight: 20,
-  },
-  recommendationsSection: {
-    gap: 8,
-  },
-  recommendationsTitle: {
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: "#2C3E50",
-  },
-  recommendationItem: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  recommendationBullet: {
-    fontSize: 14,
-    color: colors.primary,
-    fontFamily: 'PlusJakartaSans-Bold',
-  },
-  recommendationText: {
-    fontSize: 14,
-    color: "#2C3E50",
-    lineHeight: 20,
-    flex: 1,
-  },
+  // Result Styles
+  resultHeader: { paddingTop: 60, paddingHorizontal: 20, alignItems: 'flex-end' },
+  closeButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  
+  bottomSheet: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    backgroundColor: colors.surfaceLight || '#FCFAF7',
+    borderTopLeftRadius: 32, borderTopRightRadius: 32,
+    paddingTop: 12, paddingBottom: 40, paddingHorizontal: 24,
+    shadowColor: "#000", shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 10
+  },
+  dragIndicator: { width: 48, height: 6, backgroundColor: '#E0E0E0', borderRadius: 3, alignSelf: 'center', marginBottom: 24 },
+  sheetContent: { alignItems: 'center' },
+  sheetTitle: { fontSize: 24, fontWeight: '800', color: '#121714', marginBottom: 24, textAlign: 'center' },
+  
+  iconContainer: { alignItems: 'center', gap: 12, marginBottom: 24 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  statusText: { fontSize: 20, fontWeight: '700' },
+  plantNameText: { fontSize: 24, fontWeight: '700', color: colors.gray900 },
+  
+  sheetSubtitle: { fontSize: 16, color: '#678375', textAlign: 'center', lineHeight: 24, fontWeight: '500', marginBottom: 32 },
+  
+  actionButtons: { width: '100%', gap: 12 },
+  actionButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 30, gap: 10 },
+  primaryButton: { backgroundColor: colors.bloomieLime || '#8BC34A', shadowColor: '#8BC34A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+  secondaryButton: { backgroundColor: colors.bloomieOrange || '#FF9800', shadowColor: '#FF9800', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+
+  // Permission
+  permissionTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: '#fff' },
+  permissionButton: { backgroundColor: colors.primary, padding: 16, borderRadius: 12 },
+  permissionButtonText: { color: '#fff', fontWeight: 'bold' },
 });

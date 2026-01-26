@@ -1,3 +1,9 @@
+// Polyfill for Reanimated on Web
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window._frameTimestamp = null;
+}
+
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -82,25 +88,91 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-import { Drawer } from 'expo-router/drawer';
+import { Tabs } from 'expo-router';
 
 // ...
 
 function TabLayout() {
+  if (Platform.OS === 'web') {
+    return (
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.gray500,
+        }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "My Jungle",
+            tabBarIcon: ({ color, size }) => (
+              <IconSymbol name="house.fill" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="calendar"
+          options={{
+            title: "Care",
+            tabBarIcon: ({ color, size }) => (
+              <IconSymbol name="calendar" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="scan"
+          options={{
+            title: "Scan",
+            tabBarIcon: ({ color, size }) => (
+              <IconSymbol name="camera.fill" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="discover"
+          options={{
+            title: "Discover",
+            tabBarIcon: ({ color, size }) => (
+              <IconSymbol name="leaf.fill" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => (
+              <IconSymbol name="person.fill" size={size} color={color} />
+            ),
+          }}
+        />
+
+        {/* Hidden screens */}
+        <Tabs.Screen name="chat" options={{ href: null }} />
+        <Tabs.Screen name="plant" options={{ href: null }} />
+        <Tabs.Screen name="auth" options={{ href: null }} />
+      </Tabs>
+    );
+  }
+
+  // Dynamically import Drawer for native platforms to avoid Reanimated issues on web
+  const { Drawer } = require('expo-router/drawer');
+
   return (
     <Drawer
       screenOptions={{
         headerShown: false,
         drawerActiveTintColor: colors.primary,
         drawerInactiveTintColor: colors.gray900,
-        drawerType: Platform.OS === 'web' ? 'permanent' : 'front',
+        drawerType: 'front',
         drawerLabelStyle: {
           fontFamily: 'PlusJakartaSans-SemiBold',
           marginLeft: -16,
         },
         drawerStyle: {
           backgroundColor: colors.surfaceLight,
-          width: Platform.OS === 'web' ? 280 : '80%',
+          width: '80%',
           borderRightWidth: 1,
           borderRightColor: colors.gray100,
         }

@@ -54,8 +54,20 @@ export const trpc = {
                                 location?: string;
                                 potSize?: string;
                                 personality?: string;
+                                lastWatered?: string;
+                                notes?: string[];
                             }>;
-                            pendingTasks?: number;
+                            pendingTasks?: Array<{
+                                type: string;
+                                plantName: string;
+                                dueDate: string;
+                            }>;
+                            careHistory?: Array<{
+                                date: string;
+                                action: string;
+                                plantName: string;
+                                notes?: string;
+                            }>;
                             streakDays?: number;
                         }
                     }) => {

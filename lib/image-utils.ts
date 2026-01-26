@@ -40,7 +40,7 @@ export async function uriToBase64(uri: string): Promise<string | null> {
 
         // If it's a local file URI
         const base64 = await FileSystem.readAsStringAsync(uri, {
-            encoding: FileSystem.EncodingType.Base64,
+            encoding: 'base64',
         });
         return base64;
     } catch (error) {

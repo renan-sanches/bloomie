@@ -41,7 +41,7 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export default function ChatScreen() {
-  const { plants, tasks, profile } = useApp();
+  const { plants, tasks, profile, careHistory } = useApp(); // Added careHistory
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
 
@@ -152,11 +152,23 @@ export default function ChatScreen() {
         location: p.location,
         potSize: p.potSize,
         personality: p.personality,
+        lastWatered: p.lastWatered,
+        notes: p.notes,
       })),
-      pendingTasks: tasks.filter((t) => !t.completed).length,
+      pendingTasks: tasks.filter((t) => !t.completed).map((t) => ({
+        type: t.type,
+        plantName: plants.find((p) => p.id === t.plantId)?.nickname || "Unknown Plant",
+        dueDate: t.dueDate,
+      })),
+      careHistory: careHistory?.slice(0, 20).map((h) => ({
+        date: h.timestamp ? (typeof h.timestamp === 'string' ? h.timestamp : (h.timestamp as any).toDate?.().toISOString() || new Date().toISOString()) : new Date().toISOString(),
+        action: h.action,
+        plantName: h.plantName || plants.find((p) => p.id === h.plantId)?.nickname || "Unknown Plant",
+        notes: h.notes,
+      })),
       streakDays: profile.streakDays,
     };
-  }, [plants, tasks, profile]);
+  }, [plants, tasks, profile, careHistory]);
 
   const triggerHaptic = useCallback(() => {
     if (Platform.OS !== "web") {
@@ -195,7 +207,7 @@ export default function ChatScreen() {
       const result = await chatMutation.mutateAsync({
         message: messageText,
         history: conversationHistory,
-        context: userContext,
+        context: userContext as any, // Type assertion for extended context
       });
 
       const responseText = result.success

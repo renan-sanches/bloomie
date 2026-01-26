@@ -17,7 +17,10 @@ import {
     serverTimestamp,
     DocumentSnapshot,
 } from 'firebase/firestore';
-import { db } from './firebase.config';
+import { db as firestoreDb } from './firebase.config';
+
+// Force non-null for internal usage (assumes config is valid)
+const db = firestoreDb!;
 
 // Types
 export interface UserProfile {

@@ -222,21 +222,55 @@ export async function chatWithBloomie(
       location?: string;
       potSize?: string;
       personality?: string;
+      lastWatered?: string;
+      notes?: string[];
     }>;
-    pendingTasks?: number;
+    pendingTasks?: Array<{
+      type: string;
+      plantName: string;
+      dueDate: string;
+    }>;
+    careHistory?: Array<{
+      date: string;
+      action: string;
+      plantName: string;
+      notes?: string;
+    }>;
     streakDays?: number;
   }
 ): Promise<string> {
   try {
     const client = getGeminiClient();
 
+    const plantsInfo = userContext?.plants?.map((p) =>
+      `- ${p.nickname || p.species} (${p.species})
+        Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}
+        Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'}
+        Last Watered: ${p.lastWatered ? new Date(p.lastWatered).toLocaleDateString() : 'Never'}
+        Notes: ${p.notes?.join("; ") || "None"}`
+    ).join("\n") || "No plants yet.";
+
+    const tasksInfo = userContext?.pendingTasks?.length
+      ? userContext.pendingTasks.map(t => `- ${t.type} ${t.plantName} due ${new Date(t.dueDate).toLocaleDateString()}`).join("\n")
+      : "No pending tasks.";
+
+    const historyInfo = userContext?.careHistory?.length
+      ? userContext.careHistory.slice(0, 10).map(h => `- ${new Date(h.date).toLocaleDateString()}: ${h.action} ${h.plantName} ${h.notes ? `(${h.notes})` : ''}`).join("\n")
+      : "No recent care history.";
+
     const contextInfo = userContext
       ? `
-User's plant collection: ${userContext.plants?.map((p) =>
-        `${p.nickname || p.species} (${p.species}, Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}, Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'})`
-      ).join("; ") || "No plants yet"}
-Pending care tasks: ${userContext.pendingTasks || 0}
-Current streak: ${userContext.streakDays || 0} days
+HERE IS THE USER'S GARDEN CONTEXT:
+Plants:
+${plantsInfo}
+
+Pending Tasks:
+${tasksInfo}
+
+Recent Care History (Last 10 events):
+${historyInfo}
+
+Current Streak: ${userContext.streakDays || 0} days
 `
       : "";
 
@@ -249,6 +283,8 @@ Your personality:
 - Celebrate user's plant care wins
 - Be empathetic when plants struggle
 - Keep responses concise (2-3 short paragraphs max)
+- YOU HAVE ACCESS TO THE USER'S DATA. If they ask "When did I last water my pothos?", LOOK at the "Recent Care History" or "Last Watered" field and tell them exact dates.
+- If they ask "What do I need to do?", check the "Pending Tasks".
 
 ${contextInfo}
 
@@ -288,21 +324,55 @@ export async function* streamChatWithBloomie(
       location?: string;
       potSize?: string;
       personality?: string;
+      lastWatered?: string;
+      notes?: string[];
     }>;
-    pendingTasks?: number;
+    pendingTasks?: Array<{
+      type: string;
+      plantName: string;
+      dueDate: string;
+    }>;
+    careHistory?: Array<{
+      date: string;
+      action: string;
+      plantName: string;
+      notes?: string;
+    }>;
     streakDays?: number;
   }
 ): AsyncGenerator<string, void, unknown> {
   try {
     const client = getGeminiClient();
 
+    const plantsInfo = userContext?.plants?.map((p) =>
+      `- ${p.nickname || p.species} (${p.species})
+        Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}
+        Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'}
+        Last Watered: ${p.lastWatered ? new Date(p.lastWatered).toLocaleDateString() : 'Never'}
+        Notes: ${p.notes?.join("; ") || "None"}`
+    ).join("\n") || "No plants yet.";
+
+    const tasksInfo = userContext?.pendingTasks?.length
+      ? userContext.pendingTasks.map(t => `- ${t.type} ${t.plantName} due ${new Date(t.dueDate).toLocaleDateString()}`).join("\n")
+      : "No pending tasks.";
+
+    const historyInfo = userContext?.careHistory?.length
+      ? userContext.careHistory.slice(0, 10).map(h => `- ${new Date(h.date).toLocaleDateString()}: ${h.action} ${h.plantName} ${h.notes ? `(${h.notes})` : ''}`).join("\n")
+      : "No recent care history.";
+
     const contextInfo = userContext
       ? `
-User's plant collection: ${userContext.plants?.map((p) =>
-        `${p.nickname || p.species} (${p.species}, Location: ${p.location || 'Unknown'}, Size: ${p.potSize || 'Unknown'}, Health: ${p.healthScore}%, Personality: ${p.personality || 'Unknown'})`
-      ).join("; ") || "No plants yet"}
-Pending care tasks: ${userContext.pendingTasks || 0}
-Current streak: ${userContext.streakDays || 0} days
+HERE IS THE USER'S GARDEN CONTEXT:
+Plants:
+${plantsInfo}
+
+Pending Tasks:
+${tasksInfo}
+
+Recent Care History (Last 10 events):
+${historyInfo}
+
+Current Streak: ${userContext.streakDays || 0} days
 `
       : "";
 
@@ -315,6 +385,7 @@ Your personality:
 - Celebrate user's plant care wins
 - Be empathetic when plants struggle
 - Keep responses concise (2-3 short paragraphs max)
+- YOU HAVE ACCESS TO THE USER'S DATA. Use it to give specific answers.
 
 ${contextInfo}
 

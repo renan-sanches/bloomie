@@ -55,6 +55,15 @@ export interface CareEvent {
   photo?: string;
 }
 
+export interface GlobalCareEvent {
+  id: string;
+  plantId: string;
+  plantName: string;
+  action: 'water' | 'fertilize' | 'mist' | 'prune' | 'repot' | 'rotate';
+  timestamp: any; // Firestore Timestamp
+  notes?: string;
+}
+
 export interface Diagnosis {
   id: string;
   date: string;
@@ -156,6 +165,7 @@ export interface AppContextType {
   logCare: (plantId: string, type: string, note?: string) => Promise<void>;
   addInsight: (insight: Omit<Insight, "id" | "createdAt" | "dismissed">) => Promise<void>;
   dismissInsight: (id: string) => Promise<void>;
+  careHistory?: GlobalCareEvent[];
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

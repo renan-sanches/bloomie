@@ -1,0 +1,36 @@
+env: load .env.local
+env: export EXPO_PUBLIC_FIREBASE_API_KEY EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN EXPO_PUBLIC_FIREBASE_PROJECT_ID EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID EXPO_PUBLIC_FIREBASE_APP_ID EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
+Experimental React Compiler is enabled.
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Android Bundling failed 19561ms node_modules/expo-router/entry.js (1282 modules)
+Error: Unable to resolve module @react-navigation/drawer from /Users/renansanches/Projects/Bloomie/node_modules/expo-router/build/layouts/Drawer.js: @react-navigation/drawer could not be found within the project or in these directories:
+  node_modules
+  ../../node_modules
+[0m [90m 2 |[39m [33mObject[39m[33m.[39mdefineProperty(exports[33m,[39m [32m"__esModule"[39m[33m,[39m { value[33m:[39m [36mtrue[39m })[33m;[39m
+ [90m 3 |[39m exports[33m.[39m[33mDrawer[39m [33m=[39m [36mvoid[39m [35m0[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mconst[39m drawer_1 [33m=[39m require([32m"@react-navigation/drawer"[39m)[33m;[39m
+ [90m   |[39m                           [31m[1m^[22m[39m
+ [90m 5 |[39m [36mconst[39m withLayoutContext_1 [33m=[39m require([32m"./withLayoutContext"[39m)[33m;[39m
+ [90m 6 |[39m [36mconst[39m [33mDrawerNavigator[39m [33m=[39m ([35m0[39m[33m,[39m drawer_1[33m.[39mcreateDrawerNavigator)()[33m.[39m[33mNavigator[39m[33m;[39m
+ [90m 7 |[39m exports[33m.[39m[33mDrawer[39m [33m=[39m ([35m0[39m[33m,[39m withLayoutContext_1[33m.[39mwithLayoutContext)([33mDrawerNavigator[39m)[33m;[39m[0m
+Error: Unable to resolve module @react-navigation/drawer from /Users/renansanches/Projects/Bloomie/node_modules/expo-router/build/layouts/Drawer.js: @react-navigation/drawer could not be found within the project or in these directories:
+  node_modules
+  ../../node_modules
+[0m [90m 2 |[39m [33mObject[39m[33m.[39mdefineProperty(exports[33m,[39m [32m"__esModule"[39m[33m,[39m { value[33m:[39m [36mtrue[39m })[33m;[39m
+ [90m 3 |[39m exports[33m.[39m[33mDrawer[39m [33m=[39m [36mvoid[39m [35m0[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mconst[39m drawer_1 [33m=[39m require([32m"@react-navigation/drawer"[39m)[33m;[39m
+ [90m   |[39m                           [31m[1m^[22m[39m
+ [90m 5 |[39m [36mconst[39m withLayoutContext_1 [33m=[39m require([32m"./withLayoutContext"[39m)[33m;[39m
+ [90m 6 |[39m [36mconst[39m [33mDrawerNavigator[39m [33m=[39m ([35m0[39m[33m,[39m drawer_1[33m.[39mcreateDrawerNavigator)()[33m.[39m[33mNavigator[39m[33m;[39m
+ [90m 7 |[39m exports[33m.[39m[33mDrawer[39m [33m=[39m ([35m0[39m[33m,[39m withLayoutContext_1[33m.[39mwithLayoutContext)([33mDrawerNavigator[39m)[33m;[39m[0m
+    at ModuleResolver.resolveDependency (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/node-haste/DependencyGraph/ModuleResolution.js:139:15)
+    at DependencyGraph.resolveDependency (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/node-haste/DependencyGraph.js:232:43)
+    at /Users/renansanches/Projects/Bloomie/node_modules/metro/src/lib/transformHelpers.js:156:21
+    at resolveDependencies (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/DeltaBundler/buildSubgraph.js:42:25)
+    at visit (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/DeltaBundler/buildSubgraph.js:83:30)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at visit (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/DeltaBundler/buildSubgraph.js:92:5)
+    at async Promise.all (index 12)
+    at visit (/Users/renansanches/Projects/Bloomie/node_modules/metro/src/DeltaBundler/buildSubgraph.js:92:5)
