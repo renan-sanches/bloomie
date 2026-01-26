@@ -13,27 +13,13 @@ import { StatusBar } from 'expo-status-bar';
 import { ScreenContainer } from '@/components/screen-container';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useApp, type Plant } from '@/lib/store';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/components/ui/design-system';
 
-// Theme from design
-const theme = {
-  primary: "#4ade80",
-  primaryDark: "#16a34a",
-  backgroundLight: "#f8fafc",
-  surfaceLight: "#ffffff",
-  accentPink: "#f43f5e",
-  accentPurple: "#8b5cf6",
-  accentOrange: "#f59e0b",
-  accentCyan: "#06b6d4",
-  textMain: "#0f172a",
-  textSub: "#64748b",
-  shadowGreen: 'rgba(74, 222, 128, 0.15)',
-};
+type FilterType = 'all' | 'water' | 'sick' | 'growing';
 
 export default function MyJungleScreen() {
   const { plants, isLoading } = useApp();
-  const [activeFilter, setActiveFilter] = useState<'all' | 'water' | 'sick' | 'prop'>('all');
-  const insets = useSafeAreaInsets();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   // Get current hour for greeting
   const hour = new Date().getHours();
@@ -44,9 +30,12 @@ export default function MyJungleScreen() {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'water') return plant.status === 'thirsty';
     if (activeFilter === 'sick') return plant.status === 'struggling' || plant.status === 'dead';
-    if (activeFilter === 'prop') return plant.status === 'growing'; // Mapping 'growing' to Propagating for demo
+    if (activeFilter === 'growing') return plant.status === 'growing';
     return true;
   });
+
+  // Count plants needing attention
+  const needsAttention = plants.filter(p => p.status === 'thirsty' || p.status === 'struggling')?.length || 0;
 
   const handlePlantPress = useCallback((plantId: string) => {
     router.push(`/plant/${plantId}` as any);
@@ -58,30 +47,32 @@ export default function MyJungleScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: theme.primaryDark }}>Curating your jungle...</Text>
-      </View>
+      <ScreenContainer edges={['top']} containerClassName="bg-backgroundLight">
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Curating your jungle...</Text>
+        </View>
+      </ScreenContainer>
     );
   }
 
   const PlantCard = ({ plant }: { plant: Plant }) => {
     // Determine status color/text based on plant status
-    let statusColor = theme.primary;
+    let statusColor = colors.primary;
     let statusText = "thriving";
     let statusIcon = "checkmark.circle.fill";
 
     if (plant.status === 'thirsty') {
-      statusColor = theme.accentPink;
+      statusColor = colors.accentPink;
       statusText = "thirsty";
       statusIcon = "drop.fill";
     } else if (plant.status === 'mist') {
-      statusColor = theme.accentCyan;
+      statusColor = colors.accentCyan;
       statusText = "mist me";
       statusIcon = "cloud.rain.fill";
     } else if (plant.status === 'growing') {
-      statusColor = theme.accentPurple;
+      statusColor = colors.accentPurple;
       statusText = "growing";
-      statusIcon = "leaf.fill";
+      statusIcon = "scissors";
     }
 
     return (
@@ -105,8 +96,8 @@ export default function MyJungleScreen() {
               </View>
             </ImageBackground>
           ) : (
-            <View style={[styles.cardImage, { backgroundColor: theme.backgroundLight, justifyContent: 'center', alignItems: 'center' }]}>
-              <Text style={{ fontSize: 40 }}>🌱</Text>
+            <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+              <Text style={styles.plantEmoji}>🌱</Text>
               <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
                 <IconSymbol name={statusIcon as any} size={10} color="#fff" />
                 <Text style={styles.statusText}>{statusText}</Text>
@@ -122,7 +113,7 @@ export default function MyJungleScreen() {
               <Text style={styles.plantSpecies} numberOfLines={1}>{plant.species}</Text>
             </View>
             <View style={styles.arrowButton}>
-              <IconSymbol name="arrow.right" size={16} color={theme.textSub} />
+              <IconSymbol name="arrow.right" size={16} color={colors.textSub} />
             </View>
           </View>
 
@@ -135,28 +126,42 @@ export default function MyJungleScreen() {
     );
   };
 
+  const FilterPill = ({ type, label, count }: { type: FilterType; label: string; count?: number }) => {
+    const isActive = activeFilter === type;
+    let bgColor = isActive ? colors.primary : colors.surfaceLight;
+    let textColor = isActive ? '#ffffff' : colors.textSub;
+    let borderColor = isActive ? colors.primary : colors.gray100;
+
+    // Override colors for specific filters
+    if (isActive && type === 'water') {
+      bgColor = colors.accentPink;
+      borderColor = colors.accentPink;
+    } else if (isActive && type === 'sick') {
+      bgColor = colors.accentOrange;
+      borderColor = colors.accentOrange;
+    } else if (isActive && type === 'growing') {
+      bgColor = colors.accentPurple;
+      borderColor = colors.accentPurple;
+    }
+
+    return (
+      <Pressable
+        onPress={() => setActiveFilter(type)}
+        style={[
+          styles.filterPill,
+          { backgroundColor: bgColor, borderColor }
+        ]}
+      >
+        <Text style={[styles.filterText, { color: textColor }]}>
+          {label}{count !== undefined && ` (${count})`}
+        </Text>
+      </Pressable>
+    );
+  };
+
   return (
     <ScreenContainer edges={['top']} containerClassName="bg-backgroundLight">
       <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoIcon}>
-              <IconSymbol name="leaf.fill" size={24} color={theme.primaryDark} />
-            </View>
-            <Text style={styles.logoText}>Bloomie</Text>
-          </View>
-          <View style={styles.headerActions}>
-            <Pressable style={styles.notifButton}>
-              <IconSymbol name="bell.fill" size={20} color={theme.textSub} />
-              <View style={styles.notifDot} />
-            </Pressable>
-            <View style={styles.avatar} />
-          </View>
-        </View>
-      </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -167,56 +172,42 @@ export default function MyJungleScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.greetingText}>{greeting}, Planter</Text>
             <Text style={styles.subtitleText}>
-              Your jungle is thriving. <Text style={{ color: theme.accentPink, fontWeight: '700' }}>
-                {plants.filter(p => p.status === 'thirsty').length} plants
-              </Text> need attention.
+              Your jungle is thriving.
+              {needsAttention > 0 && (
+                <Text style={{ color: colors.accentPink, fontWeight: '700' }}>
+                  {` ${needsAttention} plants`}
+                </Text>
+              )} need attention today.
             </Text>
           </View>
-          {/* Temp Widget (Hidden on small screens in design, but we show it) */}
+
+          {/* Indoor Temp Widget */}
           <View style={styles.tempWidget}>
             <View style={styles.tempIcon}>
-              <IconSymbol name="sun.max.fill" size={20} color={theme.accentOrange} />
+              <IconSymbol name="sun.max.fill" size={20} color={colors.accentOrange} />
             </View>
             <View>
-              <Text style={styles.tempLabel}>INDOOR</Text>
-              <Text style={styles.tempValue}>72°F</Text>
+              <Text style={styles.tempLabel}>INDOOR TEMP</Text>
+              <Text style={styles.tempValue}>22°C / 72°F</Text>
             </View>
           </View>
         </View>
 
         {/* Filters */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll} contentContainerStyle={styles.filtersContent}>
-          <Pressable
-            onPress={() => setActiveFilter('all')}
-            style={[styles.filterPill, activeFilter === 'all' && styles.filterPillActive]}
-          >
-            <IconSymbol name="square.grid.2x2.fill" size={16} color={activeFilter === 'all' ? '#fff' : theme.textSub} />
-            <Text style={[styles.filterText, activeFilter === 'all' && styles.filterTextActive]}>All Plants</Text>
-          </Pressable>
-          
-          <Pressable
-            onPress={() => setActiveFilter('water')}
-            style={[styles.filterPill, activeFilter === 'water' ? { backgroundColor: theme.accentPink, borderColor: theme.accentPink } : {}]}
-          >
-            <IconSymbol name="drop.fill" size={16} color={activeFilter === 'water' ? '#fff' : theme.textSub} />
-            <Text style={[styles.filterText, activeFilter === 'water' && styles.filterTextActive]}>To Water</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setActiveFilter('sick')}
-            style={[styles.filterPill, activeFilter === 'sick' ? { backgroundColor: theme.accentOrange, borderColor: theme.accentOrange } : {}]}
-          >
-            <IconSymbol name="cross.case.fill" size={16} color={activeFilter === 'sick' ? '#fff' : theme.textSub} />
-            <Text style={[styles.filterText, activeFilter === 'sick' && styles.filterTextActive]}>Sick Bay</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setActiveFilter('prop')}
-            style={[styles.filterPill, activeFilter === 'prop' ? { backgroundColor: theme.accentPurple, borderColor: theme.accentPurple } : {}]}
-          >
-            <IconSymbol name="scissors" size={16} color={activeFilter === 'prop' ? '#fff' : theme.textSub} />
-            <Text style={[styles.filterText, activeFilter === 'prop' && styles.filterTextActive]}>Propagating</Text>
-          </Pressable>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersScroll}
+          contentContainerStyle={styles.filtersContent}
+        >
+          <FilterPill type="all" label="All Plants" />
+          <FilterPill
+            type="water"
+            label="To Water"
+            count={plants.filter(p => p.status === 'thirsty').length}
+          />
+          <FilterPill type="sick" label="Sick Bay" />
+          <FilterPill type="growing" label="Propagating" />
         </ScrollView>
 
         {/* Grid */}
@@ -237,7 +228,7 @@ export default function MyJungleScreen() {
               ]}
             >
               <View style={styles.addIconCircle}>
-                <IconSymbol name="plus" size={32} color={theme.accentPurple} />
+                <IconSymbol name="plus" size={32} color={colors.accentPurple} />
               </View>
               <View style={{ alignItems: 'center' }}>
                 <Text style={styles.addCardTitle}>Add New Plant</Text>
@@ -246,7 +237,7 @@ export default function MyJungleScreen() {
             </Pressable>
           </View>
         </View>
-        
+
         <View style={{ height: 100 }} />
       </ScrollView>
 
@@ -267,79 +258,290 @@ export default function MyJungleScreen() {
         onPress={() => router.push('/chat')}
         style={({ pressed }) => [
           styles.chatFab,
-          { bottom: 100, right: 24 }, // Position above Add Plant
           { transform: [{ scale: pressed ? 0.95 : 1 }] }
         ]}
       >
         <IconSymbol name="bubble.left.fill" size={24} color="#fff" />
       </Pressable>
-
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.backgroundLight },
-  
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 12,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundLight,
   },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logoContainer: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  logoIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(74, 222, 128, 0.2)', alignItems: 'center', justifyContent: 'center' },
-  logoText: { fontSize: 20, fontWeight: '800', color: theme.textMain },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  notifButton: { position: 'relative' },
-  notifDot: { position: 'absolute', top: 0, right: 0, width: 8, height: 8, borderRadius: 4, backgroundColor: theme.accentPink, borderWidth: 1, borderColor: '#fff' },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#e2e8f0' },
+  loadingText: {
+    color: colors.primaryDark,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+  },
 
-  scrollContent: { paddingHorizontal: 24, paddingTop: 24 },
-  
-  greetingSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 },
-  greetingText: { fontSize: 28, fontWeight: '800', color: theme.textMain, marginBottom: 4 },
-  subtitleText: { fontSize: 16, color: theme.textSub, lineHeight: 22 },
-  tempWidget: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.surfaceLight, padding: 12, borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9' },
-  tempIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(245, 158, 11, 0.1)', alignItems: 'center', justifyContent: 'center' },
-  tempLabel: { fontSize: 10, fontWeight: '800', color: theme.textSub },
-  tempValue: { fontSize: 14, fontWeight: '800', color: theme.textMain },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
 
-  filtersScroll: { marginBottom: 24, marginHorizontal: -24 },
-  filtersContent: { paddingHorizontal: 24, gap: 12 },
-  filterPill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, backgroundColor: theme.surfaceLight, borderWidth: 1, borderColor: '#f1f5f9' },
-  filterPillActive: { backgroundColor: theme.primary, borderColor: theme.primary },
-  filterText: { fontSize: 14, fontWeight: '700', color: theme.textSub },
-  filterTextActive: { color: '#fff' },
+  greetingSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: 24,
+    gap: 16,
+  },
+  greetingText: {
+    fontSize: 28,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: colors.textMain,
+    marginBottom: 4,
+  },
+  subtitleText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: colors.textSub,
+    lineHeight: 22,
+  },
+  tempWidget: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceLight,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.gray100,
+    ...Platform.select({
+      web: {
+        display: 'flex',
+      },
+      default: {
+        display: 'none',
+      },
+    }),
+  },
+  tempIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tempLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: colors.textSub,
+  },
+  tempValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: colors.textMain,
+  },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -8 },
-  gridItem: { width: '50%', padding: 8 },
-  
-  card: { backgroundColor: theme.surfaceLight, borderRadius: 24, padding: 12, shadowColor: theme.primary, shadowOpacity: 0.1, shadowRadius: 20, shadowOffset: {width: 0, height: 10} },
-  cardImageContainer: { aspectRatio: 4/3, borderRadius: 16, overflow: 'hidden', marginBottom: 12 },
-  cardImage: { width: '100%', height: '100%' },
-  statusBadge: { position: 'absolute', top: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
-  statusText: { color: '#fff', fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
-  
-  cardContent: { paddingHorizontal: 4 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
-  plantName: { fontSize: 16, fontWeight: '800', color: theme.textMain },
-  plantSpecies: { fontSize: 12, color: theme.textSub, fontStyle: 'italic' },
-  arrowButton: { width: 32, height: 32, borderRadius: 16, backgroundColor: theme.backgroundLight, alignItems: 'center', justifyContent: 'center' },
-  
-  cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9' },
-  locationText: { fontSize: 10, fontWeight: '700', color: theme.textSub, textTransform: 'uppercase' },
+  filtersScroll: {
+    marginBottom: 24,
+  },
+  filtersContent: {
+    gap: 12,
+  },
+  filterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Bold',
+  },
 
-  addCard: { aspectRatio: 3/4, backgroundColor: 'transparent', borderRadius: 24, borderWidth: 2, borderColor: '#e2e8f0', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', gap: 16 },
-  addIconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: theme.surfaceLight, alignItems: 'center', justifyContent: 'center', shadowColor: theme.accentPurple, shadowOpacity: 0.1, shadowRadius: 10 },
-  addCardTitle: { fontSize: 16, fontWeight: '800', color: theme.textMain },
-  addCardSubtitle: { fontSize: 12, color: theme.textSub },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -8,
+  },
+  gridItem: {
+    width: '50%',
+    padding: 8,
+  },
 
-  fab: { position: 'absolute', bottom: 32, right: 24, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.accentPurple, paddingHorizontal: 24, paddingVertical: 16, borderRadius: 20, shadowColor: theme.accentPurple, shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: {width: 0, height: 8} },
-  fabText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
-  
-  chatFab: { position: 'absolute', width: 56, height: 56, borderRadius: 28, backgroundColor: theme.primary, alignItems: 'center', justifyContent: 'center', shadowColor: theme.primary, shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: {width: 0, height: 4} },
+  card: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: 24,
+    padding: 12,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 5,
+  },
+  cardImageContainer: {
+    aspectRatio: 4 / 3,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardImagePlaceholder: {
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plantEmoji: {
+    fontSize: 40,
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    textTransform: 'uppercase',
+  },
+
+  cardContent: {
+    paddingHorizontal: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  plantName: {
+    fontSize: 16,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: colors.textMain,
+  },
+  plantSpecies: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: colors.textSub,
+    fontStyle: 'italic',
+  },
+  arrowButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.backgroundLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.gray100,
+  },
+  locationText: {
+    fontSize: 10,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: colors.textSub,
+    textTransform: 'uppercase',
+  },
+
+  addCard: {
+    aspectRatio: 3 / 4,
+    backgroundColor: 'transparent',
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: colors.gray200,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  addIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.surfaceLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.accentPurple,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  addCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: colors.textMain,
+  },
+  addCardSubtitle: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: colors.textSub,
+  },
+
+  fab: {
+    position: 'absolute',
+    bottom: 32,
+    right: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.accentPurple,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 20,
+    shadowColor: colors.accentPurple,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    letterSpacing: 0.5,
+  },
+
+  chatFab: {
+    position: 'absolute',
+    bottom: 100,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
 });

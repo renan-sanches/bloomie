@@ -37,6 +37,10 @@ export const colors = {
     gray800: '#1e293b',
     gray900: '#131614', // Carbon Text from Guidelines
 
+    // Text colors
+    textMain: '#0f172a',
+    textSub: '#64748b',
+
     // Functional
     error: '#ef4444',
     bloomieLime: '#8BC34A', // Added for scan screen
