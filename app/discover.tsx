@@ -6,183 +6,179 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
-  ImageBackground,
-  Dimensions,
+  Platform,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { ScreenContainer } from '@/components/screen-container';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { theme } from '@/constants/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/components/ui/design-system';
 
-const CATEGORIES = ["All", "Indoor", "Outdoor", "Pet Safe", "Low Light", "Rare"];
+const FILTERS = [
+  { title: 'Light', options: ['Low Light', 'Indirect Light', 'Bright Direct'] },
+  { title: 'Pet Friendly', options: ['Safe for Cats & Dogs', 'Toxic if Ingested'] },
+  { title: 'Difficulty', options: ['Beginner', 'Intermediate', 'Expert'] },
+];
 
-const TRENDING_PLANTS = [
+const DISCOVER_PLANTS = [
   {
     id: '1',
-    name: 'Monstera Deliciosa',
-    price: '$35.00',
-    category: 'Indoor',
-    image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=2664&auto=format&fit=crop',
-    rating: 4.8,
+    name: 'Snake Plant',
+    scientificName: 'Sansevieria trifasciata',
+    difficulty: 'Easy',
+    light: 'Low Light',
+    toxic: 'Toxic',
+    image: 'https://images.unsplash.com/photo-1599598425947-73e0e2d7d73d?q=80&w=2581&auto=format&fit=crop',
+    price: '$45',
+    shop: 'The Sill',
+    description: 'Ideally suited for beginners. This architectural beauty thrives on...'
   },
   {
     id: '2',
-    name: 'Fiddle Leaf Fig',
-    price: '$45.00',
-    category: 'Indoor',
-    image: 'https://images.unsplash.com/photo-1597055181300-e30ba1546d27?q=80&w=2787&auto=format&fit=crop',
-    rating: 4.6,
+    name: 'Monstera',
+    scientificName: 'Monstera deliciosa',
+    difficulty: 'Moderate',
+    light: 'Bright Indirect',
+    toxic: 'Toxic',
+    image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=2664&auto=format&fit=crop',
+    price: '$65',
+    shop: 'Horti',
+    description: 'The "Swiss Cheese Plant" makes a big statement with its fenestrated...'
   },
   {
     id: '3',
-    name: 'Snake Plant',
-    price: '$25.00',
-    category: 'Low Light',
-    image: 'https://images.unsplash.com/photo-1599598425947-73e0e2d7d73d?q=80&w=2581&auto=format&fit=crop',
-    rating: 4.9,
-  },
-  {
-    id: '4',
-    name: 'Pothos Golden',
-    price: '$15.00',
-    category: 'Beginner',
-    image: 'https://images.unsplash.com/photo-1596724857963-c5c2e268a736?q=80&w=2787&auto=format&fit=crop',
-    rating: 4.7,
-  },
+    name: 'Spider Plant',
+    scientificName: 'Chlorophytum comosum',
+    difficulty: 'Easy',
+    light: 'Any Light',
+    toxic: 'Pet Safe',
+    image: 'https://images.unsplash.com/photo-1597055181300-e30ba1546d27?q=80&w=2787&auto=format&fit=crop',
+    price: '$25',
+    shop: 'Bloomscape',
+    description: 'A resilient classic that produces "babies" you can propagate easily...'
+  }
 ];
 
 export default function DiscoverScreen() {
-  const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const insets = useSafeAreaInsets();
 
-  return (
-    <ScreenContainer edges={['top']} containerClassName="bg-backgroundLight">
-      {/* Header & Search */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.headerTitle}>Discover</Text>
-            <Text style={styles.headerSubtitle}>Find your perfect plant match</Text>
-          </View>
-          <Pressable style={styles.cartButton}>
-            <IconSymbol name="bag" size={24} color={theme.textMain} />
-            <View style={styles.badge} />
-          </Pressable>
-        </View>
-
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <IconSymbol name="magnifyingglass" size={20} color={theme.textSub} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search plants, pots, tools..."
-              placeholderTextColor={theme.textSub}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          <Pressable style={styles.filterButton}>
-            <IconSymbol name="slider.horizontal.3" size={20} color="#fff" />
-          </Pressable>
+  const PlantCard = ({ plant }: { plant: any }) => (
+    <View style={styles.card}>
+      <View style={styles.imageBox}>
+        <Image source={{ uri: plant.image }} style={styles.cardImage} contentFit="cover" />
+        <View style={styles.difficultyBadge}>
+          <View style={[styles.diffDot, { backgroundColor: plant.difficulty === 'Easy' ? '#10b981' : '#f59e0b' }]} />
+          <Text style={styles.diffText}>{plant.difficulty}</Text>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Promotional Banner */}
-        <View style={styles.promoBanner}>
-          <ImageBackground
-            source={{ uri: 'https://images.unsplash.com/photo-1463320898484-cdee8141c787?q=80&w=2669&auto=format&fit=crop' }}
-            style={styles.promoBackground}
-            imageStyle={{ borderRadius: 24 }}
-          >
-            <View style={styles.promoOverlay} />
-            <View style={styles.promoContent}>
-              <View style={styles.promoBadge}>
-                <Text style={styles.promoBadgeText}>LIMITED OFFER</Text>
-              </View>
-              <Text style={styles.promoTitle}>Summer Sale</Text>
-              <Text style={styles.promoSubtitle}>Get 20% off on all indoor plants</Text>
-              <Pressable style={styles.promoButton}>
-                <Text style={styles.promoButtonText}>Shop Now</Text>
-                <IconSymbol name="arrow.right" size={16} color={theme.primary} />
-              </Pressable>
-            </View>
-          </ImageBackground>
+      <View style={styles.cardInfo}>
+        <Text style={styles.cardName}>{plant.name}</Text>
+        <Text style={styles.cardScientific}>{plant.scientificName}</Text>
+        <Text style={styles.cardDesc} numberOfLines={2}>{plant.description}</Text>
+
+        <View style={styles.cardTags}>
+          <View style={styles.tag}>
+            <IconSymbol name="sun.max.fill" size={10} color="#f59e0b" />
+            <Text style={styles.tagText}>{plant.light}</Text>
+          </View>
+          <View style={styles.tag}>
+            <IconSymbol name="pawprint.fill" size={10} color={plant.toxic === 'Pet Safe' ? '#10b981' : '#f43f5e'} />
+            <Text style={styles.tagText}>{plant.toxic}</Text>
+          </View>
         </View>
 
-        {/* Categories */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Categories</Text>
-          <Text style={styles.seeAllText}>See all</Text>
-        </View>
-        
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={styles.categoriesList}
-        >
-          {CATEGORIES.map((cat) => (
-            <Pressable
-              key={cat}
-              onPress={() => setActiveCategory(cat)}
-              style={[
-                styles.categoryPill,
-                activeCategory === cat && styles.categoryPillActive
-              ]}
-            >
-              <Text 
-                style={[
-                  styles.categoryText, 
-                  activeCategory === cat && styles.categoryTextActive
-                ]}
-              >
-                {cat}
-              </Text>
+        <View style={styles.shopSection}>
+          <Text style={styles.shopLabel}>WHERE TO BUY</Text>
+          <View style={styles.shopButtons}>
+            <Pressable style={styles.shopBtn}>
+              <Text style={styles.shopBtnText}>{plant.shop}</Text>
+              <IconSymbol name="arrow.up.right" size={12} color="#06b6d4" />
             </Pressable>
-          ))}
-        </ScrollView>
-
-        {/* Trending Grid */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Plants</Text>
+            <Pressable style={styles.amazonBtn}>
+              <Text style={styles.amazonBtnText}>Amazon</Text>
+              <IconSymbol name="arrow.up.right" size={12} color="#f59e0b" />
+            </Pressable>
+          </View>
         </View>
+      </View>
+    </View>
+  );
 
-        <View style={styles.plantsGrid}>
-          {TRENDING_PLANTS.map((plant) => (
-            <Pressable key={plant.id} style={styles.plantCard}>
-              <ImageBackground
-                source={{ uri: plant.image }}
-                style={styles.plantImage}
-                imageStyle={{ borderRadius: 20 }}
-              >
-                <Pressable style={styles.favoriteButton}>
-                  <IconSymbol name="heart" size={18} color="#fff" />
-                </Pressable>
-              </ImageBackground>
-              
-              <View style={styles.plantInfo}>
-                <View style={styles.plantHeader}>
-                  <Text style={styles.plantName}>{plant.name}</Text>
-                  <View style={styles.ratingContainer}>
-                    <IconSymbol name="star.fill" size={12} color={theme.accentOrange} />
-                    <Text style={styles.ratingText}>{plant.rating}</Text>
+  return (
+    <ScreenContainer edges={['top']} containerClassName="bg-[#f8fafc]">
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+
+        <View style={styles.mainLayout}>
+          {/* Sidebar Filters (Web only) */}
+          {Platform.OS === 'web' && (
+            <View style={styles.sidebar}>
+              <View style={styles.sidebarHeader}>
+                <Text style={styles.sidebarTitle}>Filters</Text>
+                <Pressable><Text style={styles.resetText}>Reset All</Text></Pressable>
+              </View>
+
+              {FILTERS.map((filter, i) => (
+                <View key={i} style={styles.filterGroup}>
+                  <View style={styles.filterHeader}>
+                    <Text style={styles.filterTitle}>{filter.title}</Text>
+                    <IconSymbol name="chevron.up" size={14} color="#94a3b8" />
                   </View>
+                  {filter.options.map((opt, j) => (
+                    <View key={j} style={styles.filterOption}>
+                      <View style={styles.checkbox} />
+                      <Text style={styles.optionText}>{opt}</Text>
+                    </View>
+                  ))}
                 </View>
-                
-                <Text style={styles.plantCategory}>{plant.category}</Text>
-                
-                <View style={styles.priceRow}>
-                  <Text style={styles.plantPrice}>{plant.price}</Text>
-                  <Pressable style={styles.addButton}>
-                    <IconSymbol name="plus" size={20} color="#fff" />
-                  </Pressable>
-                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Main Content */}
+          <View style={styles.content}>
+            <View style={styles.heroHeader}>
+              <View>
+                <Text style={styles.mainTitle}>Discover New Greenery</Text>
+                <Text style={styles.mainSubtitle}>Curated recommendations for your unique space and lifestyle.</Text>
               </View>
+              <View style={styles.searchBar}>
+                <IconSymbol name="magnifyingglass" size={18} color="#94a3b8" />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search for 'Monstera'..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+            </View>
+
+            {/* Active Filter Pills */}
+            <View style={styles.pillsRow}>
+              <View style={styles.activePill}>
+                <Text style={styles.activePillText}>Pet Friendly</Text>
+                <IconSymbol name="xmark" size={12} color="#fff" />
+              </View>
+              <View style={styles.activePill}>
+                <Text style={styles.activePillText}>Low Light</Text>
+                <IconSymbol name="xmark" size={12} color="#fff" />
+              </View>
+              <Pressable><Text style={styles.clearAll}>Clear all</Text></Pressable>
+            </View>
+
+            {/* Grid */}
+            <View style={styles.grid}>
+              {DISCOVER_PLANTS.map(plant => (
+                <View key={plant.id} style={styles.gridCell}>
+                  <PlantCard plant={plant} />
+                </View>
+              ))}
+            </View>
+
+            <Pressable style={styles.loadMore}>
+              <Text style={styles.loadMoreText}>Load More Plants</Text>
             </Pressable>
-          ))}
+          </View>
         </View>
-        
         <View style={{ height: 100 }} />
       </ScrollView>
     </ScreenContainer>
@@ -190,260 +186,305 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    backgroundColor: theme.backgroundLight,
+  container: {
+    paddingBottom: 40,
+    maxWidth: 1400,
+    width: '100%',
+    marginHorizontal: 'auto',
   },
-  headerTop: {
+  mainLayout: {
+    flexDirection: 'row',
+    padding: 32,
+    gap: 40,
+  },
+  sidebar: {
+    width: 280,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    height: 'fit-content' as any,
+  },
+  sidebarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: theme.textMain,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: theme.textSub,
-  },
-  cartButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.surfaceLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  badge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.accentPink,
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.surfaceLight,
-    paddingHorizontal: 16,
-    height: 52,
-    borderRadius: 16,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: theme.textMain,
-  },
-  filterButton: {
-    width: 52,
-    height: 52,
-    backgroundColor: theme.textMain, // Dark button for contrast
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-  },
-  
-  // Promo Banner
-  promoBanner: {
-    height: 180,
-    borderRadius: 24,
-    overflow: 'hidden',
     marginBottom: 32,
-    shadowColor: theme.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
   },
-  promoBackground: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  promoOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  promoContent: {
-    padding: 24,
-  },
-  promoBadge: {
-    backgroundColor: theme.accentOrange,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-  },
-  promoBadgeText: {
-    color: '#fff',
-    fontSize: 10,
+  sidebarTitle: {
+    fontSize: 20,
     fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
   },
-  promoTitle: {
-    fontSize: 24,
+  resetText: {
+    fontSize: 12,
     fontWeight: '800',
-    color: '#fff',
-    marginBottom: 4,
+    color: '#06b6d4',
   },
-  promoSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
+  filterGroup: {
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    paddingBottom: 24,
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  promoButton: {
+  filterTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1e293b',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+  },
+  filterOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+  },
+  optionText: {
+    fontSize: 14,
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Medium',
+  },
+
+  content: {
+    flex: 1,
+  },
+  heroHeader: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    justifyContent: 'space-between',
+    alignItems: Platform.OS === 'web' ? 'center' : 'flex-start',
+    marginBottom: 32,
+    gap: 24,
+  },
+  mainTitle: {
+    fontSize: 36,
+    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+    letterSpacing: -1,
+  },
+  mainSubtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Medium',
+    marginTop: 8,
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    width: Platform.OS === 'web' ? 400 : '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    // @ts-ignore
+    outlineStyle: 'none',
+  },
+  pillsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 40,
+  },
+  activePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#06b6d4',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
-    alignSelf: 'flex-start',
-    gap: 8,
   },
-  promoButtonText: {
-    color: theme.primary,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-
-  // Categories
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.textMain,
-  },
-  seeAllText: {
-    fontSize: 14,
-    color: theme.primary,
-    fontWeight: '600',
-  },
-  categoriesList: {
-    gap: 12,
-    paddingRight: 24,
-    marginBottom: 32,
-  },
-  categoryPill: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: theme.surfaceLight,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  categoryPillActive: {
-    backgroundColor: theme.textMain,
-    borderColor: theme.textMain,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.textSub,
-  },
-  categoryTextActive: {
+  activePillText: {
     color: '#fff',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  clearAll: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#64748b',
+    marginLeft: 8,
   },
 
-  // Plants Grid
-  plantsGrid: {
+  grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -8,
+    marginHorizontal: -12,
   },
-  plantCard: {
-    width: '50%',
-    padding: 8,
-    marginBottom: 16,
-  },
-  plantImage: {
-    width: '100%',
-    aspectRatio: 3/4,
-    borderRadius: 20,
-    marginBottom: 12,
+  gridCell: {
+    width: Platform.OS === 'web' ? '33.33%' : '50%',
     padding: 12,
-    alignItems: 'flex-end',
   },
-  favoriteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 32,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#f8fafc',
   },
-  plantInfo: {
-    paddingHorizontal: 4,
+  imageBox: {
+    aspectRatio: 1,
+    borderRadius: 24,
+    overflow: 'hidden',
+    marginBottom: 20,
   },
-  plantHeader: {
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  difficultyBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  plantName: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.textMain,
-    marginRight: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: theme.textMain,
+  diffDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  plantCategory: {
-    fontSize: 12,
-    color: theme.textSub,
+  diffText: {
+    fontSize: 11,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+  },
+  cardInfo: {
+    gap: 6,
+  },
+  cardName: {
+    fontSize: 20,
+    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+  },
+  cardScientific: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    color: '#94a3b8',
     marginBottom: 8,
   },
-  priceRow: {
+  cardDesc: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Medium',
+    marginBottom: 16,
+  },
+  cardTags: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 24,
+  },
+  tag: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  plantPrice: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: theme.primary,
+  tagText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748b',
   },
-  addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: theme.textMain,
+  shopSection: {
+    gap: 12,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  shopLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#94a3b8',
+    letterSpacing: 0.5,
+  },
+  shopButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  shopBtn: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#ecfeff',
+    paddingVertical: 12,
+    borderRadius: 14,
   },
-});
+  shopBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#06b6d4',
+  },
+  amazonBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#fffbeb',
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  amazonBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#f59e0b',
+  },
+  loadMore: {
+    marginTop: 48,
+    alignSelf: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#06b6d4',
+  },
+  loadMoreText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#06b6d4',
+  },
+} as any);

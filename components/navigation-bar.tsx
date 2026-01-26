@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Platform, TextInput } from 'react-native';
 import { Link, usePathname } from 'expo-router';
-import { IconSymbol } from './icon-symbol';
+import { IconSymbol } from './ui/icon-symbol';
 import { colors } from './ui/design-system';
 import { useApp } from '@/lib/store';
 
@@ -30,51 +30,52 @@ export function NavigationBar() {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                {/* Left: Logo + Search */}
+                {/* Left: Logo */}
                 <View style={styles.leftSection}>
                     <Link href="/" asChild>
                         <Pressable style={styles.logoContainer}>
                             <View style={styles.logoIcon}>
-                                <IconSymbol name="leaf.fill" size={24} color={colors.primaryDark} />
+                                <IconSymbol name="leaf.fill" size={20} color={colors.primaryDark} />
                             </View>
                             <Text style={styles.logoText}>Bloomie</Text>
                         </Pressable>
                     </Link>
-
-                    {/* Search bar - hidden on small screens */}
-                    {Platform.OS === 'web' && (
-                        <View style={styles.searchContainer}>
-                            <IconSymbol name="magnifyingglass" size={18} color={colors.textSub} />
-                            <TextInput
-                                style={styles.searchInput}
-                                placeholder="Find a plant..."
-                                placeholderTextColor={colors.textSub}
-                            />
-                        </View>
-                    )}
                 </View>
 
-                {/* Center: Nav Links */}
-                <View style={styles.navLinks}>
-                    <NavLink href="/" label="My Garden" />
-                    <NavLink href="/calendar" label="Schedule" />
-                    <NavLink href="/scan" label="Identify" />
+                {/* Center: Search bar */}
+                <View style={[styles.centerSection, { display: Platform.OS === 'web' ? 'flex' : 'none' }]}>
+                    <View style={styles.searchContainer}>
+                        <IconSymbol name="magnifyingglass" size={16} color={colors.textSub} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Find a plant..."
+                            placeholderTextColor={colors.textSub}
+                        />
+                    </View>
                 </View>
 
-                {/* Right: Notifications + Avatar */}
+                {/* Right: Nav Links + Actions */}
                 <View style={styles.rightSection}>
-                    <Pressable style={styles.notificationButton}>
-                        <IconSymbol name="bell.fill" size={20} color={colors.textSub} />
-                        <View style={styles.notificationDot} />
-                    </Pressable>
+                    <View style={styles.navLinks}>
+                        <NavLink href="/" label="My Jungle" />
+                        <NavLink href="/calendar" label="Schedule" />
+                        <NavLink href="/scan" label="Identify" />
+                    </View>
 
-                    <Link href="/profile" asChild>
-                        <Pressable style={styles.avatar}>
-                            <Text style={styles.avatarText}>
-                                {user?.email?.charAt(0).toUpperCase() || 'U'}
-                            </Text>
+                    <View style={styles.actions}>
+                        <Pressable style={styles.notificationButton}>
+                            <IconSymbol name="bell.fill" size={18} color={colors.textSub} />
+                            <View style={styles.notificationDot} />
                         </Pressable>
-                    </Link>
+
+                        <Link href="/profile" asChild>
+                            <Pressable style={styles.avatar}>
+                                <Text style={styles.avatarText}>
+                                    {user?.email?.charAt(0).toUpperCase() || 'P'}
+                                </Text>
+                            </Pressable>
+                        </Link>
+                    </View>
                 </View>
             </View>
         </View>
@@ -83,14 +84,14 @@ export function NavigationBar() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: '#fff',
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+        borderBottomColor: '#f1f5f9',
+        zIndex: 100,
         ...Platform.select({
             web: {
                 position: 'sticky' as any,
                 top: 0,
-                zIndex: 50,
             },
         }),
     },
@@ -98,16 +99,16 @@ const styles = StyleSheet.create({
         maxWidth: 1400,
         marginHorizontal: 'auto',
         paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        width: '100%',
     },
     leftSection: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 32,
-        flex: 1,
     },
     logoContainer: {
         flexDirection: 'row',
@@ -115,87 +116,103 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     logoIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: 'rgba(74, 222, 128, 0.2)',
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: colors.primaryLight + '20',
         alignItems: 'center',
         justifyContent: 'center',
     },
     logoText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '800',
         fontFamily: 'PlusJakartaSans-ExtraBold',
-        color: colors.textMain,
+        color: '#1e293b',
+    },
+    centerSection: {
+        flex: 2,
+        alignItems: 'center',
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#f1f5f9',
-        borderRadius: 16,
+        borderRadius: 12,
         paddingHorizontal: 12,
         paddingVertical: 8,
         gap: 8,
-        width: 300,
-        display: Platform.OS === 'web' ? 'flex' : 'none',
+        width: '100%',
+        maxWidth: 400,
     },
     searchInput: {
         flex: 1,
         fontSize: 14,
         fontFamily: 'PlusJakartaSans-Regular',
-        color: colors.textMain,
+        color: '#1e293b',
+        // @ts-ignore
+        outlineStyle: 'none',
+    },
+    rightSection: {
+        flex: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: 32,
     },
     navLinks: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 32,
+        gap: 24,
         display: Platform.OS === 'web' ? 'flex' : 'none',
     },
     navLink: {
         fontSize: 14,
         fontWeight: '600',
         fontFamily: 'PlusJakartaSans-SemiBold',
-        color: colors.textSub,
+        color: '#64748b',
     },
     navLinkActive: {
-        color: colors.primaryDark,
+        color: '#10b981',
         fontWeight: '700',
         fontFamily: 'PlusJakartaSans-Bold',
     },
-    rightSection: {
+    actions: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 16,
-        paddingLeft: 16,
-        borderLeftWidth: 1,
-        borderLeftColor: '#e2e8f0',
     },
     notificationButton: {
         position: 'relative',
-    },
-    notificationDot: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: colors.accentPink,
-        borderWidth: 2,
-        borderColor: '#fff',
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#e2e8f0',
+        width: 32,
+        height: 32,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    notificationDot: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#ef4444',
+        borderWidth: 1.5,
+        borderColor: '#fff',
+    },
+    avatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#fef3c7',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#f59e0b20',
+    },
     avatarText: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '700',
         fontFamily: 'PlusJakartaSans-Bold',
-        color: colors.primaryDark,
+        color: '#d97706',
     },
-});
+} as any);

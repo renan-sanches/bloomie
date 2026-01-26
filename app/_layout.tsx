@@ -21,6 +21,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppProvider } from "@/lib/app-provider";
 import { useApp } from "@/lib/store";
 import { NavigationBar } from "@/components/navigation-bar";
+import { BloomieBot } from "@/components/bloomie-bot";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -58,9 +59,8 @@ export default function RootLayout() {
               <Stack.Screen name="profile" />
               <Stack.Screen name="chat" />
               <Stack.Screen name="plant/[id]" />
-              <Stack.Screen name="auth/login" />
-              <Stack.Screen name="auth/signup" />
             </Stack>
+            <BloomieBot />
           </AuthGuard>
         </AppProvider>
       </SafeAreaProvider>

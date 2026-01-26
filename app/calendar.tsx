@@ -6,29 +6,25 @@ import {
   FlatList,
   StyleSheet,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
-import { colors, spacing, borderRadius, typography } from "@/components/ui/design-system";
-import { useApp, formatTimeAgo, type CareTask, type Plant } from "@/lib/store";
+import { useApp, type CareTask, type Plant } from "@/lib/store";
 import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  runOnJS,
+  FadeIn,
+  FadeInDown,
 } from "react-native-reanimated";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const TASK_COLORS: Record<string, { bg: string; icon: string; text: string }> = {
-  water: { bg: colors.accentCyan + '20', icon: "💧", text: colors.accentCyan },
-  mist: { bg: colors.accentCyan + '10', icon: "💨", text: colors.accentCyan },
-  fertilize: { bg: colors.accentOrange + '20', icon: "🌱", text: colors.accentOrange },
-  rotate: { bg: colors.accentPurple + '20', icon: "🔄", text: colors.accentPurple },
+const TASK_CONFIG: Record<string, { bg: string; icon: string; color: string }> = {
+  water: { bg: '#eff6ff', icon: "drop.fill", color: "#3b82f6" },
+  mist: { bg: '#ecfeff', icon: "cloud.rain.fill", color: "#06b6d4" },
+  fertilize: { bg: '#f0fdf4', icon: "leaf.fill", color: "#10b981" },
+  rotate: { bg: '#fdf4ff', icon: "arrow.triangle.2.circlepath", color: "#a855f7" },
 };
 
 export default function CalendarScreen() {
@@ -49,7 +45,6 @@ export default function CalendarScreen() {
     }
   };
 
-  // Get tasks for selected date
   const getTasksForDate = (date: Date) => {
     return tasks.filter((t) => {
       const taskDate = new Date(t.dueDate);
@@ -57,33 +52,21 @@ export default function CalendarScreen() {
     });
   };
 
-  // Get plant by ID
   const getPlant = (plantId: string): Plant | undefined => {
     return plants.find((p) => p.id === plantId);
   };
 
-  // Generate calendar days
   const generateCalendarDays = () => {
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days: (Date | null)[] = [];
-
-    // Add empty slots for days before the first day
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      days.push(null);
-    }
-
-    // Add all days of the month
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      days.push(new Date(year, month, i));
-    }
-
+    for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
+    for (let i = 1; i <= lastDay.getDate(); i++) days.push(new Date(year, month, i));
     return days;
   };
 
-  // Get today's and pending tasks
   const today = new Date();
   const todaysTasks = tasks.filter((t) => {
     const taskDate = new Date(t.dueDate);
@@ -98,103 +81,54 @@ export default function CalendarScreen() {
   const upcomingTasks = tasks.filter((t) => {
     const taskDate = new Date(t.dueDate);
     return taskDate > today && !t.completed;
-  }).slice(0, 5);
+  }).slice(0, 10);
 
   const handleCompleteTask = async (taskId: string) => {
     triggerHaptic();
     await completeTask(taskId);
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
   };
 
-  const handleSnoozeTask = async (taskId: string) => {
-    triggerHaptic();
-    await snoozeTask(taskId, 1);
-  };
-
-  const TaskCard = ({ task }: { task: CareTask }) => {
+  const TaskCard = ({ task, index }: { task: CareTask; index: number }) => {
     const plant = getPlant(task.plantId);
-    const taskStyle = TASK_COLORS[task.type];
-    const translateX = useSharedValue(0);
-    const opacity = useSharedValue(1);
-
-    const panGesture = Gesture.Pan()
-      .runOnJS(true)
-      .onUpdate((event) => {
-        translateX.value = event.translationX;
-      })
-      .onEnd((event) => {
-        if (event.translationX > 100) {
-          // Swipe right - complete
-          translateX.value = withTiming(300);
-          opacity.value = withTiming(0, {}, () => {
-            runOnJS(handleCompleteTask)(task.id);
-          });
-        } else if (event.translationX < -100) {
-          // Swipe left - snooze
-          translateX.value = withTiming(-300);
-          opacity.value = withTiming(0, {}, () => {
-            runOnJS(handleSnoozeTask)(task.id);
-          });
-        } else {
-          translateX.value = withSpring(0);
-        }
-      });
-
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateX: translateX.value }],
-      opacity: opacity.value,
-    }));
+    const config = TASK_CONFIG[task.type] || TASK_CONFIG.water;
 
     if (!plant) return null;
 
     return (
-      <GestureDetector gesture={panGesture}>
-        <Animated.View style={[styles.taskCard, animatedStyle]}>
-          {/* Swipe indicators */}
-          <View style={styles.swipeIndicators}>
-            <View style={[styles.swipeIndicator, styles.completeIndicator]}>
-              <Text style={styles.swipeIcon}>✓</Text>
-            </View>
-            <View style={[styles.swipeIndicator, styles.snoozeIndicator]}>
-              <Text style={styles.swipeIcon}>💤</Text>
-            </View>
+      <Animated.View
+        entering={FadeInDown.delay(index * 100)}
+        style={styles.taskCard}
+      >
+        <View style={[styles.taskIconBox, { backgroundColor: config.bg }]}>
+          <IconSymbol name={config.icon as any} size={20} color={config.color} />
+        </View>
+        <View style={styles.taskMain}>
+          <Text style={styles.taskPlantName}>{plant.nickname}</Text>
+          <View style={styles.taskMeta}>
+            <Text style={styles.taskTypeName}>{task.type.toUpperCase()}</Text>
+            <View style={styles.dot} />
+            <Text style={styles.taskDueDate}>
+              {new Date(task.dueDate).toDateString() === today.toDateString() ? 'Today' : formatTimeAgo(task.dueDate)}
+            </Text>
           </View>
-
-          <View style={[styles.taskCardContent, { backgroundColor: taskStyle.bg }]}>
-            <View style={styles.taskIcon}>
-              <Text style={styles.taskEmoji}>{taskStyle.icon}</Text>
-            </View>
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskPlantName}>{plant.nickname}</Text>
-              <Text style={styles.taskType}>
-                {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => handleCompleteTask(task.id)}
-              style={({ pressed }) => [styles.completeButton, pressed && styles.buttonPressed]}
-            >
-              <Text style={styles.completeButtonText}>Done</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-      </GestureDetector>
+        </View>
+        <Pressable
+          onPress={() => handleCompleteTask(task.id)}
+          style={styles.checkBtn}
+        >
+          <IconSymbol name="checkmark" size={18} color="#fff" />
+        </Pressable>
+      </Animated.View>
     );
   };
 
   const renderCalendarDay = (day: Date | null, index: number) => {
-    if (!day) {
-      return <View key={`empty-${index}`} style={styles.calendarDay} />;
-    }
+    if (!day) return <View key={`empty-${index}`} style={styles.calendarDay} />;
 
     const isToday = day.toDateString() === today.toDateString();
     const isSelected = day.toDateString() === selectedDate.toDateString();
     const dayTasks = getTasksForDate(day);
-    const hasWater = dayTasks.some((t) => t.type === "water" && !t.completed);
-    const hasMist = dayTasks.some((t) => t.type === "mist" && !t.completed);
-    const hasFertilize = dayTasks.some((t) => t.type === "fertilize" && !t.completed);
+    const hasPending = dayTasks.some((t) => !t.completed);
 
     return (
       <Pressable
@@ -202,87 +136,82 @@ export default function CalendarScreen() {
         onPress={() => { triggerHaptic(); setSelectedDate(day); }}
         style={[
           styles.calendarDay,
-          isToday && styles.calendarDayToday,
-          isSelected && styles.calendarDaySelected,
+          isToday && styles.dayToday,
+          isSelected && styles.daySelected,
         ]}
       >
         <Text style={[
-          styles.calendarDayText,
-          isToday && styles.calendarDayTextToday,
-          isSelected && styles.calendarDayTextSelected,
+          styles.dayText,
+          isToday && styles.dayTextToday,
+          isSelected && styles.dayTextSelected,
         ]}>
           {day.getDate()}
         </Text>
-        <View style={styles.taskDots}>
-          {hasWater && <View style={[styles.taskDot, { backgroundColor: "#4FC3F7" }]} />}
-          {hasMist && <View style={[styles.taskDot, { backgroundColor: "#26C6DA" }]} />}
-          {hasFertilize && <View style={[styles.taskDot, { backgroundColor: "#FFA726" }]} />}
-        </View>
+        {hasPending && !isSelected && <View style={styles.pendingDot} />}
       </Pressable>
     );
   };
 
   const renderHeader = () => (
     <View style={styles.header}>
-      {/* Streak Banner */}
-      <View style={styles.streakBanner}>
-        <Text style={styles.streakEmoji}>🔥</Text>
-        <View style={styles.streakInfo}>
-          <Text style={styles.streakDays}>{profile.streakDays}-day streak!</Text>
-          <Text style={styles.streakMessage}>Keep it up, plant parent!</Text>
+      <View style={styles.heroRow}>
+        <View>
+          <Text style={styles.heroTitle}>Daily Schedule</Text>
+          <Text style={styles.heroSubtitle}>You have {allTasks.length} tasks pending</Text>
+        </View>
+        <View style={styles.streakBox}>
+          <Text style={styles.streakCount}>{profile.streakDays}</Text>
+          <Text style={styles.streakLabel}>STREAK</Text>
         </View>
       </View>
 
-      {/* View Toggle */}
       <View style={styles.viewToggle}>
         <Pressable
           onPress={() => { triggerHaptic(); setViewMode("quest"); }}
-          style={[styles.toggleButton, viewMode === "quest" && styles.toggleButtonActive]}
+          style={[styles.toggleBtn, viewMode === "quest" && styles.toggleBtnActive]}
         >
-          <Text style={[styles.toggleText, viewMode === "quest" && styles.toggleTextActive]}>Quest Log</Text>
+          <Text style={[styles.toggleBtnText, viewMode === "quest" && styles.toggleTextActive]}>Quest Log</Text>
         </Pressable>
         <Pressable
           onPress={() => { triggerHaptic(); setViewMode("calendar"); }}
-          style={[styles.toggleButton, viewMode === "calendar" && styles.toggleButtonActive]}
+          style={[styles.toggleBtn, viewMode === "calendar" && styles.toggleBtnActive]}
         >
-          <Text style={[styles.toggleText, viewMode === "calendar" && styles.toggleTextActive]}>Calendar</Text>
+          <Text style={[styles.toggleBtnText, viewMode === "calendar" && styles.toggleTextActive]}>Calendar</Text>
         </Pressable>
       </View>
 
-      {/* Calendar View */}
       {viewMode === "calendar" && (
-        <View style={styles.calendarContainer}>
-          <View style={styles.calendarHeader}>
-            <Pressable onPress={() => {
-              triggerHaptic();
-              setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1));
-            }}>
-              <Text style={styles.calendarNav}>←</Text>
-            </Pressable>
-            <Text style={styles.calendarMonth}>
+        <Animated.View entering={FadeIn} style={styles.calendarCard}>
+          <View style={styles.calHeader}>
+            <Text style={styles.calMonthText}>
               {MONTHS[selectedDate.getMonth()]} {selectedDate.getFullYear()}
             </Text>
-            <Pressable onPress={() => {
-              triggerHaptic();
-              setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1));
-            }}>
-              <Text style={styles.calendarNav}>→</Text>
-            </Pressable>
+            <View style={styles.calNav}>
+              <Pressable onPress={() => {
+                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1));
+              }}>
+                <IconSymbol name="chevron.left" size={16} color="#1e293b" />
+              </Pressable>
+              <Pressable onPress={() => {
+                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1));
+              }}>
+                <IconSymbol name="chevron.right" size={16} color="#1e293b" />
+              </Pressable>
+            </View>
           </View>
-          <View style={styles.calendarWeekdays}>
+          <View style={styles.weekRow}>
             {DAYS.map((day) => (
-              <Text key={day} style={styles.weekdayText}>{day}</Text>
+              <Text key={day} style={styles.weekText}>{day[0]}</Text>
             ))}
           </View>
           <View style={styles.calendarGrid}>
             {generateCalendarDays().map((day, index) => renderCalendarDay(day, index))}
           </View>
-        </View>
+        </Animated.View>
       )}
 
-      {/* Section Title */}
-      <Text style={styles.sectionTitle}>
-        {viewMode === "quest" ? "Today's Quests" : `Tasks for ${selectedDate.toLocaleDateString()}`}
+      <Text style={styles.listTitle}>
+        {viewMode === "quest" ? "Upcoming Tasks" : `Tasks for ${selectedDate.toDateString() === today.toDateString() ? 'Today' : selectedDate.toLocaleDateString()}`}
       </Text>
     </View>
   );
@@ -291,292 +220,282 @@ export default function CalendarScreen() {
     ? [...overdueTasks, ...todaysTasks, ...upcomingTasks]
     : getTasksForDate(selectedDate).filter((t) => !t.completed);
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyEmoji}>✨</Text>
-      <Text style={styles.emptyTitle}>All caught up!</Text>
-      <Text style={styles.emptySubtitle}>Your plants are thriving. Check back later!</Text>
-    </View>
-  );
-
   return (
-    <ScreenContainer containerClassName="bg-background">
+    <ScreenContainer edges={['top']} containerClassName="bg-[#fff]">
       <FlatList
         data={allTasks}
-        renderItem={({ item }) => <TaskCard task={item} />}
+        renderItem={({ item, index }) => <TaskCard task={item} index={index} />}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
+        ListEmptyComponent={() => (
+          <View style={styles.empty}>
+            <Text style={styles.emptyEmoji}>🎉</Text>
+            <Text style={styles.emptyTitle}>All caught up!</Text>
+            <Text style={styles.emptySub}>Your plants are happy and healthy.</Text>
+          </View>
+        )}
         contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         showsVerticalScrollIndicator={false}
       />
     </ScreenContainer>
   );
 }
 
+function formatTimeAgo(date: any) {
+  const d = new Date(date);
+  const now = new Date();
+  const diff = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff > 1) return `In ${diff} days`;
+  return `${Math.abs(diff)}d ago`;
+}
+
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: 32,
     paddingBottom: 100,
+    maxWidth: 800,
+    width: '100%',
+    marginHorizontal: 'auto',
   },
   header: {
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
+    paddingTop: 32,
+    paddingBottom: 24,
   },
-  streakBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.accentOrange + '10',
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
+  heroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 40,
   },
-  streakEmoji: {
-    fontSize: 36,
-    marginRight: spacing.md,
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+    letterSpacing: -0.5,
   },
-  streakInfo: {
-    flex: 1,
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Medium',
+    marginTop: 4,
   },
-  streakDays: {
-    fontSize: typography.fontSize.xl,
-    fontFamily: typography.fontFamily.display,
-    color: colors.accentOrange,
+  streakBox: {
+    backgroundColor: '#fffbeb',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fef3c7',
   },
-  streakMessage: {
-    fontSize: typography.fontSize.sm,
-    color: colors.accentOrange,
-    opacity: 0.8,
-    fontFamily: typography.fontFamily.body,
+  streakCount: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#f59e0b',
+  },
+  streakLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#fbbf24',
+    letterSpacing: 1,
   },
   viewToggle: {
     flexDirection: "row",
-    backgroundColor: colors.gray100,
-    borderRadius: borderRadius.md,
-    padding: spacing.xs,
-    marginBottom: spacing.lg,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 16,
+    padding: 6,
+    marginBottom: 32,
   },
-  toggleButton: {
+  toggleBtn: {
     flex: 1,
-    paddingVertical: spacing.sm,
+    paddingVertical: 10,
     alignItems: "center",
-    borderRadius: borderRadius.sm,
+    borderRadius: 12,
   },
-  toggleButtonActive: {
-    backgroundColor: colors.surfaceLight,
+  toggleBtnActive: {
+    backgroundColor: '#fff',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  toggleText: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.brand,
-    color: colors.gray500,
-  },
-  toggleTextActive: {
-    color: colors.primaryDark,
-  },
-  calendarContainer: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: 5,
     elevation: 2,
   },
-  calendarHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.lg,
+  toggleBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Bold',
   },
-  calendarNav: {
-    fontSize: typography.fontSize.xl,
-    color: colors.primary,
-    fontFamily: typography.fontFamily.display,
-    paddingHorizontal: spacing.sm,
+  toggleTextActive: {
+    color: '#1e293b',
   },
-  calendarMonth: {
-    fontSize: typography.fontSize.lg,
-    fontFamily: typography.fontFamily.display,
-    color: colors.gray900,
+  calendarCard: {
+    backgroundColor: '#fff',
+    borderRadius: 32,
+    padding: 24,
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    shadowColor: '#000',
+    shadowOpacity: 0.02,
+    shadowRadius: 20,
   },
-  calendarWeekdays: {
-    flexDirection: "row",
-    marginBottom: spacing.sm,
+  calHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  weekdayText: {
+  calMonthText: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+  },
+  calNav: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  weekText: {
     flex: 1,
-    textAlign: "center",
-    fontSize: typography.fontSize.xs,
-    fontFamily: typography.fontFamily.brand,
-    color: colors.gray400,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#94a3b8',
   },
   calendarGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   calendarDay: {
-    width: "14.28%",
+    width: `${100 / 7}%`,
     aspectRatio: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
-  calendarDayToday: {
-    backgroundColor: colors.primaryLight + '30',
-    borderRadius: borderRadius.md,
+  daySelected: {
+    backgroundColor: '#10b981',
+    borderRadius: 12,
   },
-  calendarDaySelected: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
+  dayToday: {
+    borderWidth: 2,
+    borderColor: '#10b981',
+    borderRadius: 12,
   },
-  calendarDayText: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.brand,
-    color: colors.gray700,
+  dayText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#475569',
   },
-  calendarDayTextToday: {
-    color: colors.primaryDark,
-    fontFamily: typography.fontFamily.display,
+  dayTextSelected: {
+    color: '#fff',
+    fontWeight: '900',
   },
-  calendarDayTextSelected: {
-    color: colors.surfaceLight,
-    fontFamily: typography.fontFamily.display,
+  dayTextToday: {
+    color: '#10b981',
+    fontWeight: '900',
   },
-  taskDots: {
-    flexDirection: "row",
-    gap: 2,
-    marginTop: 2,
-  },
-  taskDot: {
+  pendingDot: {
     width: 4,
     height: 4,
     borderRadius: 2,
+    backgroundColor: '#cbd5e1',
+    position: 'absolute',
+    bottom: 6,
   },
-  sectionTitle: {
-    fontSize: typography.fontSize.lg,
-    fontFamily: typography.fontFamily.display,
-    color: colors.gray900,
-    marginBottom: spacing.md,
+  listTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
+    marginBottom: 20,
   },
   taskCard: {
-    marginBottom: spacing.md,
-    position: "relative",
-  },
-  swipeIndicators: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: spacing.xl,
-  },
-  swipeIndicator: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  completeIndicator: {
-    backgroundColor: colors.primary,
-  },
-  snoozeIndicator: {
-    backgroundColor: colors.accentPurple,
-  },
-  swipeIcon: {
-    fontSize: 18,
-    color: colors.surfaceLight,
-  },
-  taskCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-  },
-  taskIcon: {
-    width: 48,
-    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
     borderRadius: 24,
-    backgroundColor: colors.surfaceLight,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    gap: 16,
   },
-  taskEmoji: {
-    fontSize: 24,
+  taskIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  taskInfo: {
+  taskMain: {
     flex: 1,
+    gap: 2,
   },
   taskPlantName: {
-    fontSize: typography.fontSize.base,
-    fontFamily: typography.fontFamily.display,
-    color: colors.gray900,
-    marginBottom: 2,
+    fontSize: 16,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#1e293b',
   },
-  taskType: {
-    fontSize: typography.fontSize.sm,
-    color: colors.gray600,
-    fontFamily: typography.fontFamily.body,
+  taskMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  completeButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.md,
+  taskTypeName: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#94a3b8',
+    letterSpacing: 0.5,
   },
-  completeButtonText: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.brand,
-    color: colors.surfaceLight,
+  dot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#cbd5e1',
   },
-  buttonPressed: {
-    transform: [{ scale: 0.95 }],
-    opacity: 0.8,
+  taskDueDate: {
+    fontSize: 12,
+    color: '#64748b',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
+  checkBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#10b981',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#10b981',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 60,
   },
   emptyEmoji: {
     fontSize: 48,
-    marginBottom: spacing.lg,
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: typography.fontSize.xl,
-    fontFamily: typography.fontFamily.display,
-    color: colors.gray900,
-    marginBottom: spacing.sm,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1e293b',
   },
-  emptySubtitle: {
-    fontSize: typography.fontSize.sm,
-    color: colors.gray600,
-    textAlign: "center",
-    fontFamily: typography.fontFamily.body,
-  },
-});
+  emptySub: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 4,
+  }
+} as any);

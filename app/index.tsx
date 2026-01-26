@@ -21,11 +21,9 @@ export default function MyJungleScreen() {
   const { plants, isLoading } = useApp();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
-  // Get current hour for greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // Filter plants based on active filter
   const filteredPlants = (plants || []).filter((plant: Plant) => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'water') return plant.status === 'thirsty';
@@ -34,7 +32,6 @@ export default function MyJungleScreen() {
     return true;
   });
 
-  // Count plants needing attention
   const needsAttention = plants.filter(p => p.status === 'thirsty' || p.status === 'struggling')?.length || 0;
 
   const handlePlantPress = useCallback((plantId: string) => {
@@ -47,7 +44,7 @@ export default function MyJungleScreen() {
 
   if (isLoading) {
     return (
-      <ScreenContainer edges={['top']} containerClassName="bg-backgroundLight">
+      <ScreenContainer edges={['top']} containerClassName="bg-[#f8fafc]">
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Curating your jungle...</Text>
         </View>
@@ -56,22 +53,21 @@ export default function MyJungleScreen() {
   }
 
   const PlantCard = ({ plant }: { plant: Plant }) => {
-    // Determine status color/text based on plant status
-    let statusColor = colors.primary;
-    let statusText = "thriving";
+    let statusColor = '#10b981';
+    let statusText = "THRIVING";
     let statusIcon = "checkmark.circle.fill";
 
     if (plant.status === 'thirsty') {
-      statusColor = colors.accentPink;
-      statusText = "thirsty";
+      statusColor = '#ef4444';
+      statusText = "THIRSTY";
       statusIcon = "drop.fill";
     } else if (plant.status === 'mist') {
-      statusColor = colors.accentCyan;
-      statusText = "mist me";
+      statusColor = '#06b6d4';
+      statusText = "MIST ME";
       statusIcon = "cloud.rain.fill";
     } else if (plant.status === 'growing') {
-      statusColor = colors.accentPurple;
-      statusText = "growing";
+      statusColor = '#8b5cf6';
+      statusText = "GROWING";
       statusIcon = "scissors";
     }
 
@@ -86,13 +82,13 @@ export default function MyJungleScreen() {
         <View style={styles.cardImageContainer}>
           {plant.photo || (plant.photos && plant.photos.length > 0) ? (
             <ImageBackground
-              source={{ uri: plant.photo || plant.photos[plant.photos.length - 1].uri }}
+              source={{ uri: plant.photo || (plant.photos && plant.photos.length > 0 ? plant.photos[plant.photos.length - 1].uri : '') }}
               style={styles.cardImage}
-              imageStyle={{ borderRadius: 16 }}
+              imageStyle={{ borderRadius: 20 }}
             >
               <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
                 <IconSymbol name={statusIcon as any} size={10} color="#fff" />
-                <Text style={styles.statusText}>{statusText}</Text>
+                <Text style={styles.statusBadgeText}>{statusText}</Text>
               </View>
             </ImageBackground>
           ) : (
@@ -100,7 +96,7 @@ export default function MyJungleScreen() {
               <Text style={styles.plantEmoji}>🌱</Text>
               <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
                 <IconSymbol name={statusIcon as any} size={10} color="#fff" />
-                <Text style={styles.statusText}>{statusText}</Text>
+                <Text style={styles.statusBadgeText}>{statusText}</Text>
               </View>
             </View>
           )}
@@ -112,156 +108,129 @@ export default function MyJungleScreen() {
               <Text style={styles.plantName} numberOfLines={1}>{plant.nickname}</Text>
               <Text style={styles.plantSpecies} numberOfLines={1}>{plant.species}</Text>
             </View>
-            <View style={styles.arrowButton}>
-              <IconSymbol name="arrow.right" size={16} color={colors.textSub} />
-            </View>
+            <Pressable style={styles.cardArrow}>
+              <IconSymbol name="chevron.right" size={16} color="#94a3b8" />
+            </Pressable>
           </View>
 
           <View style={styles.cardFooter}>
-            <IconSymbol name="mappin.and.ellipse" size={14} color={statusColor} />
-            <Text style={styles.locationText}>{plant.location || 'Home'}</Text>
+            <View style={[styles.locationDot, { backgroundColor: statusColor }]} />
+            <Text style={styles.locationText}>{plant.location || 'LIVING ROOM'}</Text>
           </View>
         </View>
       </Pressable>
     );
   };
 
-  const FilterPill = ({ type, label, count }: { type: FilterType; label: string; count?: number }) => {
+  const FilterPill = ({ type, label, count, icon }: { type: FilterType; label: string; count?: number; icon?: string }) => {
     const isActive = activeFilter === type;
-    let bgColor = isActive ? colors.primary : colors.surfaceLight;
-    let textColor = isActive ? '#ffffff' : colors.textSub;
-    let borderColor = isActive ? colors.primary : colors.gray100;
-
-    // Override colors for specific filters
-    if (isActive && type === 'water') {
-      bgColor = colors.accentPink;
-      borderColor = colors.accentPink;
-    } else if (isActive && type === 'sick') {
-      bgColor = colors.accentOrange;
-      borderColor = colors.accentOrange;
-    } else if (isActive && type === 'growing') {
-      bgColor = colors.accentPurple;
-      borderColor = colors.accentPurple;
-    }
 
     return (
       <Pressable
         onPress={() => setActiveFilter(type)}
         style={[
           styles.filterPill,
-          { backgroundColor: bgColor, borderColor }
+          isActive && styles.filterPillActive,
+          isActive && type === 'water' && { backgroundColor: '#ef4444', borderColor: '#ef4444' },
+          isActive && type === 'sick' && { backgroundColor: '#f59e0b', borderColor: '#f59e0b' },
+          isActive && type === 'growing' && { backgroundColor: '#8b5cf6', borderColor: '#8b5cf6' },
         ]}
       >
-        <Text style={[styles.filterText, { color: textColor }]}>
-          {label}{count !== undefined && ` (${count})`}
+        {icon && <IconSymbol name={icon as any} size={14} color={isActive ? "#fff" : "#64748b"} />}
+        <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
+          {label}{count !== undefined ? ` (${count})` : ''}
         </Text>
       </Pressable>
     );
   };
 
   return (
-    <ScreenContainer edges={['top']} containerClassName="bg-backgroundLight">
+    <ScreenContainer edges={['top']} containerClassName="bg-[#fff]">
       <StatusBar style="dark" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Greeting Section */}
-        <View style={styles.greetingSection}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.greetingText}>{greeting}, Planter</Text>
-            <Text style={styles.subtitleText}>
+        {/* Header Greeting Section */}
+        <View style={styles.headerHero}>
+          <View style={styles.greetingLeft}>
+            <Text style={styles.greetingTitle}>{greeting}, Planter</Text>
+            <Text style={styles.greetingSubtitle}>
               Your jungle is thriving.
-              {needsAttention > 0 && (
-                <Text style={{ color: colors.accentPink, fontWeight: '700' }}>
-                  {` ${needsAttention} plants`}
-                </Text>
-              )} need attention today.
+              <Text style={styles.highlightText}>
+                {` ${needsAttention} plants`}
+              </Text> need attention today.
             </Text>
           </View>
 
-          {/* Indoor Temp Widget */}
-          <View style={styles.tempWidget}>
-            <View style={styles.tempIcon}>
-              <IconSymbol name="sun.max.fill" size={20} color={colors.accentOrange} />
+          <View style={styles.weatherWidget}>
+            <View style={styles.weatherIcon}>
+              <IconSymbol name="sun.max.fill" size={20} color="#f59e0b" />
             </View>
             <View>
-              <Text style={styles.tempLabel}>INDOOR TEMP</Text>
-              <Text style={styles.tempValue}>22°C / 72°F</Text>
+              <Text style={styles.weatherLabel}>INDOOR TEMP</Text>
+              <Text style={styles.weatherValue}>22°C / 72°F</Text>
             </View>
           </View>
         </View>
 
-        {/* Filters */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filtersScroll}
-          contentContainerStyle={styles.filtersContent}
-        >
-          <FilterPill type="all" label="All Plants" />
-          <FilterPill
-            type="water"
-            label="To Water"
-            count={plants.filter(p => p.status === 'thirsty').length}
-          />
-          <FilterPill type="sick" label="Sick Bay" />
-          <FilterPill type="growing" label="Propagating" />
-        </ScrollView>
+        {/* Filters Row */}
+        <View style={styles.filtersWrapper}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersList}>
+            <FilterPill type="all" label="All Plants" icon="square.grid.2x2.fill" />
+            <FilterPill
+              type="water"
+              label="To Water"
+              count={plants.filter(p => p.status === 'thirsty').length}
+              icon="drop.fill"
+            />
+            <FilterPill type="sick" label="Sick Bay" icon="plus.square.fill" />
+            <FilterPill type="growing" label="Propagating" icon="scissors" />
+          </ScrollView>
+        </View>
 
-        {/* Grid */}
-        <View style={styles.grid}>
+        {/* Plant Grid */}
+        <View style={styles.plantGrid}>
           {filteredPlants.map((plant) => (
-            <View key={plant.id} style={styles.gridItem}>
+            <View key={plant.id} style={styles.gridCell}>
               <PlantCard plant={plant} />
             </View>
           ))}
 
-          {/* Add New Plant Card */}
-          <View style={styles.gridItem}>
+          {/* Dotted Add Card */}
+          <View style={styles.gridCell}>
             <Pressable
               onPress={handleAddPlant}
               style={({ pressed }) => [
-                styles.addCard,
+                styles.addCardDotted,
                 { transform: [{ scale: pressed ? 0.98 : 1 }] }
               ]}
             >
-              <View style={styles.addIconCircle}>
-                <IconSymbol name="plus" size={32} color={colors.accentPurple} />
+              <View style={styles.addIconBox}>
+                <IconSymbol name="plus" size={32} color="#8b5cf6" />
               </View>
               <View style={{ alignItems: 'center' }}>
-                <Text style={styles.addCardTitle}>Add New Plant</Text>
-                <Text style={styles.addCardSubtitle}>Expand your jungle</Text>
+                <Text style={styles.addTitle}>Add New Plant</Text>
+                <Text style={styles.addSubtitle}>Expand your Bloomie jungle</Text>
               </View>
             </Pressable>
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Floating Add Button (Fixed Bottom Right) */}
+      {/* Floating Action Button */}
       <Pressable
         onPress={handleAddPlant}
         style={({ pressed }) => [
-          styles.fab,
+          styles.mainFab,
           { transform: [{ scale: pressed ? 0.95 : 1 }] }
         ]}
       >
-        <IconSymbol name="plus.circle.fill" size={24} color="#fff" />
-        <Text style={styles.fabText}>ADD PLANT</Text>
-      </Pressable>
-
-      {/* Chat FAB (Small) */}
-      <Pressable
-        onPress={() => router.push('/chat')}
-        style={({ pressed }) => [
-          styles.chatFab,
-          { transform: [{ scale: pressed ? 0.95 : 1 }] }
-        ]}
-      >
-        <IconSymbol name="bubble.left.fill" size={24} color="#fff" />
+        <IconSymbol name="plus.circle.fill" size={20} color="#fff" />
+        <Text style={styles.mainFabText}>ADD PLANT</Text>
       </Pressable>
     </ScreenContainer>
   );
@@ -272,276 +241,285 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.backgroundLight,
   },
   loadingText: {
-    color: colors.primaryDark,
+    color: '#64748b',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },
-
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingBottom: 40,
+    maxWidth: 1400,
+    width: '100%',
+    marginHorizontal: 'auto',
   },
-
-  greetingSection: {
+  headerHero: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: 24,
-    gap: 16,
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 48,
+    paddingBottom: 32,
   },
-  greetingText: {
-    fontSize: 28,
-    fontWeight: '800',
+  greetingLeft: {
+    flex: 1,
+  },
+  greetingTitle: {
+    fontSize: 42,
+    fontWeight: '900',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    color: colors.textMain,
-    marginBottom: 4,
+    color: '#1e293b',
+    letterSpacing: -1,
   },
-  subtitleText: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: colors.textSub,
-    lineHeight: 22,
+  greetingSubtitle: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#64748b',
+    marginTop: 8,
   },
-  tempWidget: {
+  highlightText: {
+    color: '#ef4444',
+    fontWeight: '800',
+  },
+  weatherWidget: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: colors.surfaceLight,
-    padding: 12,
-    borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: colors.gray100,
-    ...Platform.select({
-      web: {
-        display: 'flex',
-      },
-      default: {
-        display: 'none',
-      },
-    }),
+    borderColor: '#f1f5f9',
   },
-  tempIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+  weatherIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fffbeb',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tempLabel: {
+  weatherLabel: {
     fontSize: 10,
     fontWeight: '800',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    color: colors.textSub,
+    color: '#94a3b8',
+    letterSpacing: 0.5,
   },
-  tempValue: {
-    fontSize: 14,
+  weatherValue: {
+    fontSize: 16,
     fontWeight: '800',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    color: colors.textMain,
+    color: '#1e293b',
   },
-
-  filtersScroll: {
-    marginBottom: 24,
+  filtersWrapper: {
+    paddingHorizontal: 32,
+    marginBottom: 40,
   },
-  filtersContent: {
+  filtersList: {
     gap: 12,
+    paddingRight: 32,
   },
   filterPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
+    gap: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 20,
     borderWidth: 1,
+    borderColor: '#f1f5f9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+  },
+  filterPillActive: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+    shadowColor: '#10b981',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
   },
   filterText: {
     fontSize: 14,
     fontWeight: '700',
     fontFamily: 'PlusJakartaSans-Bold',
+    color: '#64748b',
   },
-
-  grid: {
+  filterTextActive: {
+    color: '#fff',
+  },
+  plantGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -8,
+    paddingHorizontal: 24,
   },
-  gridItem: {
-    width: '50%',
+  gridCell: {
+    width: Platform.OS === 'web' ? '25%' : '50%',
     padding: 8,
   },
-
   card: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: 24,
+    backgroundColor: '#fff',
+    borderRadius: 32,
     padding: 12,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    elevation: 5,
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#f8fafc',
   },
   cardImageContainer: {
-    aspectRatio: 4 / 3,
-    borderRadius: 16,
+    aspectRatio: 1,
+    borderRadius: 24,
     overflow: 'hidden',
-    marginBottom: 12,
+    backgroundColor: '#f8fafc',
+    marginBottom: 16,
   },
   cardImage: {
     width: '100%',
     height: '100%',
   },
   cardImagePlaceholder: {
-    backgroundColor: colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
   },
   plantEmoji: {
-    fontSize: 40,
+    fontSize: 48,
   },
   statusBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 12,
+    right: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  statusText: {
+  statusBadgeText: {
     color: '#fff',
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '900',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    textTransform: 'uppercase',
   },
-
   cardContent: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
+    paddingBottom: 8,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 16,
   },
   plantName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '800',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    color: colors.textMain,
+    color: '#1e293b',
   },
   plantSpecies: {
-    fontSize: 12,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: colors.textSub,
+    fontSize: 13,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#94a3b8',
     fontStyle: 'italic',
+    marginTop: 2,
   },
-  arrowButton: {
+  cardArrow: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    gap: 8,
+  },
+  locationDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   locationText: {
-    fontSize: 10,
-    fontWeight: '700',
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: colors.textSub,
-    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-ExtraBold',
+    color: '#94a3b8',
+    letterSpacing: 0.5,
   },
-
-  addCard: {
-    aspectRatio: 3 / 4,
-    backgroundColor: 'transparent',
-    borderRadius: 24,
+  addCardDotted: {
+    aspectRatio: 1,
+    borderRadius: 32,
     borderWidth: 2,
-    borderColor: colors.gray200,
+    borderColor: '#e2e8f0',
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
+    backgroundColor: '#f8fafc40',
   },
-  addIconCircle: {
+  addIconBox: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.accentPurple,
+    shadowColor: '#8b5cf6',
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 2,
   },
-  addCardTitle: {
-    fontSize: 16,
+  addTitle: {
+    fontSize: 18,
     fontWeight: '800',
     fontFamily: 'PlusJakartaSans-ExtraBold',
-    color: colors.textMain,
+    color: '#1e293b',
   },
-  addCardSubtitle: {
+  addSubtitle: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: colors.textSub,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#94a3b8',
+    marginTop: 4,
   },
-
-  fab: {
+  mainFab: {
     position: 'absolute',
-    bottom: 32,
-    right: 24,
+    bottom: 48,
+    right: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: colors.accentPurple,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 20,
-    shadowColor: colors.accentPurple,
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 28,
+    paddingVertical: 18,
+    borderRadius: 24,
+    shadowColor: '#8b5cf6',
     shadowOpacity: 0.4,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 12 },
     elevation: 8,
   },
-  fabText: {
+  mainFabText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '800',
     fontFamily: 'PlusJakartaSans-ExtraBold',
     letterSpacing: 0.5,
-  },
-
-  chatFab: {
-    position: 'absolute',
-    bottom: 100,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
   },
 });

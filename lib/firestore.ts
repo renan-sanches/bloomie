@@ -159,14 +159,22 @@ export async function updateUserProfile(
  */
 export function subscribeToUserProfile(
     uid: string,
-    callback: (profile: UserProfile) => void
+    callback: (profile: UserProfile) => void,
+    onError?: (error: Error) => void
 ): () => void {
     const userRef = doc(db, 'users', uid);
-    return onSnapshot(userRef, (snapshot) => {
-        if (snapshot.exists()) {
-            callback(snapshot.data() as UserProfile);
+    return onSnapshot(
+        userRef,
+        (snapshot) => {
+            if (snapshot.exists()) {
+                callback(snapshot.data() as UserProfile);
+            }
+        },
+        (error) => {
+            console.error('Error subscribing to user profile:', error);
+            onError?.(error);
         }
-    });
+    );
 }
 
 /**
@@ -263,18 +271,26 @@ export async function deletePlant(userId: string, plantId: string): Promise<void
 export function subscribeToUserPlants(
     userId: string,
     callback: (plants: Plant[]) => void,
-    limitCount: number = 100
+    limitCount: number = 100,
+    onError?: (error: Error) => void
 ): () => void {
     const plantsRef = collection(db, 'users', userId, 'plants');
     const q = query(plantsRef, orderBy('updatedAt', 'desc'), limit(limitCount));
 
-    return onSnapshot(q, (snapshot) => {
-        const plants = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        })) as Plant[];
-        callback(plants);
-    });
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const plants = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as Plant[];
+            callback(plants);
+        },
+        (error) => {
+            console.error('Error subscribing to plants:', error);
+            onError?.(error);
+        }
+    );
 }
 
 // ========================================
@@ -365,7 +381,8 @@ export function subscribeToCareHistory(
     userId: string,
     plantId: string | null,
     callback: (history: CareActivity[]) => void,
-    limitCount: number = 50
+    limitCount: number = 50,
+    onError?: (error: Error) => void
 ): () => void {
     const historyRef = collection(db, 'users', userId, 'careHistory');
 
@@ -380,13 +397,20 @@ export function subscribeToCareHistory(
         );
     }
 
-    return onSnapshot(q, (snapshot) => {
-        const history = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        })) as CareActivity[];
-        callback(history);
-    });
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const history = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as CareActivity[];
+            callback(history);
+        },
+        (error) => {
+            console.error('Error subscribing to care history:', error);
+            onError?.(error);
+        }
+    );
 }
 
 /**
@@ -435,16 +459,27 @@ export async function deleteTask(userId: string, taskId: string): Promise<void> 
 /**
  * Subscribe to real-time task updates
  */
-export function subscribeToTasks(userId: string, callback: (tasks: CareTask[]) => void): () => void {
+export function subscribeToTasks(
+    userId: string,
+    callback: (tasks: CareTask[]) => void,
+    onError?: (error: Error) => void
+): () => void {
     const tasksRef = collection(db, `users/${userId}/tasks`);
     const q = query(tasksRef, orderBy('dueDate', 'asc'));
 
-    return onSnapshot(q, (snapshot) => {
-        const tasks = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as CareTask[];
-        callback(tasks);
-    });
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const tasks = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as CareTask[];
+            callback(tasks);
+        },
+        (error) => {
+            console.error('Error subscribing to tasks:', error);
+            onError?.(error);
+        }
+    );
 }
 

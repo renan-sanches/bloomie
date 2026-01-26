@@ -51,6 +51,25 @@ service cloud.firestore {
         // Prevent updates and deletes to maintain history integrity
         allow update, delete: if false;
       }
+      
+      // Tasks subcollection
+      match /tasks/{taskId} {
+        // Users can only access their own tasks
+        allow read: if isOwner(userId);
+        
+        // Users can create tasks
+        allow create: if isOwner(userId)
+          && request.resource.data.plantId is string
+          && request.resource.data.type in ['water', 'mist', 'fertilize', 'rotate']
+          && request.resource.data.dueDate is string
+          && request.resource.data.completed is bool;
+        
+        // Users can update their own tasks (mark complete, snooze, etc.)
+        allow update: if isOwner(userId);
+        
+        // Users can delete their own tasks
+        allow delete: if isOwner(userId);
+      }
     }
   }
 }

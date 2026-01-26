@@ -96,92 +96,128 @@ export function AppProvider({ children }: AppProviderProps) {
     }
 
     setIsLoading(true);
+    let dataLoadedCount = 0;
+    const totalSubscriptions = 4;
+
+    const markLoaded = () => {
+      dataLoadedCount++;
+      if (dataLoadedCount >= totalSubscriptions) {
+        setIsLoading(false);
+      }
+    };
+
+    const handleSubscriptionError = (name: string) => (error: Error) => {
+      console.error(`Subscription error (${name}):`, error);
+      markLoaded(); // Still mark as loaded to prevent infinite loading
+    };
 
     // Subscribe to real-time user profile updates
-    const unsubscribeProfile = subscribeToUserProfile(user.uid, (firestoreProfile) => {
-      const { level, levelName, progress } = calculateLevel(firestoreProfile.xp || 0);
+    const unsubscribeProfile = subscribeToUserProfile(
+      user.uid,
+      (firestoreProfile) => {
+        const { level, levelName, progress } = calculateLevel(firestoreProfile.xp || 0);
 
-      setProfile({
-        id: firestoreProfile.uid,
-        username: firestoreProfile.username || firestoreProfile.displayName || 'User',
-        experienceLevel: firestoreProfile.experienceLevel || 'beginner',
-        xp: firestoreProfile.xp || 0,
-        totalXP: firestoreProfile.xp || 0,
-        level,
-        levelName,
-        streakDays: firestoreProfile.streakDays || 0,
-        currentStreak: firestoreProfile.streakDays || 0,
-        totalPlantsAdded: firestoreProfile.totalPlantsAdded || 0,
-        totalTasksCompleted: firestoreProfile.totalTasksCompleted || 0,
-        tasksCompleted: firestoreProfile.totalTasksCompleted || 0,
-        lastActiveDate: firestoreProfile.lastActiveDate?.toMillis().toString() || new Date().toISOString(),
-      });
-
-      if (firestoreProfile.preferences) {
-        setPreferences({
-          theme: firestoreProfile.preferences.theme || 'light',
-          notifications: firestoreProfile.preferences.notificationsEnabled,
-          notificationsEnabled: firestoreProfile.preferences.notificationsEnabled,
-          morningReminders: firestoreProfile.preferences.morningReminders ?? true,
-          weeklySummaries: firestoreProfile.preferences.weeklySummaries ?? true,
-          highContrast: firestoreProfile.preferences.highContrast ?? false,
-          reducedMotion: firestoreProfile.preferences.reducedMotion ?? false,
-          hapticFeedbackEnabled: firestoreProfile.preferences.hapticFeedbackEnabled ?? true,
-          reminderTime: firestoreProfile.preferences.reminderTime || '09:00',
-          onboardingCompleted: firestoreProfile.preferences.onboardingCompleted || false,
-          preferredUnits: firestoreProfile.preferences.units || 'metric',
-          units: firestoreProfile.preferences.units || 'metric',
+        setProfile({
+          id: firestoreProfile.uid,
+          username: firestoreProfile.username || firestoreProfile.displayName || 'User',
+          experienceLevel: firestoreProfile.experienceLevel || 'beginner',
+          xp: firestoreProfile.xp || 0,
+          totalXP: firestoreProfile.xp || 0,
+          level,
+          levelName,
+          streakDays: firestoreProfile.streakDays || 0,
+          currentStreak: firestoreProfile.streakDays || 0,
+          totalPlantsAdded: firestoreProfile.totalPlantsAdded || 0,
+          totalTasksCompleted: firestoreProfile.totalTasksCompleted || 0,
+          tasksCompleted: firestoreProfile.totalTasksCompleted || 0,
+          lastActiveDate: firestoreProfile.lastActiveDate?.toMillis().toString() || new Date().toISOString(),
         });
-      }
-    });
+
+        if (firestoreProfile.preferences) {
+          setPreferences({
+            theme: firestoreProfile.preferences.theme || 'light',
+            notifications: firestoreProfile.preferences.notificationsEnabled,
+            notificationsEnabled: firestoreProfile.preferences.notificationsEnabled,
+            morningReminders: firestoreProfile.preferences.morningReminders ?? true,
+            weeklySummaries: firestoreProfile.preferences.weeklySummaries ?? true,
+            highContrast: firestoreProfile.preferences.highContrast ?? false,
+            reducedMotion: firestoreProfile.preferences.reducedMotion ?? false,
+            hapticFeedbackEnabled: firestoreProfile.preferences.hapticFeedbackEnabled ?? true,
+            reminderTime: firestoreProfile.preferences.reminderTime || '09:00',
+            onboardingCompleted: firestoreProfile.preferences.onboardingCompleted || false,
+            preferredUnits: firestoreProfile.preferences.units || 'metric',
+            units: firestoreProfile.preferences.units || 'metric',
+          });
+        }
+        markLoaded();
+      },
+      handleSubscriptionError('profile')
+    );
 
     // Subscribe to real-time plant updates
-    const unsubscribePlants = subscribeToUserPlants(user.uid, (firestorePlants) => {
-      // Convert Firestore plants to app plants format
-      const appPlants: Plant[] = firestorePlants.map((plant) => ({
-        id: plant.id,
-        nickname: plant.nickname,
-        species: plant.species,
-        scientificName: plant.scientificName,
-        location: plant.location,
-        photo: plant.photo,
-        photos: plant.photos?.map(p => ({
-          id: p.id,
-          uri: p.uri,
-          date: p.date.toMillis().toString(),
-          note: p.note
-        })) || [],
-        dateAdded: plant.dateAdded?.toMillis().toString() || new Date().toISOString(),
-        lastWatered: plant.lastWatered?.toMillis().toString() || new Date().toISOString(),
-        wateringFrequencyDays: plant.wateringFrequencyDays || 7,
-        mistingFrequencyDays: plant.mistingFrequencyDays || 3,
-        fertilizingFrequencyDays: plant.fertilizingFrequencyDays || 30,
-        rotatingFrequencyDays: plant.rotatingFrequencyDays || 7,
-        healthScore: plant.healthScore || 100,
-        hydrationLevel: plant.hydrationLevel || 80,
-        lightExposure: plant.lightExposure || 70,
-        humidityLevel: plant.humidityLevel || 60,
-        personality: plant.personality || 'chill-vibes',
-        notes: plant.notes || [],
-        careHistory: [], // Subscriptions handled separately or fetched
-        diagnosisHistory: [],
-        status: plant.status || 'growing',
-        deathReflection: plant.deathReflection,
-      }));
+    const unsubscribePlants = subscribeToUserPlants(
+      user.uid,
+      (firestorePlants) => {
+        // Convert Firestore plants to app plants format
+        const appPlants: Plant[] = firestorePlants.map((plant) => ({
+          id: plant.id,
+          nickname: plant.nickname,
+          species: plant.species,
+          scientificName: plant.scientificName,
+          location: plant.location,
+          photo: plant.photo,
+          photos: plant.photos?.map(p => ({
+            id: p.id,
+            uri: p.uri,
+            date: p.date.toMillis().toString(),
+            note: p.note
+          })) || [],
+          dateAdded: plant.dateAdded?.toMillis().toString() || new Date().toISOString(),
+          lastWatered: plant.lastWatered?.toMillis().toString() || new Date().toISOString(),
+          wateringFrequencyDays: plant.wateringFrequencyDays || 7,
+          mistingFrequencyDays: plant.mistingFrequencyDays || 3,
+          fertilizingFrequencyDays: plant.fertilizingFrequencyDays || 30,
+          rotatingFrequencyDays: plant.rotatingFrequencyDays || 7,
+          healthScore: plant.healthScore || 100,
+          hydrationLevel: plant.hydrationLevel || 80,
+          lightExposure: plant.lightExposure || 70,
+          humidityLevel: plant.humidityLevel || 60,
+          personality: plant.personality || 'chill-vibes',
+          notes: plant.notes || [],
+          careHistory: [], // Subscriptions handled separately or fetched
+          diagnosisHistory: [],
+          status: plant.status || 'growing',
+          deathReflection: plant.deathReflection,
+        }));
 
-      setPlants(appPlants);
-    });
+        setPlants(appPlants);
+        markLoaded();
+      },
+      100, // limitCount
+      handleSubscriptionError('plants')
+    );
 
     // Subscribe to care history
-    const unsubscribeHistory = subscribeToCareHistory(user.uid, null, (history) => {
-      setCareHistory(history);
-    });
+    const unsubscribeHistory = subscribeToCareHistory(
+      user.uid,
+      null,
+      (history) => {
+        setCareHistory(history);
+        markLoaded();
+      },
+      50, // limitCount
+      handleSubscriptionError('careHistory')
+    );
 
     // Subscribe to tasks
-    const unsubscribeTasks = subscribeToTasks(user.uid, (firestoreTasks) => {
-      setTasks(firestoreTasks);
-      setIsLoading(false);
-    });
+    const unsubscribeTasks = subscribeToTasks(
+      user.uid,
+      (firestoreTasks) => {
+        setTasks(firestoreTasks);
+        markLoaded();
+      },
+      handleSubscriptionError('tasks')
+    );
 
     return () => {
       unsubscribeProfile();
@@ -194,7 +230,7 @@ export function AppProvider({ children }: AppProviderProps) {
   // Helper to generate initial tasks for a new plant
   const generateInitialTasks = async (userId: string, plantId: string, plantData: Partial<Plant>) => {
     const today = new Date();
-    
+
     // Water task
     const waterDate = new Date(today);
     waterDate.setDate(today.getDate() + (plantData.wateringFrequencyDays || 7));
@@ -273,7 +309,7 @@ export function AppProvider({ children }: AppProviderProps) {
       };
 
       const plantId = await createPlant(user.uid, plantData as any);
-      
+
       // Generate initial tasks
       await generateInitialTasks(user.uid, plantId, plantData);
 
@@ -312,23 +348,23 @@ export function AppProvider({ children }: AppProviderProps) {
       // Recalculate health score
       // Create a mock updated plant for calculation
       const now = Timestamp.now();
-      const updatedPlantMock: any = { 
-          ...plant, 
-          lastWatered: careType === 'water' ? now : (plant.lastWatered ? Timestamp.fromMillis(new Date(plant.lastWatered).getTime()) : undefined)
+      const updatedPlantMock: any = {
+        ...plant,
+        lastWatered: careType === 'water' ? now : (plant.lastWatered ? Timestamp.fromMillis(new Date(plant.lastWatered).getTime()) : undefined)
       };
-      
+
       const newHealthScore = calculateHealthScore(updatedPlantMock);
-      
+
       // Update plant with new health score and potential status change
       await updatePlant(user.uid, plantId, {
-          healthScore: newHealthScore,
-          status: newHealthScore > 80 ? 'thriving' : 'growing'
+        healthScore: newHealthScore,
+        status: newHealthScore > 80 ? 'thriving' : 'growing'
       });
-      
+
       // Update/Reschedule the task for this care type
-      const pendingTask = tasks.find(t => 
-        t.plantId === plantId && 
-        t.type === careType && 
+      const pendingTask = tasks.find(t =>
+        t.plantId === plantId &&
+        t.type === careType &&
         !t.completed
       );
 
@@ -337,17 +373,17 @@ export function AppProvider({ children }: AppProviderProps) {
           completed: true,
           completedDate: new Date().toISOString()
         });
-        
+
         // Schedule next task
         let frequency = 7;
         if (careType === 'water') frequency = plant.wateringFrequencyDays;
         else if (careType === 'mist') frequency = plant.mistingFrequencyDays;
         else if (careType === 'fertilize') frequency = plant.fertilizingFrequencyDays;
         else if (careType === 'rotate') frequency = plant.rotatingFrequencyDays;
-        
+
         const nextDate = new Date();
         nextDate.setDate(nextDate.getDate() + frequency);
-        
+
         await createTask(user.uid, {
           plantId,
           type: careType as any,
@@ -381,27 +417,27 @@ export function AppProvider({ children }: AppProviderProps) {
 
     completeTask: useCallback(async (id: string) => {
       if (!user) return;
-      
+
       // Check if it's a care task and log care to update plant history and health
       const task = tasks.find(t => t.id === id);
       if (task) {
-         // Log care will handle task completion and rescheduling!
-         // We should use logCare if it's a standard care type.
-         // But logCare expects a plant ID.
-         if (['water', 'mist', 'fertilize', 'rotate'].includes(task.type)) {
-             const plant = plants.find(p => p.id === task.plantId);
-             if (plant) {
-                 // Call logCare to handle everything
-                 await value.logCare(plant.id, task.type);
-                 return;
-             }
-         }
+        // Log care will handle task completion and rescheduling!
+        // We should use logCare if it's a standard care type.
+        // But logCare expects a plant ID.
+        if (['water', 'mist', 'fertilize', 'rotate'].includes(task.type)) {
+          const plant = plants.find(p => p.id === task.plantId);
+          if (plant) {
+            // Call logCare to handle everything
+            await value.logCare(plant.id, task.type);
+            return;
+          }
+        }
       }
-      
+
       // Fallback if not a standard care task or plant not found
-      await updateTask(user.uid, id, { 
-        completed: true, 
-        completedDate: new Date().toISOString() 
+      await updateTask(user.uid, id, {
+        completed: true,
+        completedDate: new Date().toISOString()
       });
 
     }, [user, tasks, plants]), // Added value.logCare dependency implicitly via recursive call check, but `value` isn't defined yet. FIX: Use the function directly or logic.
@@ -450,14 +486,14 @@ export function AppProvider({ children }: AppProviderProps) {
     // Other stubs
     snoozeTask: useCallback(async (id: string, days: number) => {
       if (!user) return;
-       // For snooze, just update the due date
-       const task = tasks.find(t => t.id === id);
-       if (!task) return;
-       
-       const newDate = new Date(task.dueDate);
-       newDate.setDate(newDate.getDate() + days);
-       
-       await updateTask(user.uid, id, { dueDate: newDate.toISOString() });
+      // For snooze, just update the due date
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const newDate = new Date(task.dueDate);
+      newDate.setDate(newDate.getDate() + days);
+
+      await updateTask(user.uid, id, { dueDate: newDate.toISOString() });
 
     }, [user, tasks]),
     addXP: useCallback(async (amount: number) => {
